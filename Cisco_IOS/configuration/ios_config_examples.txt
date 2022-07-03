@@ -1,21 +1,21 @@
-# Cisco_IOS
+### Cisco_IOS ###
 
 
-# Configure Hostname
+### Configure Hostname
 
 conf t
 hostname R1
 do sh run | inc host
 
 
-# Configure Interface with IP address
+### Configure Interface with IP address
 
 interface FastEthernet0/0
 ip address 10.1.1.1 255.255.255.0
 no shutdown
 
 
-# Set Up an IOS Router or Switch as SSH Client
+### Set Up an IOS Router or Switch as SSH Client
 
 # There are four steps required to enable SSH support on a Cisco IOS:
 
@@ -52,7 +52,7 @@ end
 wr
 
 
-# ACL
+### ACL
 
 # access-list number { deny | permit } ip wildcard-mask
 access-list 1 deny 1.1.1.1 0.0.0.0
@@ -76,7 +76,12 @@ ip access-list standard { acl-name }
 [ entry number ] { deny | permit } ip wildcard-mask
 
 
-# OSPF
+### Static Routing
+
+# ip route [ remote network ] [ remote network subnet ] [ neighbour interface ]
+ip route 10.1.1.0 255.255.255.0 10.1.2.1
+
+### OSPF Dynamic Routing
 
 OSPF Neighbour Requirements
 
@@ -132,4 +137,47 @@ int f0/2
 switchport mode access
 switchport access vlan 20
 exit
+
+show vlans
+
+
+# Etherchannel
+
+# LACP SW1
+int range g0/1-2
+channel-group 1 mode active
+exit
+int po1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+
+# LACP SW2
+int range g0/3-4
+channel-group 1 mode active
+exit
+int po1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+
+# Static Etherchannel
+# DSW1
+int range g0/1-2
+no switchport
+channel-group 2 mode on
+int po2
+ip add 10.0.0.1 255.255.255.252
+
+# DSW2
+int range g0/1-2
+no switchport
+channel-group 2 mode on
+int po2
+ip add 10.0.0.2 255.255.255.252
+
+show etherchannel summary
+
+# Etherchannel load-balance
+port-channel load-balance src-dst-ip
+
+show etherchannel load-balance
 
