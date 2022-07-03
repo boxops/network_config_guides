@@ -181,3 +181,21 @@ port-channel load-balance src-dst-ip
 
 show etherchannel load-balance
 
+
+### HSRP
+
+# R1
+int g0/0
+standby version 2
+standby 1 ip 10.0.1.254
+standby 1 pirority 200
+standby 1 preempt
+
+# R2
+int g0/0
+standby version 2
+standby 1 ip 10.0.1.254
+standby 1 pirority 50
+
+show standby
+
