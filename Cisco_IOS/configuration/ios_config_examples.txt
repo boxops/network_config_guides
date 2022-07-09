@@ -76,6 +76,23 @@ ip access-list standard { acl-name }
 [ entry number ] { deny | permit } ip wildcard-mask
 
 
+### Better ACL Config
+
+# Standard ACL
+
+ip access-list standard 1
+# or
+ip access-list standard BLOCK_PC1
+deny 192.168.1.1
+permit any
+do show access list
+# delete an entry
+no 30
+
+# NOTE - When configuring or editing numbered ACLs from global config mode,
+# you cannot delete individual entries, you can only delete the entire ACL!
+
+
 ### Static Routing
 
 # ip route [ remote network ] [ remote network subnet ] [ neighbour interface ]
