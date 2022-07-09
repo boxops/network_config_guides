@@ -151,6 +151,13 @@ permit tcp 172.16.1.0 0.0.0.255 gt 9999 host 4.4.4.4 neq 23
 interface g0/1
 ip access-group HTTP_SRV1 in
 
+# Prevent R1 from forwarding OSPF packets out of G0/2
+ip access-list extended 112
+deny 89 any any
+permit ip any any
+interface g0/2
+ip access-group 112 out
+
 
 ### Static Routing
 
