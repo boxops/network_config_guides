@@ -79,6 +79,7 @@ ip access-list standard { acl-name }
 ### Better ACL Config
 
 # Standard ACL
+# Numbered ACL Ranges: 100-199, 2000-2699
 
 ip access-list standard 1
 # or
@@ -89,8 +90,27 @@ do show access list
 # delete an entry
 no 30
 
+# insert a new entry by specifying the sequence number
+30 deny 192.168.2.0 0.0.0.255
+
+# resequence ACLs
+# ip access-list resequence [acl-id] [starting-seq-num] [increment]
+# [starting-seq-num] = change the sequence number of the first entry to 10
+# [increment] = add 10 for every entry after that
+ip access-list resequence 1 10 10
+
 # NOTE - When configuring or editing numbered ACLs from global config mode,
 # you cannot delete individual entries, you can only delete the entire ACL!
+
+
+### Extended ACLs
+
+# Extendend Numbered ACL
+# access-list [number] (permit | deny) [protocol] [src-ip] [dest-ip]
+
+# Extended Named ACL
+# ip access-list extended (name | number)
+# [seq-num] (permit | deny) [protocol] [src-ip] [dest-ip]
 
 
 ### Static Routing
