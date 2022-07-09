@@ -145,6 +145,12 @@ deny udp any range 20000 30000 host 3.3.3.3
 # allow hosts in 172.16.1.0/24 using a TCP source port greater than 9999 to access all TCP ports on server 4.4.4.4/32 except port 23
 permit tcp 172.16.1.0 0.0.0.255 gt 9999 host 4.4.4.4 neq 23
 
+# Applying Extended ACLs to interfaces
+# Note - Extended ACLs should be applied as close to the soruce as possible to limit how far the packets travel in the network before being denied. Standard ACLs are less specific, so if they are applied close to the source there is a risk of blocking more than intended.
+
+interface g0/1
+ip access-group HTTP_SRV1 in
+
 
 ### Static Routing
 
