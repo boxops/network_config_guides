@@ -1,0 +1,5 @@
+set interfaces xe-0/0/4 unit 305 description "Vapiano North 50/100"
+set interfaces xe-0/0/4 unit 305 vlan-id 305
+set interfaces xe-0/0/4 unit 305 family inet address 185.93.18.26/31
+set protocols bgp group leasedlines neighbour 185.93.18.27 peer-as 64664
+set protocols bgp group leasedlines neighbour 185.93.18.27 description "Vapiano North 50/100"
