@@ -1,4 +1,4 @@
-set host-name {{ hostname }}
+set system host-name {{ hostname }}
 set system login user netadmin uid 2000
 set system login user netadmin class super-user
 set system login user netadmin authentication encrypted-password "$6$ciSTorlm$X77BK0sdn10A4CoKJds560Y2eUqbDIpUURGK1YB95aVPlyZ1TTbzseTpPOqbeOnPxncw91dUH7zesQgCaP9C71"
