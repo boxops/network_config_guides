@@ -1,0 +1,132 @@
+set host-name 831-SRX-VapNorth-EH2-1-CR248149
+set system login user netadmin uid 2000
+set system login user netadmin class super-user
+set system login user netadmin authentication encrypted-password "$6$ciSTorlm$X77BK0sdn10A4CoKJds560Y2eUqbDIpUURGK1YB95aVPlyZ1TTbzseTpPOqbeOnPxncw91dUH7zesQgCaP9C71"
+set system services ssh
+set system services dhcp-local-server group voice interface ge-0/0/1.0
+set system services dhcp-local-server group data interface ge-0/0/0.0
+set security alg sip disable
+set security nat source rule-set voice from zone voice
+set security nat source rule-set voice to zone untrust
+set security nat source rule-set voice rule default match source-address 192.168.254.0/24
+set security nat source rule-set voice rule default match destination-address 0.0.0.0/0
+set security nat source rule-set voice rule default then source-nat interface
+set security nat source rule-set data from zone trust
+set security nat source rule-set data to zone untrust
+set security nat source rule-set data rule default-out match source-address 192.168.38.0/24
+set security nat source rule-set data rule default-out match destination-address 0.0.0.0/0
+set security nat source rule-set data rule default-out then source-nat interface
+set security policies from-zone trust to-zone untrust policy default_out match source-address any
+set security policies from-zone trust to-zone untrust policy default_out match destination-address any
+set security policies from-zone trust to-zone untrust policy default_out match application any
+set security policies from-zone trust to-zone untrust policy default_out then permit
+set security policies from-zone untrust to-zone trust policy default_in match source-address any
+set security policies from-zone untrust to-zone trust policy default_in match destination-address any
+set security policies from-zone untrust to-zone trust policy default_in match application any
+set security policies from-zone untrust to-zone trust policy default_in then permit
+set security policies from-zone voice to-zone untrust policy allow match source-address any
+set security policies from-zone voice to-zone untrust policy allow match destination-address any
+set security policies from-zone voice to-zone untrust policy allow match application any
+set security policies from-zone voice to-zone untrust policy allow then permit
+set security policies from-zone voice to-zone untrust policy voice match source-address any
+set security policies from-zone voice to-zone untrust policy voice match destination-address any
+set security policies from-zone voice to-zone untrust policy voice match application UDP1800s
+set security policies from-zone voice to-zone untrust policy voice then permit
+set security policies from-zone untrust to-zone voice policy default_in match source-address any
+set security policies from-zone untrust to-zone voice policy default_in match destination-address any
+set security policies from-zone untrust to-zone voice policy default_in match application any
+set security policies from-zone untrust to-zone voice policy default_in then permit
+set security zones security-zone untrust host-inbound-traffic system-services all
+set security zones security-zone untrust host-inbound-traffic protocols bgp
+set security zones security-zone untrust interfaces ge-0/0/5.0
+set security zones security-zone trust interfaces ge-0/0/0.0 host-inbound-traffic system-services all
+set security zones security-zone trust interfaces ge-0/0/0.0 host-inbound-traffic protocols all
+set security zones security-zone voice host-inbound-traffic system-services all
+set security zones security-zone voice host-inbound-traffic protocols all
+set security zones security-zone voice interfaces ge-0/0/1.0
+set interfaces ge-0/0/0 unit 0 family inet address 192.168.38.1/24
+set interfaces ge-0/0/1 unit 0 family inet address 192.168.254.1/24
+set interfaces ge-0/0/5 vlan-tagging
+set interfaces ge-0/0/5 unit 0 vlan-id 305
+set interfaces ge-0/0/5 unit 0 family inet address 185.96.18.27/31
+set snmp interface ge-0/0/5.0
+set snmp client-list management 185.96.17.164/32
+set snmp client-list management 185.96.17.163/32
+set snmp client-list management 91.109.47.179/32
+set snmp community T3l3h0u53 authorization read-only
+set snmp community T3l3h0u53 client-list-name management
+set snmp community T3l3h0u53Nth authorization read-write
+set snmp community T3l3h0u53Nth client-list-name management
+set policy-options policy-statement export-64664 term prefixes from route-filter 185.96.16.120/29 exact
+set policy-options policy-statement export-64664 term prefixes then accept
+set policy-options policy-statement export-64664 term deny then reject
+set access address-assignment pool voice family inet network 192.168.254.0/24
+set access address-assignment pool voice family inet range r1 low 192.168.254.10
+set access address-assignment pool voice family inet range r1 high 192.168.254.200
+set access address-assignment pool voice family inet dhcp-attributes name-server 8.8.8.8
+set access address-assignment pool voice family inet dhcp-attributes name-server 8.8.4.4
+set access address-assignment pool voice family inet dhcp-attributes router 192.168.254.1
+set access address-assignment pool data family inet network 192.168.38.0/24
+set access address-assignment pool data family inet range r1 low 192.168.38.20
+set access address-assignment pool data family inet range r1 high 192.168.38.200
+set access address-assignment pool data family inet dhcp-attributes name-server 8.8.8.8
+set access address-assignment pool data family inet dhcp-attributes name-server 8.8.4.4
+set access address-assignment pool data family inet dhcp-attributes router 192.168.38.1
+set applications application UDP1800s protocol udp
+set applications application UDP1800s destination-port 1-65535
+set applications application UDP1800s inactivity-timeout 1800
+set protocols bgp group transit neighbor 185.93.18.26 export export-64664
+set protocols bgp group transit neighbor 185.93.18.26 peer-as 59402
+set routing-options autonomous-system 64664
+set policy-options prefix-list bgp-neighbors apply-path "protocols bgp group <*> neighbor <*>"
+set policy-options prefix-list MANAGEMENT-RANGE 10.0.1.0/24
+set policy-options prefix-list MANAGEMENT-RANGE 10.1.1.22/32
+set policy-options prefix-list MANAGEMENT-RANGE 10.1.1.30/32
+set policy-options prefix-list MANAGEMENT-RANGE 91.109.40.0/24
+set policy-options prefix-list MANAGEMENT-RANGE 91.109.47.179/32
+set policy-options prefix-list MANAGEMENT-RANGE 185.96.16.112/29
+set policy-options prefix-list MANAGEMENT-RANGE 185.96.17.160/28
+set policy-options prefix-list MANAGEMENT-RANGE 192.168.196.0/24
+set firewall family inet filter router-protect interface-specific
+set firewall family inet filter router-protect term bgp from source-prefix-list bgp-neighbors
+set firewall family inet filter router-protect term bgp then accept
+set firewall family inet filter router-protect term MGMT from source-prefix-list MANAGEMENT-RANGE
+set firewall family inet filter router-protect term MGMT then accept
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP from protocol tcp
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP from port ftp
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP from port ftp-data
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP from port http
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP from port https
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP from port telnet
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP from port ssh
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-TCP then reject
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-UDP from protocol udp
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-UDP from port snmp
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-UDP from port snmptrap
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-UDP from port ntp
+set firewall family inet filter router-protect term BLOCK-MGMT-OTHER-UDP then discard
+set firewall family inet filter router-protect term ALLOW-ALL-ELSE then accept
+set firewall family inet filter router-protect term IP-OPTION-LIMIT from ip-options any
+set firewall family inet filter router-protect term IP-OPTION-LIMIT then policer IP-OPTIONS-POLICER
+set firewall family inet filter router-protect term FRAGMENT-LIMIT-1 from first-fragment
+set firewall family inet filter router-protect term FRAGMENT-LIMIT-1 then policer IP-FRAGMENT-POLICER
+set firewall family inet filter router-protect term FRAGMENT-LIMIT-2 from fragment-offset 64-8191
+set firewall family inet filter router-protect term FRAGMENT-LIMIT-2 then policer IP-FRAGMENT-POLICER
+set firewall family inet filter router-protect term ICMP-LIMIT from protocol icmp
+set firewall family inet filter router-protect term ICMP-LIMIT then policer ICMP-POLICER
+set firewall family inet filter router-protect term BGP from source-prefix-list bgp-neighbors
+set firewall family inet filter router-protect term BGP then accept
+set firewall family inet filter router-protect term BGP-OTHER from destination-port bgp
+set firewall family inet filter router-protect term BGP-OTHER then discard
+set firewall policer TCP-SYN-POLICER if-exceeding bandwidth-limit 32k
+set firewall policer TCP-SYN-POLICER if-exceeding burst-size-limit 3k
+set firewall policer TCP-SYN-POLICER then discard
+set firewall policer IP-OPTIONS-POLICER if-exceeding bandwidth-limit 32k
+set firewall policer IP-OPTIONS-POLICER if-exceeding burst-size-limit 3k
+set firewall policer IP-OPTIONS-POLICER then discard
+set firewall policer IP-FRAGMENT-POLICER if-exceeding bandwidth-limit 32k
+set firewall policer IP-FRAGMENT-POLICER if-exceeding burst-size-limit 3k
+set firewall policer IP-FRAGMENT-POLICER then discard
+set firewall policer ICMP-POLICER if-exceeding bandwidth-limit 64k
+set firewall policer ICMP-POLICER if-exceeding burst-size-limit 12k
+set firewall policer ICMP-POLICER then discard
