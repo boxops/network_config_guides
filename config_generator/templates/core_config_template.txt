@@ -1,0 +1,5 @@
+set interfaces {{ pe_nni_physical_interface_id }} unit {{ pe_public_wan_vlan_id }} description "{{ pe_customer_name_with_speed_interface_description }}"
+set interfaces {{ pe_nni_physical_interface_id }} unit {{ pe_public_wan_vlan_id }} vlan-id {{ pe_public_wan_vlan_id }}
+set interfaces {{ pe_nni_physical_interface_id }} unit {{ pe_public_wan_vlan_id }} family inet address {{ pe_ppp_default_gateway_with_mask }}
+set protocols bgp group leasedlines neighbour {{ pe_ppp_customer_usable }} peer-as {{ pe_remote_asn }}
+set protocols bgp group leasedlines neighbour {{ pe_ppp_customer_usable }} description "{{ pe_customer_name_with_speed_interface_description }}"
