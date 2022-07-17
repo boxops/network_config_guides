@@ -282,3 +282,106 @@ standby 1 pirority 50
 
 show standby
 
+
+### CDP
+
+# Enable / disable CDP globally
+[no] cdp run
+
+# Enable / disable CDP on specirfic interfaces
+interface g0/1
+[no] cdp enable
+
+# Configure the CDP timer
+cdp timer (seconds)
+
+# Configure the CDP holdtime
+cdp holdtime (seconds)
+
+# Enable / disable CDPv2
+[no] cdp advertise-v2
+
+# CDP show commands
+show cdp
+show cdp traffic
+show cdp interface
+show cdp  neighbours
+show cdp detail
+show cdp entry (name)
+
+
+### LLDP
+
+# Enable / disable LLDP
+[no] lldp run
+
+# Enable / disable LLDP on specirfic interfaces (tx)
+int g0/1
+[no] lldp transmit
+
+# Enable / disable LLDP on specirfic interfaces (rx)
+int g0/1
+[no] lldp receive
+
+# Configure the LLDP timer
+lldp timer (seconds)
+
+# Configure the LLDP holdtime
+lldp holdtime (seconds)
+
+# Configure the LLDP reinit timer
+lldp reinit (seconds)
+
+# LLDP show commands
+show lldp
+show lldp traffic
+show lldp interface
+show lldp  neighbours
+show lldp detail
+show lldp entry (name)
+
+
+### NTP
+
+# The most important reason to have accurate time on a device
+# is to have accurate logs for troubleshooting.
+
+show clock
+show clock detail
+show calendar
+
+# Manual clock configuration (Internal clocks will drift, so it is not ideal)
+clock set 14:30:00 27 July 2022
+clock timezone GMT 0
+ntp update-calendar
+
+# Configure NTP servers
+ntp server 216.239.35.0
+ntp server 216.239.35.4
+ntp server 216.239.35.8
+ntp server 216.239.35.12
+
+show ntp status
+show ntp associations
+
+# NTP authentication
+
+# R1
+ntp authenticate
+ntp authentication-key 1 md5 myCiscoLab
+ntp trusted-key 1
+
+# R2
+ntp authenticate
+ntp authentication-key 1 md5 myCiscoLab
+ntp trusted-key 1
+ntp server 10.0.12.1 key 1
+ntp peer 10.0.23.2 key 1
+
+# R3
+ntp authenticate
+ntp authentication-key 1 md5 myCiscoLab
+ntp trusted-key 1
+ntp server 10.0.12.1 key 1
+ntp peer 10.0.23.1 key 1
+

@@ -66,8 +66,8 @@ def print_pe_conf(): # Print Provider Edge (PE) configuration to the terminal
         print("-"*40 + " End of PE Configuration for " + filename + " " + "-"*40)
 
 
-# save_cpe_file()
+save_cpe_file()
 print_cpe_conf()
 
-# save_pe_file()
+save_pe_file()
 print_pe_conf()
