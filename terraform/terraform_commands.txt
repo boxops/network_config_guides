@@ -1,0 +1,4 @@
+# Terraform is a tool for infrastructure provisioning.
+# It allows you to automate and manage your infrastructure,
+# your platform, and services that run on that infrastructure.
+
