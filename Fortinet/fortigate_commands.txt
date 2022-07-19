@@ -1,0 +1,12 @@
+InterNetwork Training
+https://www.youtube.com/watch?v=hjuNunqNGhM&list=RDCMUC06pIM60pwN4tS0mRUBV2-g&index=2
+
+### Configure a static IP on an interface from a console
+
+config system interface
+edit port1
+set mode static
+set ip 192.168.1.99/24
+set allowaccess ping https ssh
+end
+
