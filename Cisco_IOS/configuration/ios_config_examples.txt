@@ -401,6 +401,7 @@ lease 0 5 30
 # lease infinite
 
 show ip dhcp binding
+show ip dhcp server statistics
 
 # Configure a router to act as a DHCP Relay Agent
 
