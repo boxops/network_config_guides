@@ -385,3 +385,34 @@ ntp trusted-key 1
 ntp server 10.0.12.1 key 1
 ntp peer 10.0.23.1 key 1
 
+
+### DHCP
+
+# Configure a router to act as a DHCP Server
+
+ip dhcp excluded-address 192.168.1.1 192.168.1.10
+ip dhcp pool LAB_POOL
+network 192.168.1.0 255.255.255.0
+dns-server 8.8.8.8
+domain-name cisco.com
+default-router 192.168.1.1
+# lease [days] [hours] [minutes]
+lease 0 5 30
+# lease infinite
+
+show ip dhcp binding
+
+# Configure a router to act as a DHCP Relay Agent
+
+interface g0/1
+ip helper-address 192.168.10.10
+
+show ip interface g0/1
+
+# Configure a router to be a DHCP Client
+
+interface g0/1
+ip address dhcp
+
+sh ip interface g0/1
+
