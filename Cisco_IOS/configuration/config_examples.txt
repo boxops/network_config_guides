@@ -635,3 +635,87 @@ access-class 1 in
 ssh -l [username] [ip-address]
 ssh [username]@[ip-address]
 
+
+### FTP and TFTP (File Transfer Protocol and Trivial File Transfer Protocol)
+
+TFTP server port listen = UDP 69
+FTP control port = TCP 21
+FTP data port = TCP 20
+
+# FTPS (FTP over SSL/TLS) is an upgrade to FTP.
+# SFTP (SSH File Transfer Protocol) is a different protocol to FTP.
+
+# FTP is more compex than TFTP and allows not only file transfers, but clients can also navigate file directories, add and remove directories, list files, etc.
+
+# In FTP active mode, the server initiates the data connection.
+# In FTP passive mode, the client initiates the data connection, which is often necessary when the client is behind a firewall that could block the incoming connection from the server.
+
+## IOS File Systems
+show file systems
+
+## Upgrading Cisco IOS
+# View the current IOS version
+show version
+# View the contents of flash
+show flash
+# Copy the file using TFTP
+# copy [source] [destination]
+copy tftp: flash:
+192.168.1.1
+c2900-universalk9-mz.SPA.155-3.M4a.bin
+
+# View the copied file
+show flash
+
+# Load and replace the file with the old one
+conf t
+boot system flash:c2900-universalk9-mz.SPA.155-3.M4a.bin
+exit
+write memory
+reload
+
+# Delete a file in flash
+delete flash:c2900-universalk9-mz.SPA.151-4.M4.bin
+
+## FTP copying files to a server
+# An FTP username and password must be configured
+ip ftp username cisco
+ip ftp password cisco
+exit
+copy ftp: flash:
+192.168.1.1
+c2900-universalk9-mz.SPA.155-3.M4a.bin
+
+## Password Recovery for the 2900 Integrated Services Router
+https://www.cisco.com/c/en/us/support/docs/routers/2800-series-integrated-services-routers/112033-c2900-password-recovery-00.html
+
+# Step-by-Step Procedure
+# Perform these steps in order to recover your password:
+
+# 1. Either switch off or shut down the router.
+# 2. Remove the compact flash that is on the rear of the router. This image shows the rear of the 2951 router:
+# 3. Switch on the router.
+# 4. Once the router is on Rommon mode, reinsert the compact flash.
+# 5. Type confreg 0x2142 at the rommon 1> prompt in order to boot from Flash.
+# This step bypasses the startup configuration where the passwords are stored.
+# 6. Type reset at the rommon 2> prompt.
+# The router reboots, but ignores the saved configuration.
+# 7. Type no after each setup question, or press Ctrl-C in order to skip the initial setup procedure.
+# 8. Type enable at the Router> prompt.
+# You are in enable mode and should see the Router# prompt.
+# 9. Type configure memory or copy startup-config running-config in order to copy the nonvolatile RAM (NVRAM) into memory.
+# Warning:  Do not enter copy running-config startup-config or write. These commands erase your startup configuration.
+# 10. Issue the show running-config command.
+# The show running-config command shows the configuration of the router. In this configuration, the shutdown command appears under all interfaces, which indicates all interfaces are currently shut down. In addition, the passwords (enable password, enable secret, vty, and console passwords) are in either an encrypted or unencrypted format. You can reuse unencrypted passwords. You must change encrypted passwords to a new password.
+# 11. Type configure terminal.
+# The hostname(config)# prompt appears.
+# 12. Type enable secret <password> in order to change the enable secret password. For example:
+# hostname(config)#enable secret cisco
+# 13. Issue the no shutdown command on every interface that you use.
+# If you issue a show ip interface brief command, every interface that you want to use should display up up.
+# 14. Type config-register <configuration_register_setting> . Where <configuration_register_setting> is either the value you recorded in step 2 or 0x2102 . For example:
+# hostname(config)#config-register 0x2102
+# 15. Press Ctrl-z or end in order to leave the configuration mode.
+# The hostname# prompt appears.
+# 16. Type write memory or copy running-config startup-config in order to commit the changes.
+
