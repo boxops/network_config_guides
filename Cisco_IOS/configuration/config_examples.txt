@@ -506,3 +506,64 @@ snmpwalk -v3 -l authPriv -u UserJustMe -a SHA -A AuthPass1 -x AES -X PrivPass2 1
 
 ### Syslog
 
+# Syslog server port (listen) = UDP 514
+
+# seq:time stamp: %facility-severity-MNEMONIC:description
+# [sequence number]:[timestamp]: %[which process]-[severity number]-[short message]:[detailed information]
+
+# Examples
+# *Feb 11 03:02:55.304: %LINK-3-UPDOWN: Interface GigabitEthernet0/0, changed state to up
+# *Feb 11 03:02:55.304: %OSPF-5-ADJCHG: Process 1, Nbr 192.168.1.2 on GigabitEthernet0/0 from LOADING to FULL, Loading Done
+# *Feb 11 03:02:55.304: %SYS-5-CONFIG_I: Configured from console by admin on console
+# *Feb 11 03:02:55.304: %SYS-6-CLOCKUPDATE: System clock has been updated from 07:27:23 UTC Thu Feb 11 2021 to 16:27:23 JST Thu Feb 11 2021, configured from console by admin on console.
+
+# Syslog severity levels
+# Level - Keyword - Description
+# 0 - Emergency - System is unusable
+# 1 - Alert - Action must be taken immediately
+# 2 - Critical - Critical conditions
+# 3 - Error - Error conditions
+# 4 - Warning - Warning conditions
+# 5 - Notice - Normal but significant conditions
+# 6 - Informational - Informational messages
+# 7 - Debugging - Debug-level messages
+
+# Memorize the severity levels
+# Every Awesome Cisco Engineer Will Need Icecream Daily
+
+## Syslog Logging Locations
+
+# Console line: Syslog messages will be displayed in the CLI when connected to the device via the console port. All messages are displayed by default.
+
+# VTY lines: Syslog messages will be displayed in the CLI when connected to the device via Telnet or SSH. Disabled by default.
+
+# Buffer: Syslog messages will be saved to RAM. All messages will be displayed by default.
+
+# External server: You can configure the device to send Syslog messages to an external server.
+
+
+## Syslog Configuration
+
+# Enable console logging for the Informational severity and higher
+logging console 6
+# Enable logging for the Informational severity and higher
+logging monitor informational
+# Logging buffered [size] [level name or number]
+logging buffered 8192 6
+# Logging to an external server
+logging 192.168.1.100
+# Or: logging host 192.168.1.100
+# Logging trap [level name or number]
+logging trap debugging
+
+# Enable Syslog messages when using Telnet or SSH
+terminal monitor
+
+# Print a new line when the typing is interrupted by a Syslog message (more user friendly)
+line console 0
+logging synchronous
+
+# Enable timestamps for Syslog messages
+service timestamp log datetime
+service sequence-numbers
+
