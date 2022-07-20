@@ -417,3 +417,92 @@ ip address dhcp
 
 sh ip interface g0/1
 
+
+### SNMP
+
+http://oid-info.com/
+
+# SNMP Agent port = UDP 161
+# SNMP Manager port = UDP 162
+
+## SNMP Read Messages
+# Messages sent by the NMS to read information from the managed devices.
+
+# Get - A request sent from the manager to the agent to retrieve the value of a variable (OID), or multiple variables.
+# The agent will send a Response message with the current value of each variable.
+
+# GetNext - A request sent from the manager to the agent to discover the available variables on the MIB.
+
+# GetBulk - A more efficient version of the GetNext message (introduced in SNMPv2).
+
+## SNMP Write Messages
+# Messages sent by the NMS to change information on the managed devices.
+
+# Set - A request sent from the manager to the agent to change the value of one or more variables.
+# The agent will send a Response message with the new values.
+
+## SNMP Notification
+# Messages sent by the managed devices to alert the NMS of a particular event.
+
+# Trap - A notification sent from the agent to the manager. 
+# The manager does not send a Response message to acknowledge that it received the Trap, so these messages are unreliable.
+
+# Inform - A notification message that is acknowledged with a Response message.
+# Originally used for communications between managers, but later updates allow agents to send Inform messages to managers too.
+
+## SNMP Response
+# Messages sent in response to a previous message/request.
+
+
+## SNMPv2c Configuration
+
+snmp-server contact example@google.com
+snmp-server location "Rack B1"
+snmp-server community CCNA1 ro
+snmp-server community CCNA2 rw
+# Specify the address of the NMS (version and which community string to use)
+snmp-server host 192.168.1.1 version 2c CCNA1
+# Traps will be sent if an interface goes up or down
+snmp-server enable traps snmp linkdown linkup
+# Traps will be sent if configuration changes are made
+snmp-server enable traps config
+
+show snmp community
+show snmp contact
+show snmp host
+show snmp location
+
+
+## SNMPv3 Configuration
+
+Username: UserJustMe
+Authentication Password: AuthPass1
+Privacy Password: PrivPass2
+View Name: ViewDefault
+Group Name: GrpMonitoring
+
+# IOS & IOS-XE
+snmp-server view ViewDefault iso included
+snmp-server group GrpMonitoring v3 priv read ViewDefault
+snmp-server user UserJustMe GrpMonitoring v3 auth sha AuthPass1 priv aes 128 PrivPass2
+
+# IOS-XR
+snmp-server view ViewDefault iso included 
+snmp-server group GrpMonitoring v3 priv read ViewDefault
+snmp-server user UserJustMe GrpMonitoring v3 auth sha AuthPass1 priv aes 128 PrivPass2
+
+# Nexus Switch (OS-NX)
+snmp-server user UserJustMe network-admin v3 auth sha AuthPass1 priv aes-128 PrivPass2
+
+# ASA firewall
+snmp-server group GrpMonitoring v3 priv
+snmp-server user UserJustMe GrpMonitoring v3 auth sha AuthPass1 priv aes 128 PrivPass2
+snmp-server host mgmt 10.1.1.161 version 3 UserJustMe
+
+# Testing SNMPv3 configuration with Net-SNMP
+# apt-get install snmp
+snmpwalk -v3 -l authPriv -u UserJustMe -a SHA -A AuthPass1 -x AES -X PrivPass2 10.7.1.9:161 sysDescr
+
+
+### Syslog
+
