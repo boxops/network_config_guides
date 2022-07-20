@@ -567,3 +567,71 @@ logging synchronous
 service timestamp log datetime
 service sequence-numbers
 
+
+### Console, Telnet, and SSH (local and remote connections)
+
+## Configure a password on the console
+line console 0
+password ccna
+# Require the user to enter the console password
+login
+
+## Configure a username and password on the console
+username admin secret ccna
+line console 0
+# Require a user to login using the configured usernames on the device
+login local
+# Log the user out after a certain time of inactivity: exec-timeout [minutes] [seconds]
+exec-timeout 3 30
+
+## Configure the Switch Virtual Interface (SVI) on a Layer 2 switch for remote connectivity
+interface vlan1
+ip address 192.168.1.253 255.255.255.0
+no shutdown
+exit
+ip default-gateway 192.168.1.254
+
+## Teletype Network (Telnet) Configuration
+# If an enable password or secret is not configured, you won't be able to access priviledged exec mode when connecting via Telnet
+enable secret ccna
+username admin secret ccna
+# Optional. Limit which devices can connect
+access-list 1 permit host 192.168.2.1
+# There are 16 Virtual Teletype (vty) lines available for up to 16 users
+line vty 0 15
+login local
+# Time out after 5 mins
+exec-timeout 5 0
+# Allow telnet connections
+transport input telnet
+# Apply the ACL to the vty lines
+access-class 1 in
+
+# Connect via Telnet
+telnet [ip-address]
+
+## SSH Configuration
+# Hostname and DNS domain name must be defined first
+hostname R1
+ip domain name cisco.com
+# Generate RSA keys
+crypto key generate rsa modulus 2048
+
+enable secret ccna
+username admin secret ccna
+# Optional. Limit which devices can connect
+access-list 1 permit host 192.168.2.1
+ip ssh version 2
+line vty 0 15
+login local
+# Time out after 5 mins
+exec-timeout 5 0
+# Allow SSH connections
+transport input ssh
+# Apply the ACL to the vty lines
+access-class 1 in
+
+# Connect via SSH
+ssh -l [username] [ip-address]
+ssh [username]@[ip-address]
+
