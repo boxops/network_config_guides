@@ -719,3 +719,41 @@ https://www.cisco.com/c/en/us/support/docs/routers/2800-series-integrated-servic
 # The hostname# prompt appears.
 # 16. Type write memory or copy running-config startup-config in order to commit the changes.
 
+
+### NAT
+
+# RFC 1918 private IPv4 ranges (cannot be used over the Internet):
+# Class A - 10.0.0.0/8 (10.0.0.0 to 10.255.255.255)
+# Class B - 172.16.0.0/12 (172.16.0.0 to 172.31.255.255)
+# Class C - 192.168.0.0/16 (192.168.0.0 to 192.168.255.255)
+
+## Static NAT Configuration
+
+# Involves statically configuring one-to-one mappings of private IP addresses to public IP addresses.
+# Inside Local IP address is mapped to an inside global IP address. The IP configured on the host. Usually a private IP address.
+# Inside Global IP address is the IP address of the inside host after NAT. Usually a public IP address.
+# Outside Local is the IP address of the outside host from the perspective of the local network.
+# Outside Global is the IP address of the outside host from the perspective of the outside network.
+
+# Inside / OUtside = Location of the host
+# Local / Global = Perspective
+
+# Define inside interfaces connected to the internal network
+int g0/1
+ip nat inside
+exit
+# Define outside interfaces connected to the external network
+int g0/0
+ip nat outside
+exit
+# Configure the one-to-one IP address mappings
+# ip nat inside source static [inside-local-ip] [inside-global-ip]
+ip nat inside source static 192.168.0.167 100.0.0.1
+# The following command will be rejected as a static entry already exists
+ip nat inside source static 192.168.0.168 100.0.0.1
+
+show ip nat translations
+# Clear the dynamic IP translations only (static IP translations will remain)
+clear ip nat translation *
+show ip nat statistics
+
