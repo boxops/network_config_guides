@@ -727,7 +727,7 @@ https://www.cisco.com/c/en/us/support/docs/routers/2800-series-integrated-servic
 # Class B - 172.16.0.0/12 (172.16.0.0 to 172.31.255.255)
 # Class C - 192.168.0.0/16 (192.168.0.0 to 192.168.255.255)
 
-## Static NAT Configuration
+## Static NAT
 
 # Involves statically configuring one-to-one mappings of private IP addresses to public IP addresses.
 # Inside Local IP address is mapped to an inside global IP address. The IP configured on the host. Usually a private IP address.
@@ -737,6 +737,11 @@ https://www.cisco.com/c/en/us/support/docs/routers/2800-series-integrated-servic
 
 # Inside / OUtside = Location of the host
 # Local / Global = Perspective
+
+# One-to-one mapping allows external hosts to access the internal host via the inside global address.
+
+
+## Static NAT Configuration
 
 # Define inside interfaces connected to the internal network
 int g0/1
@@ -756,4 +761,105 @@ show ip nat translations
 # Clear the dynamic IP translations only (static IP translations will remain)
 clear ip nat translation *
 show ip nat statistics
+
+
+## Dynamic NAT
+
+# The router dynamically maps inside local addresses to inside global addresses as needed.
+
+# An ACL is used to identify which traffic should be translated.
+# If the source IP is permitted by the ACL, then it will be translated.
+# If the source IP is denied by the ACL, then it will NOT be translated (traffic will not be dropped).
+
+# A NAT pool is used to determine the available inside global addresses.
+
+# The mappings are still one-to-one (one inside local IP address per inside global IP address).
+
+# If there aren't enough inside global IP addresses available (all are currently being used), it is called 'NAT pool exhaustion'.
+# If a packet from another inside host arrives and needs NAT but there are no available addresses, the router will drop the packet.
+# The host will be unable to access outside networks until one of the inside global IP addresses becomes available.
+# Dynamic NAT entries will time out automatically if not used, or you can clear them manually.
+
+
+## Dynamic NAT Configuration
+
+# Define inside interfaces connected to the internal network
+int g0/1
+ip nat inside
+exit
+# Define outside interfaces connected to the external network
+int g0/0
+ip nat outside
+exit
+
+# Define the traffic that should be translated, permitted by the ACL
+acccess-list 1 permit 192.168.0.0 0.0.0.255
+
+# Define the pool of inside global IP addresses (instead of prefix-length 24, you can use netmask 255.255.255.0)
+ip nat pool POOL1 100.0.0.0 100.0.0.255 prefix-length 24
+
+# Configure dynamic NAT by mapping the ACL to the pool
+ip nat inside source list 1 pool POOL1
+
+# Clear NAT table. Only dynamic NAT translations will be cleared (static NAT entries will remain)
+show ip nat translations
+
+show ip nat statistics
+# UDP and ICMP mappings are cleared about 1 minute later (statistics show as extended entries)
+# The original dynamic mappings will be cleared after 24 hours (statistics show as dynamic entries)
+
+
+## Dynamic PAT
+
+# Port Address Translation (aka NAT overload) translates both the IP address and the port number (if necessary).
+# By using a unique port number for each communication flow, a single public IP address can be used by many different internal hosts.
+# Port numbers are 16 bits = over 65000 available port numbers.
+
+# The router will keep track of which inside local address is using which inside global address and port.
+
+# Because many inside hosts can share a single public IP, PAT is very useful for preserving public IP addresses, and it is used in networks all over the world.
+
+
+## Configure PAT (pool)
+
+# Define inside interfaces connected to the internal network
+int g0/1
+ip nat inside
+exit
+# Define outside interfaces connected to the external network
+int g0/0
+ip nat outside
+exit
+
+# Define the traffic that should be translated, permitted by the ACL
+acccess-list 1 permit 192.168.0.0 0.0.0.255
+
+# Define the pool of inside global IP addresses (instead of prefix-length 24, you can use netmask 255.255.255.0)
+ip nat pool POOL1 100.0.0.0 100.0.0.255 prefix-length 24
+
+# Configure PAT by mapping the ACL to the pool and using the overload keyword at the end
+ip nat inside source list 1 pool POOL1 overload
+
+show ip nat translations
+
+
+## Configure PAT (interface)
+
+# Define inside interfaces connected to the internal network
+int g0/1
+ip nat inside
+exit
+# Define outside interfaces connected to the external network
+int g0/0
+ip nat outside
+exit
+
+# Define the traffic that should be translated, permitted by the ACL
+acccess-list 1 permit 192.168.0.0 0.0.0.255
+
+# Configure PAT by mapping the ACL to the interface and enabling overload
+ip nat inside source list 1 interface g0/0 overload
+
+show ip nat translations
+
 
