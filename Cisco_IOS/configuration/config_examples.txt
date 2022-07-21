@@ -982,3 +982,190 @@ show power inline police g0/0
 # In standard RED, all kinds of traffic are treated the same.
 # An improved version, Weighted Random Early Detection (WRED), allows you to control which packets are dropped depending on the traffic class.
 
+
+## QoS Classification
+# The purpose of QoS is to give certain kinds of network traffic priority over others during congestion.
+# Classification organises network traffic (packets) into traffic classes (categories).
+# Classification is fundamental to QoS. To give priority to certain types of traffic, you have to identify which types of traffic to give priority to.
+
+# There are many methods of classifying traffic. Some examples:
+# An ACL. Traffic which is permitted by the ACL will be given certain treatment, other traffic will not.
+# Network Based Application Recognition (NBAR) performs a deep packet inspection, looking beyond the Layer 3 and Layer 4 information up to Layer 7 to identify the specific kind of traffic.
+# In the Layer 2 and Layer 3 headers there are specific fields used for this purpose.
+
+# The Priority Code Point (PCP) field of the 802.1Q tag (in the Ethernet header) can be used to indentify high / low priority traffic. Only when there is a dot1q tag.
+
+# The Differentiated Services Code Point (DSCP) field of the IP header can also be used to identify high / low priority traffic.
+
+# PCP is also known as Class of Service (CoS). Its use is defined by IEEE 802.1p
+# 3 bits = 8 possible values (2^3 = 8)
+
+# PCP Value | Traffic Types
+# 0 | Best effort (default)
+# 1 | Background
+# 2 | Excellent effort
+# 3 | Critical applications
+# 4 | Video
+# 5 | Voice
+# 6 | Internetwork control
+# 7 | Network control
+
+# Best effort delivery means there is no guarantee that data is delivered or that it meets any QoS standard. This is regular traffic, not high priority.
+# IP phones mark call signalling traffic (used to establish calls) as PCP3. They mark the actual voice traffic as PCP5.
+
+# Because PCP is found in the dot1q header, it can only be used over the following connections:
+# Trunk links
+# Access links with a voice VLAN
+
+## IP Precedence (IPP)
+# Standard IPP markings are similar to PCP:
+# 6 and 7 are reserved for network control traffic (ie. OSPF messages between routers)
+# 5 = voice
+# 4 = video
+# 3 = voice signalling
+# 0 = best effort
+
+# With 6 and 7 reserved, 6 possible values remain
+# Although 6 values is sufficient for many networks, the QoS requirements of some networks demand more flexibility.
+
+## Differentiated Services Code Point (DSCP)
+# RFC 2474 (1998) defines the DSCP field, and other DiffServ RFCs elaborate on its use.
+
+# With IPP updated to DSCP, new standard markings had to be decided upon.
+# By having generally agreed upon standard markings for different kinds of traffic, QoS design and implementation is simplified, QoS works better between ISPs and enterprises, among other benefits.
+
+# You should be aware of the following standard markings:
+# Default Forwarding (DF) - best effort traffic. The DSCP value for DF is 0.
+# Expedited Forwarding (EF) - low loss / latency / jitter traffic (usually voice). The DSCP value for EF is 46. 
+# Assured Forwarding (AF) - A set of 12 standard values. 
+# Class Selector (CS) - A set of 8 standard values, provides backward compability with IPP
+
+## Calculate AF values
+# Defines 4 traffic classes. All packets in a class have the same priority. 
+# Within each class, there are three levels of drop precedence. 
+# Higher drop precedence = more likely to drop the packet during congestion.
+
+# AF table
+# | Class || Drop Precedence || 0 |
+# | 4 | 2 | 1 || 2 | 1 || 0 |
+# AF + Class + Drop Precedence
+
+# DSCP table
+# | 32 | 16 | 8 || 4 | 2 || 1 |
+# DSCP + Binary addition
+
+# Examples
+# | 0 | 0 | 1 || 0 | 1 || 0 |
+# = AF11
+# = DSCP 10
+
+# | 0 | 0 | 1 || 1 | 0 || 0 |
+# = AF12
+# = DSCP 12
+
+# | 0 | 1 | 0 || 1 | 1 || 0 |
+# = AF23
+# = DSCP 22
+
+# | 0 | 1 | 1 || 1 | 0 || 0 |
+# = AF32
+# = DSCP 28
+
+# | 1 | 0 | 0 || 1 | 1 || 0 |
+# = AF43
+# = DSCP 38
+
+# Formula to convert from AF value to decimal DSCP value:
+# Class = X
+# Drop Precedence = Y
+# 8X + 2Y
+
+# Example
+# AF43
+# DSCP = (8 x 4) + (2 x 3) = 32 + 6 = 38
+
+## Summary of AF values
+
+#                     Lowest drop precedence ----> Highest drop precedence
+# Highest priority 
+#                 ^   AF41 (34)   AF42 (36)   AF43 (38)
+#                 |   AF31 (26)   AF32 (28)   AF33 (30)
+#                 |   AF21 (18)   AF22 (20)   AF23 (22)
+#                 |   AF11 (10)   AF12 (12)   AF13 (14)
+# Lowest priority
+
+# Traffic marked with AF41 gets the best treatment as it has the highest priority class and the lowest drop precedence
+# Traffic marked with AF13 gets the worst treatment as it has the lowest priority class and the highest drop precedence
+
+## Class Selector (CS)
+# CS defines eight DSCP values for backward compability with IPP.
+# Three bits that were added for DSCP are set to 0, and the original IPP bits are used to make 8 values.
+
+# CS table
+# | Decimal values || 0 | 0 | 0 |
+# | 4 | 2 | 1 || 0 | 0 | 0 |
+# IPP: 0 1 2 3 4 5 6 7
+# CS: CS0 CS1 CS2 CS3 CS4 CS5 CS6 CS7
+# DSCP is 8 x CS number
+# DSCP: 0 8 16 24 32 40 48 56
+
+## RFC 4954 (Standard Recommendations)
+# RFC 4954 was developed with the help of Cisco to bring all of these values together and standardize their use.
+# The RFC offers many specific recommendations, but here are a few key ones:
+
+# Voice traffic: EF
+# Interactive video: AF4x
+# Streaming video: AF3x
+# High priority data: AF2x
+# Best effort: DF
+
+## Trust Boundaries
+# The trust boundary of a network defines where devices trust and don't trust the QoS markings of received messages.
+# If the markings are trusted, the device will forward the message without changeing the markings.
+# If the markings aren't trusted, the device will change the markings according to the configured policy.
+
+# If an IP phone is connected to the switch port, it is recommended to move the trust boundary to the IP phones.
+# This is done via configuration on the switch port connected to the IP phone.
+# If a user marks their PC's traffic with a high priority, the marking will be changed (not trusted).
+
+## Queuing and Congestion Management
+# When a network device receives traffic at a faster rate than it can forward the traffic out of the appropriate interface, packets are placed in that interface's queue as they wait to be forwarded.
+# When the queue becomes full, packets that don't fit in the queue are dropped (tail drop).
+# RED and WRED drop packets early to avoid tail drop.
+
+# An essential part of QoS is the use of multiple queues.
+# This is where classification plays a role. The device can match traffic based on various factors (for example the DSCP marking in the IP header) and then place it in the appropriate queue.
+# However, the device is only able to forward one frame out if an interface at once, so a scheduler is used to decide which queue traffic is forwarded from next.
+# Prioritization allows the scheduler to give certain queues more priority than others.
+
+# Process:
+# Ingress traffic (routing, etc.) -> Classification -> Queuing -> Scheduling -> Transmission
+
+# A common scheduling method is weighted round robin.
+# Round robin = packets are taken from each queue in order, cyclically
+# Weighted = more data is taken from high priority queues each time the scheduler reaches that queue
+
+# Class-Based Weighted Fair Queuing (CBWFQ) is a popular method of scheduling, using a weighted round-robin scheduler while guaranteeing each queue a certain percentage of the interface's bandwidth during congestion.
+
+# Round-robin scheduling is not ideal for voice and video traffic. Even if the voice and video traffic receives a guaranteed minimum amount of bandwidth, round-robin can add delay and jitter because even the high priority queues have to wait their turn in the scheduler.
+# To resolve this, we can configure Low Latency Queuing (LLQ) that designates one (or more) queues as strict priority queues.
+# This means that if there is traffic in the queue, the scheduler will always take the next packet from that queue until it is empty.
+# This is very effective for reducing the delay and jitter of voice and video traffic.
+
+# However, it has the downsite of potentially starving other queues if there is always traffic in the designated strict priority queue.
+# Policing can control the amount of traffic allowed in the strict priority queue so that it can't take all of the link's bandwidth.
+
+## Shaping and Policing
+# Traffic shaping and policing are both used to control the rate of traffic.
+
+# Shaping buffers traffic in a queue if the traffic rate goes over the configured rate.
+
+# Policing drops the traffic if the traffic rate goes over the configured rate.
+# Policing also has the option of re-marking the traffic instead of dropping it.
+# Burst traffic over the configured rate is allowed for a short period of time.
+# This accomodates data applications which typically are bursty in nature. Instead of a constant stream of data, they send data in bursts.
+# The amound of burst traffic allowed is configurable.
+
+# In both cases, classification can be used to allow for different rates for different kinds of traffic.
+
+
