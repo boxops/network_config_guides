@@ -1169,3 +1169,51 @@ show power inline police g0/0
 # In both cases, classification can be used to allow for different rates for different kinds of traffic.
 
 
+## QoS Configuration
+
+# Free CCNA | QoS | Day 47 Lab | CCNA 200-301 Complete Course
+
+# R1
+configure terminal
+# Identify traffic in a QoS configuration, we use class-map [name-matching-traffic]
+class-map HTTPS_MAP
+match protocol https
+exit
+class-map HTTP_MAP
+match protocol http
+exit
+class-map ICMP_MAP
+match protocol icmp
+exit
+
+show run | section class-map
+
+# Specify what kind of treatment we want to give to each kind of traffic
+policy-map G0/0/0_OUT
+# Mark any https traffic
+class HTTPS_MAP
+# Decide what to do with traffic that matches this class map
+set ip dscp AF31
+# Give HTTPS a priority queue with at least 10% of the link's bandwidth during periods of congestion
+priority percent 10
+exit
+class HTTP_MAP
+set ip dscp af32
+bandwidth percent 10
+exit
+class ICMP_MAP
+set ip dhcp cs2
+bandwidth percent 5
+exit
+exit
+
+show run | section policy-map
+
+# Apply the policy map using a service policy
+interface G0/0/0
+service-policy output G0/0/0_OUT
+end
+
+show run
+
+
