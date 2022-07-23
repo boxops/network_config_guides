@@ -1944,3 +1944,51 @@ show standby brief
 # Site-to-Site VPNs are typically used to permanently connect two sites over the Internet.
 # Remote-Access VPNs are typically used to provide on-demand access for end devices that want to securely access comapny resources while connected to a network which is not secure.
 
+
+## Free CCNA | GRE Tunnels | Day 53 Lab | CCNA 200-301 Complete Course
+
+# Topology:
+# | R1 |-| SPR1 |-| SPR2 |-| R2 |
+
+# R1
+conf t
+# Create a virtual tunnel interface
+int tunnel 0
+# Specify which physical interface on R1 will be used for the tunnel
+tunnel source g0/0/0
+# Destination is R2 WAN interface IP
+tunnel destination 200.0.0.2
+# The tunnel interface itself needs an IP address
+ip address 192.168.1.1 255.255.255.252
+# Configure a default route to R2
+ip route 0.0.0.0 0.0.0.0 100.0.0.1
+# Enable OSPF so hosts can communicate between branches
+router ospf 1
+network 192.168.1.1 0.0.0.0 area 0
+network 10.0.1.1 0.0.0.0 area 0
+passive-interface g0/0
+
+# R2
+conf t
+# Create a virtual tunnel interface
+int tunnel 0
+# Specify which physical interface on R2 will be used for the tunnel
+tunnel source g0/0/0
+# Destination is R1 WAN interface IP
+tunnel destination 100.0.0.2
+# The tunnel interface itself needs an IP address
+ip address 192.168.1.2 255.255.255.252
+# R2 does not know how to reach the IP address we specified as the tunnel destination 100.0.0.2
+# If R2 does not know how to get to 100.0.0.2, it cannot build a GRE tunnel to 100.0.0.2.
+# Configure a default route to R1
+ip route 0.0.0.0 0.0.0.0 200.0.0.1
+# Enable OSPF so hosts can communicate between branches
+router ospf 1
+network 192.168.1.2 0.0.0.0 area 0
+network 10.0.2.1 0.0.0.0 area 0
+passive-interface g0/0
+
+do show ip int brief
+do show ip route
+
+
