@@ -1492,4 +1492,109 @@ do show running-config interface g0/1
 # You can view all secure MAC addresses with:
 show mac address-table secure
 
+## Free CCNA | Port Security | Day 49 Lab | CCNA 200-301 Complete Course
+
+# SW1 Config
+conf t
+int range f0/1-3
+switchport mode access
+switchport port-security
+switchport port-security aging time 60
+
+# SW2 Config
+conf t
+int g0/1
+switchport mode access
+switchport port-security
+switchport port-security violation restrict
+switchport port-security maximum 4
+switchport port-security mac-address sticky
+
+show port-sec int g0/1
+show run
+show mac address-table
+show port-sec
+
+
+### DHCP Snooping
+
+# DHCP snooping is a security feature of switches that is used to filter DHCP messages received on untrusted ports.
+# DHCP snooping only filters DHCP messages. Non-DHCP messages aren't affected.
+# All ports are untrusted by default.
+# Usually, uplink ports are configured as trusted ports, and downlink ports remain untrusted.
+
+## DHCP Starvation
+# An example of a DHCP-based attack is a DHCP starvation attack.
+# An attacker uses spoofed MAC addresses to flood DHCP Discover messages.
+# The target server's DHCP pool becomes full, resulting in a DoS to other devices.
+
+## DHCP Poisoning (Man-in-the-Middle)
+# Similar to ARP Poisoning, DHCP Poisoning can be used to perrform a Man-in-the-Middle attack.
+# A spurious DHCP server replies to clients' DHCP Discover messages and assigns them IP addresses, but makes the client use the spurious server's IP as the default gateway.
+# This will cause the client to send traffic to the attacker instead of the legitimate default gateway.
+# The attacker can then examine / modify the traffic before forwarding it to the legitimate default gateway.
+
+## DHCP Messages
+# When DHCP Snooping filters messages, it differentiates between DHCP Server messages and DHCP Client messages.
+# Messages sent by DHCP Servers:
+# Offer
+# ACK
+# NAK = Opposite of ACK, used to decline a client's REQUEST
+# Messages sent by DHCP Clients:
+# DISCOVER
+# REQUEST
+# RELEASE = Used to tell the server that the client no longer needs its IP address
+# DECLINE = Used to decline the IP address offered by a DHCP server
+
+## DHCP Snooping Operations
+# If a DHCP message is received on a trusted port, forward it as normal without inspection.
+# If a DHCP message is received on an untrusted port, inspect it and act as follows:
+# If it is a DHCP Server message, discard it.
+# If it is a DHCP Client message, perform the following checks:
+# DISCOVER / REQUEST messages: Check if the frame's source MAC address and the DHCP message's CHADDR fields match. Match = forward, mismatch = discard
+# RELEASE / DECLINE messages: Check if the packet's source IP address and the receiving interface match the entry in the DHCP Snooping Binding Table. Match = forward, mismatch = discard
+# When a client successfully leases an IP address from a server, create a new entry in the DHCP Snooping Binding Table.
+
+## DHCP Snooping Configuration
+
+# SW2 - Distribution Layer
+ip dhcp snooping
+ip dhcp snooping vlan 1
+no ip dhcp snooping information option
+# Specify which ports to trust (interface pointing toward the DHCP server)
+interface g0/0
+ip dhcp snooping trust
+
+# SW1 - Access Layer
+ip dhcp snooping
+ip dhcp snooping vlan 1
+no ip dhcp snooping information option
+# Specify which ports to trust (interface pointing toward the DHCP server)
+interface g0/0
+ip dhcp snooping trust
+
+show ip dhcp snooping binding
+# RELEASE / DECLINE messages will be checked to make sure their IP address / interface ID match the entry in the DHCP snooping table.
+
+## DHCP SNooping Rate-Limiting
+# DHCP snooping can limit the rate at which DHCP messages are allowed to enter an interface.
+# If the rate of DHCP messages crosses the configured limit, the interface is err-disabled.
+# Like with Port Security, the interface can be manually re-enabled, or automatically re-enabled with errdisable recovery.
+
+# DHCP SNooping Rate-Limiting Configuration example
+int r g0/1-3
+ip dhcp snooping limit rate 1
+# If the interfaces receive more than one DHCP message per second, it will be disabled (this is too low for a real network).
+
+# Enable error disabled recovery for DHCP rate limiting
+errdisable recovery cause dhcp-rate-limit
+
+## DHCP Option 82 (Information Option)
+# Option 82, also known as the DHCP relay agent information option is one of many DHCP options.
+# It provides additional informaiton about which DHCP relay agent received the client's message, on which interface, in which VLAN, etc.
+# DHCP relay agents can add Option 82 to messages they forward to the remote DHCP server.
+# With DHCP snooping enabled, by default Cisco switches will add Option 82 to DHCP messages they receive from clients, even if the switch isn't acting as a DHCP relay agent.
+# By default, Cisco switches will drop DHCP messages with Option 82 that are received on an untrusted port.
+no ip dhcp snooping information option
+
 
