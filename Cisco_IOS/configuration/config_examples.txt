@@ -1537,7 +1537,7 @@ show port-sec
 ## DHCP Messages
 # When DHCP Snooping filters messages, it differentiates between DHCP Server messages and DHCP Client messages.
 # Messages sent by DHCP Servers:
-# Offer
+# OFFER
 # ACK
 # NAK = Opposite of ACK, used to decline a client's REQUEST
 # Messages sent by DHCP Clients:
@@ -1591,10 +1591,35 @@ errdisable recovery cause dhcp-rate-limit
 
 ## DHCP Option 82 (Information Option)
 # Option 82, also known as the DHCP relay agent information option is one of many DHCP options.
-# It provides additional informaiton about which DHCP relay agent received the client's message, on which interface, in which VLAN, etc.
+# It provides additional information about which DHCP relay agent received the client's message, on which interface, in which VLAN, etc.
 # DHCP relay agents can add Option 82 to messages they forward to the remote DHCP server.
 # With DHCP snooping enabled, by default Cisco switches will add Option 82 to DHCP messages they receive from clients, even if the switch isn't acting as a DHCP relay agent.
 # By default, Cisco switches will drop DHCP messages with Option 82 that are received on an untrusted port.
 no ip dhcp snooping information option
 
+## Free CCNA | DHCP Snooping | Day 50 Lab | CCNA 200-301 Complete Course
+# R1
+conf t
+ip dhcp excluded-address 192.168.1.1 192.168.1.9
+ip dhcp pool POOL1
+network 192.168.1.0 255.255.255.0
+default-router 192.168.1.1
+
+# SW1
+conf t
+ip dhcp snooping
+ip dhcp snooping vlan 1
+int g0/2
+ip dhcp snooping trust
+exit
+no ip dhcp snooping information option
+
+# SW2
+conf t
+ip dhcp snooping
+ip dhcp snooping vlan 1
+int g0/1
+ip dhcp snooping trust
+exit
+no ip dhcp snooping information option
 
