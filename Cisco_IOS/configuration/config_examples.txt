@@ -1623,3 +1623,142 @@ ip dhcp snooping trust
 exit
 no ip dhcp snooping information option
 
+
+### Dynamic ARP Inspection
+
+## ARP Review
+# ARP is used to learn the MAC address of another device with a known IP address.
+# For example, a PC will use ARP to learn the MAC address of its default gateway to communicate with external networks.
+# Typically it is a tow message exchange: request and reply
+
+## Gratuitous ARP
+# A gratuitous ARP message is an ARP reply that is sent without receiving an ARP request.
+# It is sent to the broadcast MAC address.
+# It allows other devices to learn the MAC address of the sending device without having to send ARP requests.
+# Some devices automatically send GARP messages when an interface is enabled, IP address is changed, MAC address is changed, etc.
+
+## Dynamic ARP Inspection
+# DAI is a security feature of switches that is used to filter ARP messages received on untrusted ports.
+# DAI only filters ARP messages. Non-ARP messages aren't affected.
+# All ports are untrusted by default.
+# Typically, all ports connected to other network devices (switches, routers) should be configured as trusted, while interfaces connected to end hosts should remain untrusted.
+
+## ARP Poisoning (Man-in-the-Middle)
+# Similar to DHCP poisoning, ARP poisoning involves an attacker manipulating target's ARP tables so traffic is sent ot the attacker.
+# To do this, the attacker can send gratuitous ARP messages using another device's IP address.
+# Other devices in the network will receive the GARP and update their ARP tables, causing them to send traffic to the attacker instaed of the legitimate destination.
+
+## Dynamic ARP Inspection Operations
+# DAI inspects the sender MAC and sender IP fields of ARP messages received on untrusted ports and checks that there is a matching entry in the DHCP snooping binding table.
+# If there is a matching entry, the ARP message is forwarded normally.
+# If there isn't a matching entry, the ARP message is discarded.
+# DAI doesn't inspect messages received on trusted ports. They are forwarded as normal.
+# ARP ACLs can be manually configured to map IP address / MAC addresses for DAI to check.
+# Useful for hosts that don't use DHCP.
+# DAI can be configured to perform more in-depth checks also, but these are optional.
+# like DHCP snooping, DAI also supports rate-limiting to prevent attackes from overwhelming the switch with ARP messages.
+# DHCP snooping and DAi both require work from the switch's CPU.
+# Even if the attacker's messages are blocked, they can overload the switch CPU with ARP messages.
+
+## DAI Configuration
+# SW1
+ip arp inspection vlan 1
+int r g0/0-1
+ip arp inspection trust
+
+# DHCP snooping requires two commands to enable it:
+ip dhcp snooping
+ip dhcp snooping vlan [vlan-number]
+# DAI only requires one:
+ip arp inspection vlan [vlan-number]
+
+show ip arp inspection interfaces
+
+# DAI rate limiting is enabled on untrusted ports by default with a rate of 15 packets per second.
+# It is disabled on trusted ports by default.
+# DHCP snooping rate limiting is disabled on all interfaces by default.
+# DHCP snooping rate limiting is configured like this: [x packets per second]
+# The DAI burst interval allows you to configure rate limiting like this: [x packets per y seconds]
+
+## DAI Rate Limiting Configuration
+# SW1
+int r g0/1-2
+ip arp inspection limit rate 25 burst interval 2
+# The burst interval is optional. If you don't specify it, the default is 1 second.
+int r g0/3
+ip arp inspection limit rate 10
+# If ARP messages are received faster than the specified rate, the interface will be err-disabled.
+# It can be re-enabled in two ways:
+# 1. [shutdown] and [no shutdown]
+# 2. [errdisable recovery cause arp-inspection]
+
+show ip arp inspection interfaces
+
+## DAI Optional Checks
+ip arp inspection validate [dst-mac]
+ip arp inspection validate [ip]
+ip arp inspection validate [src-mac]
+
+# dst-mac: Enables validation of the destination MAC address in the Ethernet header agains the target MAC address in the ARP body for ARP responses. The device classifies packets with different MAC addresses as invalid and drops them.
+# ip: Enables validation of the ARP body for invalid and unexpected IP addresses. Addresses include 0.0.0.0, 255.255.255.255, and all IP multicast addresses.
+# The device checks the sender IP addresses in all ARP requests and responses and checks the target IP addresses only in ARP responses.
+# src-mac: Enables validation of the source MAC address in the Ethernet header against the sender MAC address in the ARP body for ARP requests and responses.
+# The devices classifies packets with different MAC addresses as invalid and drops them.
+
+show run | include validate
+
+# You must enter all of the validation checks you want in a single command. Specify one, two, or all three. The order isn't significant.
+ip arp inspection validate src-mac dst-mac ip
+
+## ARP ACLs
+arp access-list ARP-ACL-1
+permit ip host 192.168.1.100 mac host 0c29.2f1e.7700
+exit
+# Apply the ACL
+ip arp inspection filter ARP-ACL-1 vlan 1
+# The IP is forwarded even though there is no entry in the DHCP snooping binding table.
+
+show ip arp inspection
+
+## Free CCNA | Dynamic ARP Inspection | Day 51 Lab | CCNA 200-301 Complete Course
+# R1
+conf t
+ip dhcp excluded-address 192.168.1.1 192.168.1.9
+ip dhcp pool POOL1
+network 192.168.1.0. 255.255.255.0
+default-router 192.168.1.1
+
+# SW1
+conf t
+# Enables command globally
+ip dhcp snooping
+# Also needs to be enabled per VLAN
+ip dhcp snooping vlan 1
+no ip dhcp snooping information option
+int g0/2
+ip dhcp snooping trust
+exit
+ip arp inspection vlan 1
+ip arp inspection validate dst-mac ip src-mac
+int r g0/1-2
+ip arp inspection trust
+end
+
+# SW2
+conf t
+ip dhcp snooping
+ip dhcp snooping vlan 1
+no ip dhcp snooping information option
+int g0/1
+ip dhcp snooping trust
+exit
+ip arp inspection vlan 1
+ip arp inspection validate dst-mac ip src-mac
+int g0/1
+ip arp inspection trust
+end
+
+show run
+show ip arp inspection interfaces
+
+
