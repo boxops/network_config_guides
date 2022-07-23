@@ -1955,7 +1955,7 @@ conf t
 # Create a virtual tunnel interface
 int tunnel 0
 # Specify which physical interface on R1 will be used for the tunnel
-tunnel source g0/0/0
+tunnel source g0/0/0 # preferable remote IP address
 # Destination is R2 WAN interface IP
 tunnel destination 200.0.0.2
 # The tunnel interface itself needs an IP address
@@ -1973,7 +1973,7 @@ conf t
 # Create a virtual tunnel interface
 int tunnel 0
 # Specify which physical interface on R2 will be used for the tunnel
-tunnel source g0/0/0
+tunnel source g0/0/0 # preferable remote IP address
 # Destination is R1 WAN interface IP
 tunnel destination 100.0.0.2
 # The tunnel interface itself needs an IP address
