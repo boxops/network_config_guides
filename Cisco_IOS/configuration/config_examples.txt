@@ -1992,3 +1992,121 @@ do show ip int brief
 do show ip route
 
 
+### Virtualization & Cloud
+
+## Server Hardware
+# Although Cisco is more know for their networking devices (routers, switches, firewalls), they also offer hardware servers such as UCS (Unified Computing System).
+# The largest vendors of hardware servers include Dell EMC, HPE, and IBM.
+
+## Servers before Virtualization
+# Before virtualization, there was a one-to-one relationship between a physical server and an operating system.
+# In that operating system, apps providing services such as a web server, email server, etc. would run.
+# One physical server would be used for the web server, one for the email server, one for the database server, etc.
+# This is inefficient for multiple reasons:
+# Each physical server is expensive and takes up space, power, etc.
+# The resources on each physical server (CPU, RAM, Storage, NIC) are typically under-used.
+
+## Virtualization (Type 1 Hypervisor)
+# Virtualization allows us to break the one-to-one relationship of hardware to OS, allowing multiple OS's to run on a single physical server.
+# Each instance is called a VM (Virtual Machine).
+# A hypervisor is used to manage and allocate the hardware resources (CPU, RAM, etc) to each VM.
+# Another name for a hypervisor is VMM (Virtual Machine Monitor).
+# The type of hypervisor which runs directly on top of the hardware is called a Type 1 hypervisor.
+# Examples inclide VMware ESXi, Microsoft Hyper-V, etc.
+# Type 1 hypervisors are also called bare-metal hypervisors because they run directly on the hardware (metal).
+# Another term is native hypervisor.
+
+## Virtualization (Type 2 Hypervisor)
+# Type 2 hypervisors run as a program on an OS like a regular computer program.
+# Examples include VMware Workstation, Oracle VirtualBox, etc.
+# The OS running directly on the hardware is called the Host OS, and the OS running in a VM is called a Guest OS.
+# Another name for a Type 2 hypervisor is hosted hypervisor.
+# Although Type 2 hypervisors are rarely used in data centre environments, they are common on personal-use devices (for example, if a Mac/Linux user needs to run an app that is only supported on Windows, or vice versa).
+
+## Why Virtualization
+# Partitioning:
+# - Run multiple operating systems on one physical machine. 
+# - Divide system resources between virtual machines.
+# Isolation: 
+# - Provide fault and security isolation at the hardware level. 
+# - Preserve performance with advanced resource controls.
+# Encapsulation:
+# - Save the entire state of a virtual machine to files.
+# - Move and copy virtual machines as easily as moving and copying files.
+# Hardware Independence:
+# - Provision or migrate any virtual machine to any physical server.
+
+## Connecting VMs to the Network
+# VMs are connected to each other and the external network via a virtual switch running on the hypervisor.
+# Just like a regular physical switch, the vSwitch's interfaces can operate as access or trunk ports and use VLANs to separate the VMs at Layer 2.
+# Interfaces on the vSwitch connect to the physical NIC (or NICs) of the server to communicate with the external network.
+
+## Cloud Services
+# Traditional IT infrastucture deployments were some combination of the following:
+# On-Premises
+# - All servers, network devices, and other infrastucture are located on company property.
+# - All equipment is purchased and owned bt the company using it.
+# - The company is responsible for the necessary space, power, and cooling.
+# Colocation
+# - Data centres that rent out space for customers to put their infrastucture (servers, network devices).
+# - The data centre provides the space, electricity, and cooling.
+# - The servers, network devices, etc are still the responsibility of the end customer, although they are not located on the customer's premises.
+
+# Cloud services provide an alternative that is hugely popular, and it continuing to grow.
+# Most people associate cloud with public cloud providers such as AWS.
+# Although this is the most common use of cloud services, it is not the only one.
+
+## The Five Essential Characteristics of Cloud
+# On-demand self-service
+# - The customer is able to use the service (or stop using the service) freely (via a web portal) without direct communication to the service provider.
+# Broad network access
+# - The service is available through standard network connections (ie. the Internet or provate WAN connections), and can be accessed through many kinds of devices.
+# Resource pooling
+# - A pool of resources is provided by the service provider, and when a customer requests a service (for example creates a new VM), the resources to fulfill that request are allocated from the shared pool.
+# Rapid elasticity
+# - Customers can quickly expand the services they use in the cloud (for example, add new VMs, expand storage, etc) from a pool of resources that appreas to be infinite. Likewise, they can quickly reduce their services when not needed.
+# Measured service
+# - The cloud service provider measures the customer's usage of cloud resources, and the customer can measure their own use as well. Customers are charged based on usage (for example, X dollars per gigabyte of storage per day).
+
+## The Three Service Models of Cloud
+# In cloud computing, everything is provided on a service model.
+# For example, rather than the end user buying a physical server, mounting it on a rack, installing the hypervisor, creating the VMs, etc, the service provider offers all of this as a service.
+# There are a variety of services referred to as 'Something' as a Service.
+# The three service models of cloud computing are:
+# - Software as a Service (SaaS) ie. Microsoft Office 365
+# - Platform as a Service (PaaS) ie. AWS Lambda and Google App Engine
+# - Infrastucture as a Service (IaaS) ie. Amazon EC2 and Google Compute Engine
+
+## The Four Deployment Models of Cloud
+# Private cloud
+# - Generally only used by large enterprises.
+# - Although the cloud is private, it may be owned by a third party.
+# - Private clouds may be on or off premises.
+# - The same kinds of services offered are the same as in public clouds (SaaS, PaaS, Iaas)
+# Community cloud
+# - This is the least common cloud deployment.
+# - Similar to private cloud, but the infrastucture is reserved for use by only a specific group of organisations.
+# Public cloud
+# - This is the most common cloud deployment.
+# - Popular public cloud service providers include: AWS, Microsoft Azure, GCP, OCI, IBM Cloud, Alibaba Cloud
+# Hybrid cloud
+# - This is basically any combination of the previous three deployment types.
+# - For example, a private cloud which can offload to a public cloud when necessary.
+
+## Benefits of Cloud Computing
+# Cost
+# - CapEx (Capital Expenses) of buying hardware and software, setting up data centres etc. are reduced or eliminated.
+# Global Scale
+# - Cloud services can scale globally at a rapid pace. Services can be set up and offered to customers from a geographic location close to them.
+# Speed/Agility
+# - Services are provided on demand, and vast amounts of resources can be provisioned within minutes.
+# Productivity
+# - Cloud services remove the need for many time-consuming tasks such as procuring physical servers, racking them, cabling, installing and updating operating systems, etc.
+# Reliability
+# - Backups in the cloud are very easy to perform. Data can be mirrored at multiple sites in different geographic locations to support disaster recovery.
+
+## Connecting to Cloud resources
+# 1) Private WAN Service Provider
+# 2) Connect via the Internet which is cheap and flexible, but not as secure as a private VPN
+# 3) IPsec VPN Tunnel (redundant connections are preferable)
+
