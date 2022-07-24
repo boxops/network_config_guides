@@ -2110,3 +2110,427 @@ do show ip route
 # 2) Connect via the Internet which is cheap and flexible, but not as secure as a private VPN
 # 3) IPsec VPN Tunnel (redundant connections are preferable)
 
+
+### Wireless Fundamentals
+
+# Wireless networks have some issues that we need to deal with.
+
+# 1) All devices within range receive all frames, like devices connected to an Ethernet hub.
+# - Privacy of data within the LAN is a greater concern.
+# - CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance) is used to facilitate half-duplex communications.
+# CSMA/CD is used in wired networks to detect and recover from collisions.
+# CSMA/CA is used in wireless networks to avoid collisions.
+# When using CSMA/CA, a device will wait for other devices to stop transmitting before it transmits data itself.
+
+# 2) Wireless communications are regulated by various international and national bodies.
+
+# 3) Wireless signal coverage area must be considered
+# - Signal range.
+# - Signal absorbtion, reflection, refraction, diffraction, and scattering.
+
+# Absorbtion happens when a wireless signal passes through a material and is converted into heat, weakening the original signal.
+# Reflection happens when a signal bounces off of a material, for example metal.
+# - This is why Wi-Fi reception is usually poor in elevators. The signal bounces off the metal and very little penetrates into the elevator.
+# Refraction happens when a wave is bent when entering a medium where the signal travels at a different speed.
+# - For example, glass and water can refract waves.
+# Diffraction happens when a wave encounters an obstacle and travels around it.
+# - This can result in blind spots behind the obstacle.
+# Scattering happens when a material causes a signal to scatter in all directions.
+# - Dust, smog, uneven surfaces, etc. can cause scattering.
+
+# 4) Other devices using the same channels can cause interference.
+# - For example, a wireless LAN in your neighbour's house.
+
+## Radio Frequency
+# To send wireless signals, the sender applies an alternating current to an antenna.
+# - This creates electromagnetic fields which propagate out as waves.
+# Electromagnetic waves can be measured in multiple ways for example amplitude and frequency.
+# Amplitude is the maximum strength of the electric and magnetic fields.
+
+# Frequency measures the number of up/down cycles per a given unit of time.
+# The most common measurement of frequency is hertz.
+
+## Radio Frequency Bands
+Wi-Fi uses two main bands (frequency ranges)
+# - 2.4 GHz band that typically provides further reach in open space and better penetration of obstacles such as walls.
+# More devices tend to use the 2.4 GHz band so interference can be a bigger problem compared to the 5 GHz band.
+# - 5 GHz band
+
+## Channels
+# Each band is divided up into multiple channels.
+# Devices are configured to transmit and receive traffic on one (or more) of these channels.
+# The 2.4 GHz band is divided into several channels, each with a 22 MHz range.
+# In a small wireless LAN with only a single AP, you can use any channel.
+# However, in larger WLANs with multiple APs, it is important that adjacent APs don't use overlapping channels.
+# This helps avoid interference.
+# In the 2.4 GHz band, it is recommended to use channels 1, 6, and 11.
+# Outside of North America you could use other combinations.
+# The 5 GHz band consist of non-overlapping channels, so it is much easier to avoid interference between adjacent APs.
+
+# Using channels 1, 6, and 11, you can place APs in a honeycomb pattern to provide complete coverage of an area without interference between channels.
+
+## 802.11 Standards
+
+# | Standard | Frequencies | Max Data Rate | Alternate Name |
+# | 802.11 | 2.4 GHz | 2 Mbps | |
+# | 802.11b | 2.4 GHz | 11 Mbps | |
+# | 802.11a | 5 GHz | 54 Mbps | |
+# | 802.11g | 2.4 GHz | 54 Mbps | |
+# | 802.11n | 2.4 / 5 GHz | 600 Mbps | Wi-Fi 4 |
+# | 802.11ac | 5 GHz | 6.93 Gbps | Wi-Fi 5 |
+# | 802.11ax | 2.4 / 5 / 6 GHz | 4*802.11ac | Wi-Fi 6 |
+
+## Service Sets (SSID)
+# 802.11 devines different kinds of service sets which are groups of wireless network devices.
+# There are three main types:
+# - Independent
+# - Infrastructure
+# - Mesh
+# All devices in a service set share the same SSID (Service Set Identifier)
+# The SSID is a human-readable name which identifies the service set.
+# The SSID does not have to be unique.
+
+# Independent Basic Service Set (IBSS)
+# It is a wireless network in which two or more wireless devices connect directly without using an AP.
+# Also called ad hoc network.
+# Can be used for file transfers.
+# Not scalable beyond a few devices.
+
+# Basic Service Set (BSS)
+# A BSS is a kind of Infrastucture Service Set in which clients connect to each other via an Ap, but not directly to each other.
+# A BSSID is used to uniquely identify the AP.
+# Other APs can use the same SSID, but not the same BSSID.
+# The BSSID is the MAC address of the AP's radio.
+# Wireless devices request to assiciate with the BSS.
+# Wireless devices that have associated with the BSS are called clients or stations.
+# The area around an AP where its signal is usable is called a BSA (Basic Service Area).
+# Clients must communicate via the AP, not directly with each other.
+
+# Extended Service Set (ESS)
+# To create larget wireless LANs beyond the range of a single AP, we use an ESS.
+# APs with their own BSSs are connected by a wired network.
+# - Each BSS uses the same SSID, has a unique BSSID, uses a different channel to avoid interference.
+# Clients can pass between APs without having to reconnect, providing a seamless Wi-Fi experience when moving between APs.
+# This is called roaming.
+# The BSAs should overlap bout 10-15%.
+
+# Mesh Basic Service Set (MBSS)
+# An MBSS can be used in situations where it's difficult to run an Ethernet connection to every AP.
+# Mesh APs use two radios: one to provide a BSS to wireless clients, and one to form a backhaul network which is used to bridge traffic from AP to AP.
+# At least one AP is connected to the wired network, and it is called the Root Access Point (RAP).
+# The other APs are called Mesh Access Points (MAPs).
+# A protocol is used to determine the best path through the mesh (similar to how dynamic routing protocols are used to determine the best path to a destination).
+
+## Distribution System
+# Most wireless network aren't standalone networks.
+# Rather they are a way for wireless clients to connect to the wired network infrasturcture.
+# In 802.11, the upstream wired network is called the DS (Distribution System).
+# Each wireless BSS or ESS is mapped to a VLAN in the wired network.
+# It is possible for an AP to provide multiple wireless LANs, each with a unique SSID.
+# Each WLAN is mapped to a separate VLAN and connected to the wired network via a trunk.
+# Each WLAN uses a unique BSSID, usually by incrementing the last digit of the BSSID by one.
+
+## Additional AP Operational Modes
+# APs can operate in additional modes.
+# An AP in repeater mode can be used to extend the range of a BSS.
+# The repeater will simply retransmit any signal it receives from the AP.
+# A repeater with a single radio must operate on the same channel as the AP, but this can drastically reduce the overall througput on the channel.
+# A repeater with two radios can receive on one channel, and then retransmit on another channel.
+
+# A Workgroup Bridge (WGB) operates as a wireless client of another AP, and can be used to connect wired devices to the wireless network.
+# There are two kinds of WGBs:
+# - Universal WGB (uWGB) is an 802.11 standard that allows one device to be bridged to the wireless network.
+# - WGB is a Cisco-proprietary version of the 802.11 standard that allows multiple wired clients to be bridged to the wireless network.
+
+# An outdoor bridge can be used to connect networks over long distances without a physical cable connecting them.
+# The APs will use specialised antennas that focus most of the signal power in one direction, which allows the wireless connection to be made over longer distances than normally possible.
+# The connection can be point-to-point as in the diagram below, or point-to-multipoint in which multiple sites connect to one central site.
+
+
+### Wireless Architectures
+
+## 802.11 Frame Format
+# 802.11 frames have a different format than 802.3 Ethenet frames.
+# Depending on the 802.11 version and the message type, some of the fields might not be present in the frame.
+# For example, not all messages use all 4 address fields.
+
+# Frame Control: Provides information such as the message type and subtype.
+
+# Duration / ID: Depending on the message type, this field can indicate:
+# - The time the channel will be dedicated for transmission of the frame
+# - The identifier for the association (connection).
+
+# Addresses: Up to four addresses can be present in an 802.11 frame. Which addresses are present, and their order, depends on the message type.
+# - Destination Address (DA): Final recipient of the frame
+# - Source Address (SA): Original sender of the frame
+# - Receiver Address (RA): Immediate recipient of the frame
+# - Transmitter Address (TA): Immediate sender of the frame
+
+# Sequence Control: Used to reassemble fragments and elimiate duplicate frames.
+
+# QoS Control: Used in QoS to prioritise certain traffic.
+
+# HT (Hight Throughput) Control: Added in 802.11n to enable High Throughput operations.
+# - 802.11n is also known as High Throughput (HT) Wi-Fi
+# - 802.11ac is also know as Very High Throughput (VTH) Wi-Fi
+
+# FCS (Frame Check Sequence): Same as in an Ethernet frame, used to check for errors.
+
+## 802.11 Association Process
+# Access Points bridge traffic between wireless stations and other devices.
+# For a station to send traffic through the AP, it must be associated with the AP.
+# There are three 802.11 connection states:
+# - Not authenticated, not associated
+# - Authenticated, not associated
+# - Authenticated and assiciated
+# The station must be authenticated and assiciated with the AP to send traffic through it.
+
+# There are two ways a station can scan for a BSS:
+# - Active scanning: The station send probe requests and listens for a probe response from an AP.
+# - Passive scanning: The station listens for beacon messages from an AP.
+# Beacon messages are sent periodically by APs to advertise the BSS.
+
+# There are three 802.11 message types:
+# Management: used to manage the BSS.
+# - Beacon
+# - Probe request, probe response
+# - Authentication
+# - Association request, association response
+# Control: used to control access to the medium (radio frequency). Assists with delivery of management and data frames.
+# - RTS (Request to Send)
+# - CTS (Clear to Send)
+# - ACK
+# Data: used to send actual data packets.
+
+## Autonomus APs
+# There are three main wireless AP deployment methods:
+# - Autonomus
+# - Lightweight
+# - Cloud-based
+
+# Autonomus APs are self contained systems that do not rely on a WLC and are configured individually.
+# - Can be configured by console cable (CLI), telnet / SSH (CLI), or HTTP / HTTPS web connection (GUI).
+# - An IP address for remote management should be configured
+# - The RF parameters must be manually configured (trasmit power, channel, etc)
+# - Security policies are handled individually by each AP.
+# - QoS rules etc. are configured individually on each AP.
+# There is no central monitoring or management of APs.
+
+# Autonomus APs connect to the wired network with a trunk link.
+# Data traffic from wireless clients has a very direct path to the wired network or to other wireless clients associated with the same AP.
+# Each VLAN has to stretch across the entire network. This is considered bad practice.
+# - Large broadcast domains
+# - Spanning tree will disable links
+# - Adding/deleting VLANs is very labour-intensive
+# Autonomus APs can be used in small networks, but they are not viable in medium to large networks.
+# Large networks can have thousands of APs.
+# Autonomus APs can also function in the modes: Repeater, Outdoor Bridge, Workgroup Bridge.
+
+## Lightweight APs
+# The functions of an AP can be split between the AP and a Wireless LAN Controller (WLC).
+# Lightweight APs handle real-time operations like transmitting/receiving RF traffic, encryption/decryption of traffic, sending out beacons/probes, etc.
+# Other functions are carried out by a WLC, for example RF management, securit/QoS management, client authentication, client assiciation/roaming management, etc.
+# This is called split-MAC architecture.
+# The WLC is also used to centrally configure the lightweight APs.
+# The WLC can be located in the same subnet/VLAN as the lightweight APs it manages, or in a different subnet/VLAN.
+# The WLC and the lightweight APs authenticate each other using digital certificates installed on each device (X.509 standard certificates).
+# This ensures that only authorised Aps can join the network.
+
+# The WLC and lightweight APs use a protocol called CAPWAP (Control And Provisioning of Wireless Access Points) to communicate.
+# Based on an older protocol called LWAPP (Lightweight Access Point Protocol).
+# Two tunnels are created between each AP and the WLC:
+# - Control tunnel (UDP port 5246). This tunnel is used to configure the APs, and control/manage the operations. All traffic in this tunnel is encrypted by default.
+# - Data tunnel (UDP port 5247). All traffic from wireless clients is sent through this tunnel to the WLC. It does not got directly to the wired network.
+# Traffic in this tunnel is not encrypted by default, but you can configure it to be encrypted with DTLS (Datagram Transport Layer Security).
+# Because all traffic from wireless cleints is tunneled to the WLC with CAPWAP, APs connect to switch access ports, not trunk ports.
+
+# There are some key benefits to split-MAC architecture:
+# - Scalability: With a WLC (or multiple in very large networks) it is much simpler to build and support a network with thousands of APs.
+# - Dynamic channel assignment: The WLC can automatically select which channel each AP should use.
+# - Transmit power optimisation: The WLC can automatically set the appropriate transmit power for each AP.
+# - Self-healing wireless coverage: When an AP stops functioning, the WLC can increase the transmit power of nearby APs to avoid coverage holes.
+# - Seamless roaming: Clients can roam between APs with no noticable delay.
+# - Client load balancing: If a client is in range of two APs, the WLC can associate the client with the least-used AP, to balance the load among APs.
+# - Security/QoS management: Central management of security and QoS policies ensures consistency across the network.
+
+# Lightweight APs can be configured to operate in various modes:
+# - Local: This is the default mode where the AP offers a BSS (more multiple BSSs) for clients to associate with.
+# - FlexConnect: Like a lightweight AP in Local mode, it offers one or more BSSs for clients to associate with.
+# However, FlexConnect allows the AP to locally switch traffic between the wired and wireless networks if the tunnels to the WLC go down.
+# - Sniffer: The AP does not offer a BSS for clients. It is dedicated to capturing 802.11 frames and sending them to a device running software such as Wireshark.
+# - Monitor: The AP does not offer a BSS for clients. It is dedicated to receiving 802.11 frames to detect rouge devices. If a client is found to be a rouge device, an AP can send de-authentication messages to disassociate the rogue device from the AP.
+# - Rogue Detector: The Ap does not even use its radio. It listens to traffic on the wired network only, but it receives a list of suspected rogue clients and AP MAC addresses from the WLC. By listening to ARP messages on the wired network and correlating it with the information it receives from the WLC, it can detect rogue devices.
+# - SE-Connect (Spectrum Expert Connect): The AP does not offer a BSS for clients. It is dedicated to RF spectrum analysis on all channels. It can send information to softawre such as Cisco Spectrum Expert on a PC to collect and analyse the data.
+# - Bridge/Mesh: Like the autonomus APs Outdoor Bridge mode, the lightweight AP can be a dedicated bridge between sites, even over long distances. A mesh can be made between the access points.
+# - Flex plus Bridge: Adds FlexConnect functionality to the Bridge/Mesh mode. Allows wireless access points to locally forward traffic even if connectivity to the WLC is lost.
+
+## Cloud-based APs
+# The architecture is in between autonomus Ap and split-MAC architecture.
+# - Autonomus APs that are centrally managed in the cloud.
+# Cisco Meraki is a popular cloud-based Wi-Fi solution.
+# The Meraki dashboard can be used to configure APs, monitor the network, generate performance reports, etc.
+# - Meraki Also tells each AP which channel to use, what transmit power, etc.
+# However, data traffic is not sent to the cloud. It is sent directly to the wired network like when using autonomus APs.
+# - Only management/control traffic is sent to the cloud.
+
+## WLC Deployments
+# In a split-MAC architecture, there are four main WLC deployment models:
+# - Unified: The WLC is a hardware appliance in a central location of the network.
+# A unified WLC can support up to about 6000 APs. If more than 6000 Aps are needed, additional WLCs can be added to the network.
+# - Cloud-based: The WLC is a VM running on a server, usually in a provate cloud in a data centre.
+# Cloud-based WLCs can typically support up to about 3000 APs. If more than 3000 APs are needed, more WLC VMs can be deployed.
+# This is not the same as the cloud-based Ap architecture discussed previously.
+# - Embedded: The WLC is integrated within a switch.
+# An embedded WLC can support up to about 200 APs. If more than 200 APs are needed, more switches with embedded WLCs can be added. Suitable for smaller campuses.
+# - Mobility Express: The WLC is integrated within an AP.
+# The Cisco Mobility Express places the WLC within an AP. 
+# The AP containing the WLC builds internal CAPWAP tunnels to it, and the other APs do too.
+# A mobility express WLC can support up to about 100 APs, and you will have to add more APs with embedded mobility express WLCs.
+# This deployment is suitable for a small branch office.
+
+
+### Wireless Security
+
+# Although security is important in all networks, it is even more essential in wireless networks.
+# Because wireless signals are not contained within a wire, any device within range of the signal can receive the traffic.
+# In wired networks, traffic is often only encrypted when sent over an untrusted network such as the Internet.
+# In wireless networks, it is very important to encrypt traffic sent between the wireless clients and the AP.
+
+## Authentication
+# All clients must be authenticated before they can associate with an AP.
+# In a corporate setting, only trusted users/devices should be given access to the network.
+# - In a corporate settings, a separate SSID which does not have access to the corporate network can be provided for guest users.
+# Ideally, clients should also authenticate the AP to avoid associating with a malicious AP.
+# There are multiple ways to authenticate:
+# - Password
+# - Username/password
+# - Certificates
+
+## Encryption
+# Traffic sent between clients and APs should be encrypted so that it cannot be read by anyone except the AP and the client.
+# There are many possible protocols that can be used to encrypt traffic.
+# All devices on the WLAN will use the same protocol, however each client will use a unique encryption/decryption key so that other devices cannot read its traffic.
+# A group key is used by the AP to encrypt traffic that it wants to send to all of its clients.
+# All of the clients associated with the AP keep that key so they can decrypt the traffic.
+
+## Integrity
+# Integrity ensures that a message is not modified by a third-party.
+# The message that is sent by the soruce host should be the same as the message that is received by the destination host.
+# A MIC (Message Integrity Check) is added to messages to help protect their integrity.
+
+## Authentication Methods
+# The original 802.11 standard included two options for authentication:
+
+# Open Authentication
+# - The client sends an authentication request, and the AP accepts it. No questions asked.
+# - This is clearly not a secure authentication method.
+# - After the client is authenticated and associated with the AP, it is possible to require the user to authenticate via other methods before access to the network is granted (ie. Starbuck's WiFi).
+
+# WEP (Wired Equivalent Privacy)
+# - WEP is used to provide both authentication and encryption of wireless traffic.
+# - For encryption, WEP uses the RC4 algorithm.
+# - WEP is a shared-key protocol, requiring the sender and receiver to have the same key.
+# - WEP keys can be 40 bits or 104 bits in length.
+# - The above keys are combined with a 24-bit IV (Initalisation Vector) to bring the total length to 64 bits or 128 bits.
+# - WEP encryption is not secure and can easily be cracked.
+# - WEP can be used for authentication like this:
+# 1) AP sends challenge phrase
+# 2) Client encrypts challenge phrase using WEP key and sends it back
+# 3) AP compares client's encrypted challenge phrase with AP's encrypted challenge phrase
+
+# EAP (Extensible Authentication Protocol)
+# - EAP is an authentication framework.
+# - It defines a standard set of authentication functions that are used by the various EAP Methods.
+# - EAP is integrated with 802.1X, which provides port-based network access control.
+# 802.1x is used to limit network access for clients connected to a LAN or WLAN until they authenticate.
+# There are three main entities in 802.1x:
+# - Supplicant: The device that wants to connect to the network.
+# - Authenticator: The device that provides access to the network.
+# - Authentication Server (AS): The device that receives client credentials and permits/denies access.
+
+# LEAP (Lightweight EAP)
+# - LEAP was developed by Cisco as an improvement over WEP.
+# - Clients must provide a username and password to authenticate.
+# - In addition, mutual authentication is provided by both the client and server sending a challenge phrase to each other.
+
+# EAP-FAST (EAP Flexible Authentication via Secure Tunneling)
+# - EAP-FAST was also developed by Cisco.
+# - Consists of three phrases:
+# 1) A PAC (Protected Access Credential) is generated and passed from the server to the client.
+# 2) A secure TLS tunnel is established between the client and authentication server.
+# 3) Inside of the secure (encrypted) TLS tunnel, the client and server communicate further to authenticate/authorise the client.
+
+# PEAP (Protected EAP)
+# - Like EAP-FAST, PEAP involves establishing a secure TLS tunnel between the client and server.
+# - Instead of a PAC, the server has a digital certificate.
+# - The client uses this digital certificate to authenticate the server.
+# - The certificate is also used to establish a TLS tunnel.
+# - Because only the server provides a certificate for authentication, the client must still be authenticated within the secure tunnel, for example by using MS-CHAP (Microsoft Challenge-Handshake Authentication Protocol)
+
+# EAP-TLS (EAP Transport Layer Security)
+# - Whereas PEAP only requires the AS to have a certificate, EAP-TLS requires a certificate on the AS and on every single client.
+# - EAP-TLS is the most secure wireless authentication method, but it is more difficult to implement than PEAP because every client device needs a certificate.
+# - Because the client and server authenticate each other with digital certificates, there is no need to authenticate the client within the TLS tunnel.
+# - The TLS tunnel is still used to exchange encryption key information.
+
+## Encryption and Integrity Methods
+
+# TKIP (Temporal Key Integrity Protocol)
+# WEP was found to be vulnerable, but wireless hardware at the time was built to use WEP.
+# A temporary solution was needed until a new standard was created and new hardware was built.
+# TKIP adds various security features:
+# - A MIC is added to protect the integrity of messages.
+# - A Key mixing algorithm is used to create a unique WEP key for every frame.
+# - The initialisation vector is doubled in length from 24 bits to 48 bits, making brute-force attacks much more difficult.
+# - The MIC includes the sender MAC address to identify the frame's sender.
+# - A timestamp is added to the MIC to prevent replay attacks. Replay attacks involve re-resending a frame that has already been transmitted.
+# - A TKIP sequence number is used to keep track of frames sent from each source MAC address. This also protects agains replay attacks.
+
+# CCMP (Counter/CBC-MAC Protocol)
+# - CCMP was developed after TKIP and is more secure.
+# - It is used in WPA2.
+# - To use CCMP, it must be supported by the device's hardware. Old hardware built only to use WEP/TKIP cannot use CCMP.
+# - CCMP consists of two different algorithms to provide encryption and MIC.
+# 1) AES counter mode encryption
+# - AES is the most secure encryption protocol currently available. It is widely used all over the world.
+# - There are multiple modes of operation for AES. CCMP uses counter mode.
+# 2) CBC-MAC (Cipher Block Chaining Message Authentication Code) is used as a MIC to ensure the integrity of messages.
+
+# GCMP (Galois/Counter Mode Protocol)
+# - GCMP is more secure and efficient than CCMP.
+# - Its increased efficiency allows higher data throughput than CCMP.
+# - It is used in WPA3.
+# - GCMP consists of two algorithms:
+# 1) AES counter mode encryption
+# 2) GMAC (Galois Message Authentication Code) is used as a MIC to ensure the integrity of messages.
+
+## WiFi Protected Access
+
+# The Wi-Fi Alliance has developed three WPA certifications for wireless devices:
+# - WPA
+# - WPA2
+# - WPA3
+# To be WPA-certified, equipment must be tested in authorised testing labs.
+# All of the above support two authentication modes:
+# - Personal mode: A pre-shared key (PSK) is used for authentication. When you connect a home Wi-Fi network, enter the password and are authenticated, that is personal mode.
+# This is common in small networks.
+# The PSK itself is not send over the air. A four-way handshake is used for authentication, and the PSK is used to generate encryption keys.
+# - Enterprise mode: 802.1X is used with an authentication server (RADIUS server).
+# No specific EAP method is specified, so all are supported (PEAP, EAP-TLS, etc).
+
+# The WPA certification was developed after WEP proven to be vulnerable and includes the following protocols:
+# - TKIP (based on WEP) provides encryption/MIC.
+# - 802.1X authentication (Enterprise mode) or PSK (Personal mode)
+
+# WPA2 was released in 2004 and includes the following protocols:
+# - CCMP provides encryption/MIC.
+# - 802.1X authentication (Enterprise mode) or PSK (Personal mode)
+
+# WPA3 was released in 2018 and includes the following protocols:
+# - GCMP provides encryption/MIC.
+# - 802.1X authentication (Enterprise mode) or PSK (Personal mode)
+# - WPA3 also provides several additional security features, for example:
+# -- PMF (Protected Management Frames), protecting 802.11 management frames from eavesdropping/forging.
+# -- SAE (Simultaneous Authentication of Equals) protects the four-way handshake when using personal mode authentication.
+# -- Forward secrecy prevents data from being decrypted after it has been transmitted over the air. So, an attacker cannot capture wireless frames and then try to decrypt them later.
+
