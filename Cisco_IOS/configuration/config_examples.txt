@@ -2534,3 +2534,50 @@ Wi-Fi uses two main bands (frequency ranges)
 # -- SAE (Simultaneous Authentication of Equals) protects the four-way handshake when using personal mode authentication.
 # -- Forward secrecy prevents data from being decrypted after it has been transmitted over the air. So, an attacker cannot capture wireless frames and then try to decrypt them later.
 
+
+## Free CCNA | Wireless Configuration | Day 58 | CCNA 200-301 Complete Course
+
+# SW1
+vlan 10
+name Management
+vlan 100
+name Internal
+vlan 200
+name Guest
+exit
+
+int range f0/6-8
+switchport mode access
+switchport access vlan 10
+spanning-tree portfast
+
+# WLCs only support static LAG, no PAgP or LACP
+int range f0/1-2
+channel-group 1 mode on
+
+int port-channel 1
+switchport mode trunk
+switchport trunk allowed vlan 10,100,200
+exit
+
+int vlan 10
+ip address 192.168.1.1 255.255.255.0
+int vlan 100
+ip address 10.0.0.1 255.255.255.0
+int vlan 200
+ip address 10.1.0.1 255.255.255.0
+
+ip dhcp pool VLAN100
+network 10.0.0.0 255.255.255.0
+default-router 10.0.0.1
+# Option 43 can be used to tell the APs the IP address of their WLC
+option 43 ip 192.168.1.100
+exit
+
+ip dhcp pool VLAN200
+network 10.1.0.0 255.255.255.0
+default-router 10.1.0.1
+exit
+
+ntp master
+
