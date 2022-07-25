@@ -1,91 +1,93 @@
 - id: 1
   # Customer Premises Equipment (CPE) Variables
-  cpe_filename: Vapiano_North_Juniper_Config # Name for configuration file that will be generated. No spaces, use underscores instead!
-  hostname: 831-SRX-VapNorth-EH2-1-CR248149 # Naming convention (No spaces!): { vlan_prefix }-{ device_model }-{ abbreviated_name }-{ postcode_district }-{ primary/secondary_node }-{ circuit_reference }
+  cpe_filename: My_Leased_Line # Name for configuration file that will be generated. No spaces, use underscores instead!
+  hostname: R1 # Naming convention (No spaces!)
 
-  data_lan_ip_with_mask: 192.168.38.1/24 # Private IP with Mask for Data LAN (typically Ge-0/0/0) e.g. 192.168.1.1/24
+  data_lan_ip_with_mask: 192.168.0.1/24 # Private IP with Mask for Data LAN
   data_lan_interface: ge-0/0/0 # Data LAN interface
   data_lan_interface_unit: ge-0/0/0.0 # Data LAN interface unit, keep it consistent with data LAN interface
 
-  data_network_address_with_mask: 192.168.38.0/24 # DHCP server for Data VLAN
-  data_dhcp_first_usable_ip: 192.168.38.20
-  data_dhcp_last_usable_ip: 192.168.38.200
-  data_dhcp_default_gateway_ip: 192.168.38.1
+  data_network_address_with_mask: 192.168.0.0/24 # DHCP server for Data VLAN
+  data_dhcp_first_usable_ip: 192.168.0.20
+  data_dhcp_last_usable_ip: 192.168.0.200
+  data_dhcp_default_gateway_ip: 192.168.0.1
   data_dhcp_primary_name_server_ip: 8.8.8.8
   data_dhcp_secondary_name_server_ip: 8.8.4.4
 
-  voice_lan_ip_with_mask: 192.168.254.1/24 # Private IP with Mask for Voice LAN (typically Ge-0/0/1) e.g. 192.168.2.1/24
+  voice_lan_ip_with_mask: 192.168.1.1/24 # Private IP with Mask for Voice LAN (typically Ge-0/0/1) e.g. 192.168.2.1/24
   voice_lan_interface: ge-0/0/1 # Voice LAN interface
   voice_lan_interface_unit: ge-0/0/1.0 # Voice LAN interface unit, keep it consistent with voice LAN interface
 
-  voice_network_address_with_mask: 192.168.254.0/24 # DHCP server for Voice VLAN
-  voice_dhcp_first_usable_ip: 192.168.254.10
-  voice_dhcp_last_usable_ip: 192.168.254.200
-  voice_dhcp_default_gateway_ip: 192.168.254.1
+  voice_network_address_with_mask: 192.168.1.0/24 # DHCP server for Voice VLAN
+  voice_dhcp_first_usable_ip: 192.168.1.10
+  voice_dhcp_last_usable_ip: 192.168.1.200
+  voice_dhcp_default_gateway_ip: 192.168.1.1
   voice_dhcp_primary_name_server_ip: 8.8.8.8
   voice_dhcp_secondary_name_server_ip: 8.8.4.4
 
-  customer_usable_ppp_wan_ip_with_mask: 185.96.18.27/31 # Customer Usable Public WAN IP with Mask for PPP (typically Ge-0/0/5) e.g. 185.96.18.69/31 (Found in QS under the Service Item)
+  customer_usable_ppp_wan_ip_with_mask: 11.11.11.11/31 # Customer Usable Public WAN IP with Mask for PPP
   ppp_wan_interface: ge-0/0/5 # Point-to-Point WAN interface
   ppp_wan_interface_unit: ge-0/0/5.0 # Point-to-Point WAN interface, keep it consistent with Point-to-Point WAN interface
   
-  public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix. Ignore the last digit on the Transit VLAN!) (typically assigned to Ge-0/0/5 WAN interface) (Found in QS under the Service Item)
-  route_filter_term_prefix_ip_with_mask: 185.96.16.120/29 # Hybrid Ethernet Address - Network Address (Found in QS under the Service Item) usually with /29 mask
-  remote_asn: 64664 # Remote Autonomus-system Number (ASN) (Found in QS under the Service Item)
-  bgp_group_transit_neighbor_ip: 185.93.18.26 # Provider Usable (Default Gateway) Public WAN IP for PPP (Found in QS under the Service Item)
+  public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix.)
+  route_filter_term_prefix_ip_with_mask: 11.11.11.13/29 # Network Address usually with /29 mask
+  remote_asn: 64444 # Remote Autonomus-system Number (ASN)
+  bgp_group_transit_neighbor_ip: 11.11.11.12 # Provider Usable (Default Gateway) Public WAN IP for PPP
 
   # Provider Edge (PE) Variables
-  pe_filename: Vapiano_North_Core_Config # Name for configuration file that will be generated. No spaces, use underscores instead!
-  pe_nni_physical_interface_id: xe-0/0/4 # Network-to-Network Interface (NNI) Depending on which NNI has been selected at order stage. (Found in QS under the Service Item)
-  pe_customer_name_with_speed_interface_description: "Vapiano North 50/100" # "Customer Name + Speeds" (Found in QS under the Service Item)
-  pe_public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix. Ignore the last digit on the Transit VLAN!) (typically assigned to Ge-0/0/5 WAN interface) (Found in QS under the Service Item)
-  pe_remote_asn: 64664 # Remote Autonomus-system Number (ASN) (Found in QS under the Service Item)
-  pe_ppp_default_gateway_with_mask: 185.93.18.26/31 # Provider Usable (Default Gateway) Public WAN IP for PPP (mask /31) (Found in QS under the Service Item)
-  pe_ppp_customer_usable: 185.93.18.27 # Customer Usable Public WAN IP for PPP (mask /31) (Found in QS under the Service Item)
+  pe_filename: Core_Config_For_My_Leased_Line # Name for configuration file that will be generated. No spaces, use underscores instead!
+  pe_nni_physical_interface_id: xe-0/0/1 # Network-to-Network Interface (NNI)
+  pe_customer_name_with_speed_interface_description: "Example Company 50/100" # "Customer Name + Speeds"
+  pe_public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix.)
+  pe_remote_asn: 64666 # Remote Autonomus-system Number (ASN)
+  pe_ppp_default_gateway_with_mask: 11.11.11.12/31 # Provider Usable (Default Gateway) Public WAN IP for PPP (mask /31)
+  pe_ppp_customer_usable: 11.11.11.11 # Customer Usable Public WAN IP for PPP
 
 
 
 # - id: 2
-  # # Customer Premises Equipment (CPE) Variables
-  # cpe_filename: Vapiano_South_Juniper_Config # Name for configuration file that will be generated. No spaces, use underscores instead!
-  # hostname: 831-SRX-VapSouth-EH2-1-CR248149 # Naming convention (No spaces!): { vlan_prefix }-{ device_model }-{ abbreviated_name }-{ postcode_district }-{ primary/secondary_node }-{ circuit_reference }
+#   # Customer Premises Equipment (CPE) Variables
+#   cpe_filename: My_Second_Leased_Line # Name for configuration file that will be generated. No spaces, use underscores instead!
+#   hostname: R1 # Naming convention (No spaces!)
 
-  # data_lan_ip_with_mask: 192.168.38.1/24 # Private IP with Mask for Data LAN (typically Ge-0/0/0) e.g. 192.168.1.1/24
-  # data_lan_interface: ge-0/0/0 # Data LAN interface
-  # data_lan_interface_unit: ge-0/0/0.0 # Data LAN interface unit, keep it consistent with data LAN interface
+#   data_lan_ip_with_mask: 192.168.0.1/24 # Private IP with Mask for Data LAN
+#   data_lan_interface: ge-0/0/0 # Data LAN interface
+#   data_lan_interface_unit: ge-0/0/0.0 # Data LAN interface unit, keep it consistent with data LAN interface
 
-  # data_network_address_with_mask: 192.168.38.0/24 # DHCP server for Data VLAN
-  # data_dhcp_first_usable_ip: 192.168.38.20
-  # data_dhcp_last_usable_ip: 192.168.38.200
-  # data_dhcp_default_gateway_ip: 192.168.38.1
-  # data_dhcp_primary_name_server_ip: 8.8.8.8
-  # data_dhcp_secondary_name_server_ip: 8.8.4.4
+#   data_network_address_with_mask: 192.168.0.0/24 # DHCP server for Data VLAN
+#   data_dhcp_first_usable_ip: 192.168.0.20
+#   data_dhcp_last_usable_ip: 192.168.0.200
+#   data_dhcp_default_gateway_ip: 192.168.0.1
+#   data_dhcp_primary_name_server_ip: 8.8.8.8
+#   data_dhcp_secondary_name_server_ip: 8.8.4.4
 
-  # voice_lan_ip_with_mask: 192.168.254.1/24 # Private IP with Mask for Voice LAN (typically Ge-0/0/1) e.g. 192.168.2.1/24
-  # voice_lan_interface: ge-0/0/1 # Voice LAN interface
-  # voice_lan_interface_unit: ge-0/0/1.0 # Voice LAN interface unit, keep it consistent with voice LAN interface
+#   voice_lan_ip_with_mask: 192.168.1.1/24 # Private IP with Mask for Voice LAN (typically Ge-0/0/1) e.g. 192.168.2.1/24
+#   voice_lan_interface: ge-0/0/1 # Voice LAN interface
+#   voice_lan_interface_unit: ge-0/0/1.0 # Voice LAN interface unit, keep it consistent with voice LAN interface
 
-  # voice_network_address_with_mask: 192.168.254.0/24 # DHCP server for Voice VLAN
-  # voice_dhcp_first_usable_ip: 192.168.254.10
-  # voice_dhcp_last_usable_ip: 192.168.254.200
-  # voice_dhcp_default_gateway_ip: 192.168.254.1
-  # voice_dhcp_primary_name_server_ip: 8.8.8.8
-  # voice_dhcp_secondary_name_server_ip: 8.8.4.4
+#   voice_network_address_with_mask: 192.168.1.0/24 # DHCP server for Voice VLAN
+#   voice_dhcp_first_usable_ip: 192.168.1.10
+#   voice_dhcp_last_usable_ip: 192.168.1.200
+#   voice_dhcp_default_gateway_ip: 192.168.1.1
+#   voice_dhcp_primary_name_server_ip: 8.8.8.8
+#   voice_dhcp_secondary_name_server_ip: 8.8.4.4
 
-  # customer_usable_ppp_wan_ip_with_mask: 185.96.18.27/31 # Customer Usable Public WAN IP with Mask for PPP (typically Ge-0/0/5) e.g. 185.96.18.69/31 (Found in QS under the Service Item)
-  # ppp_wan_interface: ge-0/0/5 # Point-to-Point WAN interface
-  # ppp_wan_interface_unit: ge-0/0/5.0 # Point-to-Point WAN interface, keep it consistent with Point-to-Point WAN interface
+#   customer_usable_ppp_wan_ip_with_mask: 11.11.11.11/31 # Customer Usable Public WAN IP with Mask for PPP
+#   ppp_wan_interface: ge-0/0/5 # Point-to-Point WAN interface
+#   ppp_wan_interface_unit: ge-0/0/5.0 # Point-to-Point WAN interface, keep it consistent with Point-to-Point WAN interface
   
-  # public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix. Ignore the last digit on the Transit VLAN!) (typically assigned to Ge-0/0/5 WAN interface) (Found in QS under the Service Item)
-  # route_filter_term_prefix_ip_with_mask: 185.96.16.120/29 # Hybrid Ethernet Address - Network Address (Found in QS under the Service Item) usually with /29 mask
-  # remote_asn: 64664 # Remote Autonomus-system Number (ASN) (Found in QS under the Service Item)
-  # bgp_group_transit_neighbor_ip: 185.93.18.26 # Provider Usable (Default Gateway) Public WAN IP for PPP (Found in QS under the Service Item)
+#   public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix.)
+#   route_filter_term_prefix_ip_with_mask: 11.11.11.13/29 # Network Address usually with /29 mask
+#   remote_asn: 64444 # Remote Autonomus-system Number (ASN)
+#   bgp_group_transit_neighbor_ip: 11.11.11.12 # Provider Usable (Default Gateway) Public WAN IP for PPP
 
-  # # Provider Edge (PE) Variables
-  # pe_filename: Vapiano_North_Core_Config # Name for configuration file that will be generated. No spaces, use underscores instead!
-  # pe_nni_physical_interface_id: xe-0/0/4 # Network-to-Network Interface (NNI) Depending on which NNI has been selected at order stage. (Found in QS under the Service Item)
-  # pe_customer_name_with_speed_interface_description: "Vapiano North 50/100" # "Customer Name + Speeds" (Found in QS under the Service Item)
-  # pe_public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix. Ignore the last digit on the Transit VLAN!) (typically assigned to Ge-0/0/5 WAN interface) (Found in QS under the Service Item)
-  # pe_remote_asn: 64664 # Remote Autonomus-system Number (ASN) (Found in QS under the Service Item)
-  # pe_ppp_default_gateway_with_mask: 185.93.18.26/31 # Provider Usable (Default Gateway) Public WAN IP for PPP (mask /31) (Found in QS under the Service Item)
-  # pe_ppp_customer_usable: 185.93.18.27 # Customer Usable Public WAN IP for PPP (mask /31) (Found in QS under the Service Item)
+#   # Provider Edge (PE) Variables
+#   pe_filename: Core_Config_For_My_Second_Leased_Line # Name for configuration file that will be generated. No spaces, use underscores instead!
+#   pe_nni_physical_interface_id: xe-0/0/1 # Network-to-Network Interface (NNI)
+#   pe_customer_name_with_speed_interface_description: "Example Company 50/100" # "Customer Name + Speeds"
+#   pe_public_wan_vlan_id: 305 # Public WAN VLAN ID Prefix (Important! This is the VLAN Prefix.)
+#   pe_remote_asn: 64666 # Remote Autonomus-system Number (ASN)
+#   pe_ppp_default_gateway_with_mask: 11.11.11.12/31 # Provider Usable (Default Gateway) Public WAN IP for PPP (mask /31)
+#   pe_ppp_customer_usable: 11.11.11.11 # Customer Usable Public WAN IP for PPP
+
+
