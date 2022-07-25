@@ -1,7 +1,7 @@
 set system host-name {{ hostname }}
-set system login user netadmin uid 2000
-set system login user netadmin class super-user
-set system login user netadmin authentication encrypted-password "$6$ciSTorlm$X77BK0sdn10A4CoKJds560Y2eUqbDIpUURGK1YB95aVPlyZ1TTbzseTpPOqbeOnPxncw91dUH7zesQgCaP9C71"
+set system login user admin uid 2000
+set system login user admin class super-user
+set system login user admin authentication encrypted-password "{{ encrypted_password }}"
 set system services ssh
 set system services dhcp-local-server group voice interface {{ voice_lan_interface_unit }}
 set system services dhcp-local-server group data interface {{ data_lan_interface_unit }}
@@ -50,9 +50,9 @@ set interfaces {{ ppp_wan_interface }} vlan-tagging
 set interfaces {{ ppp_wan_interface }} unit 0 vlan-id {{ public_wan_vlan_id }}
 set interfaces {{ ppp_wan_interface }} unit 0 family inet address {{ customer_usable_ppp_wan_ip_with_mask }}
 set snmp interface {{ ppp_wan_interface_unit }}
-set snmp client-list management 185.96.17.164/32
-set snmp client-list management 185.96.17.163/32
-set snmp client-list management 91.109.47.179/32
+set snmp client-list management 11.11.11.11/32
+set snmp client-list management 11.11.11.12/32
+set snmp client-list management 11.11.11.13/32
 set snmp community T3l3h0u53 authorization read-only
 set snmp community T3l3h0u53 client-list-name management
 set snmp community T3l3h0u53Nth authorization read-write
@@ -73,19 +73,14 @@ set access address-assignment pool data family inet dhcp-attributes name-server 
 set access address-assignment pool data family inet dhcp-attributes name-server {{ data_dhcp_secondary_name_server_ip }}
 set access address-assignment pool data family inet dhcp-attributes router {{ data_dhcp_default_gateway_ip }}
 set applications application UDP1800s protocol udp
-set applications application UDP1800s destination-port 1-65535
+set applications application UDP1800s destination-port 1-65555
 set applications application UDP1800s inactivity-timeout 1800
 set protocols bgp group transit neighbor {{ bgp_group_transit_neighbor_ip }} export export-{{ remote_asn }}
-set protocols bgp group transit neighbor {{ bgp_group_transit_neighbor_ip }} peer-as 59402
+set protocols bgp group transit neighbor {{ bgp_group_transit_neighbor_ip }} peer-as 59444
 set routing-options autonomous-system {{ remote_asn }}
 set policy-options prefix-list bgp-neighbors apply-path "protocols bgp group <*> neighbor <*>"
 set policy-options prefix-list MANAGEMENT-RANGE 10.0.1.0/24
-set policy-options prefix-list MANAGEMENT-RANGE 10.1.1.22/32
-set policy-options prefix-list MANAGEMENT-RANGE 10.1.1.30/32
-set policy-options prefix-list MANAGEMENT-RANGE 91.109.40.0/24
-set policy-options prefix-list MANAGEMENT-RANGE 91.109.47.179/32
-set policy-options prefix-list MANAGEMENT-RANGE 185.96.16.112/29
-set policy-options prefix-list MANAGEMENT-RANGE 185.96.17.160/28
+set policy-options prefix-list MANAGEMENT-RANGE 10.1.1.1/32
 set policy-options prefix-list MANAGEMENT-RANGE 192.168.196.0/24
 set firewall family inet filter router-protect interface-specific
 set firewall family inet filter router-protect term bgp from source-prefix-list bgp-neighbors
