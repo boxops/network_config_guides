@@ -2,14 +2,14 @@
 # pip3 install junos-eznc lxml
 
 # Usage
-# python3 junos_get_config.py
+# python3 junos_backup_config.py
 
 from jnpr.junos import Device
 from lxml import etree
 
-host = "185.96.18.45"
-user = "netadmin"
-password = "H3st1a3n!"
+host = "11.11.11.11"
+user = "admin"
+password = "Super23Secure34Password?"
 port = 22
 filename = host + ".txt"
 
