@@ -2711,3 +2711,189 @@ ntp master
 # - However, APIs allow third-party applications to interact with the controller, which can be very powerful.
 # Although SDN and automation are not the same thing, the SDN architecture greatly facilitates the automation of various tasks in the network via the SDN controller and APIs.
 
+
+### JSON, XML, & YAML 
+
+## Data Serialisation
+# It is the process of converting data into a standarised format/structure that can be stored (in a file) or transmitted (over a network) and reconstructed later (ie. by a different application).
+# This allows the data to be communicated between applications in a way both applications understand.
+# Data serialisation languages allow us to represent variables with text.
+
+## JSON
+# JavaScript Object Notation (JSON) is an open standard file format and data interchange format that uses human-readable text to store and transmit data objects.
+# It is standarised in RFC 8259
+# It was delivered from JavaScript, but it is language-independent and many modern programming languages are able to generate and read JSON data.
+# - REST APIs often use JSON.
+# Whitespace is not significant.
+# JSON can represent four primitive data types:
+# - string
+# - number
+# - boolean
+# - null
+# JSON also has two structured data types:
+# - object
+# - array
+
+## JSON primitive data types:
+# A string is a text value. It is surrounded by double quotes "".
+# - "Hello"
+# - "five"
+# - "5"
+# - "true"
+# - "null"
+
+# A number is a numeric value. It is not surrounded by quotes.
+# - 5
+# - 100
+
+# A boolean is a data type that has only two possible values, not surrounded by quotes.
+# - true
+# - false
+
+# A null value represents the intentional absence of any object value. It is not surrounded by quotes.
+# - null
+
+# An object is an unordered list of key-value pairs (variables).
+# - Objects are surrounded by curly brackets {}.
+# - The key is a string.
+# - The value is any valid JSON data type (string, number, boolean, null, object, array).
+# - The key and value are separated by a colon : .
+# - If there are multiple key-value pairs, each pair is separated by a comma.
+
+{
+    "interface": "GigabitEthernet1/1",
+    "is_up": true,
+    "ipaddress": "192.168.1.1",
+    "netmask": "255.255.255.0",
+    "speed": 1000
+}
+
+# An array is a series of values separated by commas.
+# - not key-value pairs
+# - the values do not have to be the same data type
+
+## XML
+# Extensible Markup Langiage (XML) was developed as a markup language, but is now used as a general data serialisation language.
+# - Markup languages (ie. HTML) are used to format text (font, size, color, headings, etc.)
+# XML is generally less human-readable than JSON.
+# Whitespace is not significant.
+# Often used by REST APIs.
+# <key>value</key>
+
+## YAML
+# YAML originally meant Yet Another Markup Language, but to distinguish its purpose as a data-serialisation language rather than a markup language, it was repurposed to YAML Aint Markup Language.
+# YAML is used by the network automation tool Ansible.
+# YAML is very human-readable.
+# Whitespace is significant (unlike JSON and XML).
+# - Indentation is very important.
+# YAML files start with --- .
+# - is used to indicate a list.
+# Keys and values are represented as key:value.
+
+
+### REST APIs
+
+# An API (Application Programming Interface) is a software interface that allows two applications to communicate with each other.
+# APIs are essential nut just for network automation, but for all kings of applications.
+# In SDN architecture, APIs are used to communicate between apps and the SDN controller (via the NBI), and between the SDN controller and the network devices (via the SBI).
+# The NBI typically used REST APIs.
+# NETCONF and RESTCONF are popular southbound APIs.
+
+## CRUD
+# CRUD (Create, Read, Update, Delete) refers to the operations we perform using REST APIs.
+# Create operations are used to create new variables and set their initial values.
+# - ie. create variable "ip_address" and set the value to "10.1.1.1".
+# Read operations are used to retrieve the value of a variable.
+# - ie. what is the value of variable "ip_address"?
+# Update operations are used to change the value of a variable.
+# - ie. change the value of variable "ip_address" to "10.2.3.4".
+# Delete operations are used to delete variables.
+# - ie. delete variable "ip_address".
+# HTTP used verbs (aka. methods) that map to these CRUD operations.
+# REST APIs typically use HTTP.
+
+# | Purpose | CRUD Operation | HTTP Verb |
+# | Create new variable | Create | POST |
+# | Retrieve value of variable | Read | GET |
+# | Change the value of variable | Update | PUT,PATCH |
+# | Delete variable | Delete | DELETE |
+
+## HTTP Request
+# When a HTTP client sends a request to a HTTP server, the HTTP header includes information like this:]
+# An HTTP Verb (ie. GET)
+# A URI (Uniform Resource Identifier), indicating the resource it is trying to access.
+
+# The HTTP request can include additional headers which pass additional information to the server.
+# - Check the list at https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+# An example would be an Accept header, which informs the server about the types of data that can be sent back to the client.
+# - ie. Accept: application/json or Accept: application/xml
+
+# You can also view the standard HTTP header fields with some examples at https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+# When a REST client makes an API call (request) to a REST server, it will send an HTTP request like the one above.
+# REST APIs do not have to use HTTP for communication, although HTTP is the most common choice.
+
+## HTTPS Response
+# The server's response will include a status code indicating if the request succeeded or failed, as well as other details.
+# The first digit indicates the class of the response:
+# - 1xx informational - the request was received, continuing process
+# - 2xx successful - the request was successfully received, understood, and accepted
+# - 3xx redirection - further action needs to be taken in order to complete the request
+# - 4xx client error - the request contains bad syntax or cannot be fulfilled
+
+# Here are some examples of each HTTP Response class:
+# 1xx Informational
+# - 102 Processing indicates that the server has received the request and it processing it, but the response is not yet available.
+# 2xx Successful
+# - 200 OK indicates that the request succeeded.
+# - 201 Created indicates that the request succeeded and a new resource was created (ie. response to POST)
+# 3xx Redirection
+# - 301 Moved Permanently incidates that hte requested resource has been moved, and the server indicates its new location.
+# 4xx Client Error
+# - 403 Unauthorised means the client must authenticate to get a reponse.
+# - 404 Not Found means the requested resource was not found.
+# 5xx Server Error
+# - 500 Internal Server Error means the server encountered something unexpected that it does not know how to handle.
+
+## REST: Client-server
+# REST APIs use a client-server architecture.
+# The client uses API calls (HTTP requests) to access the resources on the server.
+# The separation between the client and server means they can both change and evolve independently of each other.
+# - When the client application chnages or the server application changes, the interface between them must not break.
+
+## REST: Stateless
+# REST API exchanges are stateless.
+# This means that each API exchange is a separate event, independent of all past exchanges between the client and server.
+# - The server does not store information about previous requests from the client to determine how it should respond to new requests.
+# If authentication is required, this means that the client must authenticate with the server for each request it makes.
+# TCP is an example of a stateful protocol.
+# UDP is an example if a stateless protocol.
+# Although REST APIs use HTTP, which uses TCP (stateful) as its Layer 4 protocol, HTTP and REST APIs themselves are not stateful. The functions of each layer are separate.
+
+## REST: Cacheable or Non-Cacheable
+# REST APIs must support caching of data.
+# Caching refers to storing data for future use.
+# - For example, your computer might cache many elements of a web page so that it does not have to retrieve the entire page every time you visit it.
+# - This imporves performance for the client and reduces the load on the server.
+# Not all resources have to be cacheable, but cacheable resources MUST be declared as cacheable.
+
+# REST is not a specific API. Instead, it describes a set of rules about how the API should work.
+# The six constraints of RESTful architecture are:
+# - Uniform Interface
+# - Client-server
+# - Stateless
+# - Cacheable or non-cacheable
+# - Layered system
+# - Code-on-demand (optional)
+
+## Cisco DevNet
+# Cisco DevNet is Cisco's developer program to help developers and IT professionals who want to write applications and develop integrations with Cisco products, platforms, and APIs.
+# DevNet offers lots of free resources such as courses, tutorials, labs, sandboxes, documentation, etc. to learn about automation and develop your skills.
+# There is also a DevNet certification track that you can pursue if you are interested in automation.
+# We will use their Cisco DNA Center Sandbox to send a REST API call using Postman.
+# - DNA Center is one of Cisco's SDN controllers.
+# - Postman is a platform for building and using APIs.
+# To start:
+# - Make an account on developer.cisco.com
+# - Make an account on postman.com and download the deskto app (https://postman.com/downloads).
+# Will be following this tutorial on DevNet: https://developer.cisco.com/docs/dna-center/#!getting-started
+
