@@ -136,6 +136,15 @@ wr
 # Acronym to remember the order of the OSI model:
 # All People Seem To Need Data Processing
 
+## OSI Model PDUs
+
+# | PDU Name -> Encapsulation |
+# | Data -> Data (no header or trailer) |
+# | Segment -> Data + L4 Header (no trailer) |
+# | Packet -> Data + L4 Header + L3 Header (no trailer) |
+# | Frame -> Data + L4 Header + L3 Header + L2 Header + L2 Trailer
+
+
 ## TCP/IP Suite
 # It is a conceptial model and set of commuincations protocols used in the Internet and other networks.
 # Know as TCP/IP because those are two of the foundational protocols in the suite.
