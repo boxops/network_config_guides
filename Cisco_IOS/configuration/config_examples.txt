@@ -49,7 +49,105 @@ end
 wr
 
 
-### ---[ Cisco_IOS with CCNA Topics ]--- ###
+##### ---[ Cisco_IOS with CCNA Topics ]--- #####
+
+
+### OSI Model and TCP/IP Suite
+
+# Networking models categorise and provide a structure for networking protocols and standards.
+# Protocols are a set of rules defining how network devices and software should work.
+
+## OSI (Open Systems Interconnection) model
+# It is a conceptual model that categorises and standardises the different functions in a network.
+# Created by the International Organisation for Standardisation (ISO).
+# Functions are divided into 7 layers.
+# These layers work together to make the network function.
+
+# OSI Model Layers
+# Layer 7 - Application
+# Layer 6 - Presentation
+# Layer 5 - Session
+# Layer 4 - Transport
+# Layer 3 - Network
+# Layer 2 - Data Link
+# Layer 1 - Physical
+
+
+# Layer 7 - Application
+# This layer is the closest to the end user.
+# Interacts with software applications for example your web browser.
+# HTTP and HTTPS are Layer 7 protocols.
+# Functions of Layer 7 include:
+# - Identifying communication partners
+# - Synchronising communication
+
+# The software application interacts with Layer 7 and wants to send some data to other systems.
+# This data is processed through the OSI stack, each layer adding something to the original data.
+# This is called encapsulation because the original data is encapsulated inside this additional information which is added on.
+# By the time it reaches the physical layer, it becomes electrical signals in a wire and sent to the neighboring system.
+# Then the neighbouring system performs the opposite process, the additions of each layer are stripped off until the data reaches the application layer of the neighbouring system.
+# This process is called de-encapsulation as the additional information is removed as the data is processed up the stack.
+# Both the encapsulation and de-encapsulation processes are examples of adjacent-layer interaction, interaction between the different layers of the OSI model.
+# However, the commuincation between the application layers of the two different systems is called same-layer interaction.
+# This same-layer interaction between application layers is what allows the application layer to perform its functions of identifying communication partners, synchronising communications, etc.
+
+# Layer 6 - Presentation
+# Data in the application layer is in application format.
+# It needs to be translated to a different format to be sent over the network.
+# The presentation layer's job is to translate between application and network formats.
+# For example, encryption of data as it is sent, and dercyption of data as it is received.
+# Also translates between different application layer formats.
+
+# Layer 5 - Session
+# Controls dialogues (sessions) between communicating hosts.
+# Establishes, manages, and terminates connections between the local application (for example, your web browser) and the remote application (for example, YouTube).
+
+# Network engineers do not usully work with the top 3 layers.
+# Application developers work with the top layers of the OSI model to connect their applications over networks.
+# The PDU (Protocol Data Unit) of the first 3 layers are called data.
+
+# Layer 4 - Transport
+# It segments and reassembles data for communications between end hosts.
+# Breaks large pieces of data into smaller segments which can be more easily sent over the network and are less likely to cause transmission problems if errors occur.
+# Provide host-to-host communication.
+# The PDU us segment.
+
+# Layer 3 - Network
+# Provides connectivity between end hosts on different networks (ie. outside of the LAN).
+# Provides path selection between source and destination.
+# Routers operate at layer 3.
+# The PDU is called a packet.
+
+# Layer 2 - Data Link
+# Provides node-to-node connectivity and data transfer (for example, PC to switch, switch to router, router to router).
+# Defines how data is formatted for transmission over a physical medium (for example, copper UTP cables).
+# Detects and (possibly) corrects Physical layer errors.
+# Uses layer 2 addressing, separate from layer 3 addressing.
+# Switches operate at layer 2.
+# The PDU is called a frame.
+
+# Layer 1 - Physical
+# Defines physical characteristics of the medium used to transfer data between devices.
+# For example, voltage levels, maximum transmission distances, physical connectors, cable specifications, etc.
+# Digital bits are converted into electrical (for wired connections) or radio (for wireless connections) signals.
+# Cables, pin layouts, etc. are related to the physical layer.
+# The PDU is called bit.
+
+# Acronym to remember the order of the OSI model:
+# All People Seem To Need Data Processing
+
+## TCP/IP Suite
+# It is a conceptial model and set of commuincations protocols used in the Internet and other networks.
+# Know as TCP/IP because those are two of the foundational protocols in the suite.
+# Developed by the United States Department of Defense through DARPA (Defense Advanced Research Projects Agency).
+# Similar structure to the OSI model, but with fewer layers.
+# Note: The OSI model still influences how network engineers think and talk about networks.
+
+# TCP/IP Suite Layers
+# Layer 4 - Application (equivalent to Application, Presentation, and Session layers of the OSI model)
+# Layer 3 - Transport (equivalent to the Transport layer of the OSI model)
+# Layer 2 - Internet (equivalent to the Network layer of the OSI model)
+# Layer 1 - Link (equivalent to Data Link and Physical layers of the OSI model)
 
 
 ### Interfaces and Cables
