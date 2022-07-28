@@ -248,6 +248,45 @@ wr
 # - Does not emit any signal outside of the cable (no security risk).
 
 
+### Ethernet LAN Switching
+
+## Ethernet frame fields (26 bytes total with header + trailer)
+# 1) Ethernet header:
+# - Preamble (7 bytes or 56 bits). Allows devices to synchronise their receiver clocks
+# - Start Frame Delimiter (SFD) (1 byte of 8 bits). Marks the end of the preamble, and the beginning of the rest of the frame.
+# - Destination (6 byte or 48 bit MAC address). Indicate the device that is receiving the frame.
+# - Source (6 byte or 48 bit MAC address). Indicate the device that is sending the frame.
+# - Type (or Length) (2 bytes or 16 bits). A value of 1500 or less indicates the Length. A value of 1536 or greater indicates the type of the encapsulated packet.
+
+# 2) Ethernet trailer:
+# - Frame Check Sequence (FCS) (4 bytes or 32 bits). Detects corrupted data by running a CRC (Cyclic Redundancy Check) algorithm over the received data.
+
+## MAC Address
+# 6 byte or 48 bit in length physical address assigned to the device when it is made.
+# It is globally unique.
+# The first 3 bytes are the OUI (Organisationally Unique Identifier), which is assigned to the company making the device.
+# The last 3 bytes are unique to the device itself.
+# Written as 12 hexadecimal characters.
+
+show mac address-table
+
+# Aging: If the switch does not get any traffic from a MAC address for 5 minutes, it will remove the entry from the MAC address table.
+
+# Manually remove all entries in the MAC address table
+clear mac address-table dynamic
+
+# Manually remove a specific MAC address
+clear mac address-table dynamic address 0c2f.b011.9d00
+clear mac address-table dynamic interface G0/0
+
+
+## ARP (Address Resolution Protocol)
+# ARP is used to discover the layer 2 address (MAC address) of a known layer 3 address (IP address).
+# Consists of two messages:
+# - ARP Request. It is broadcast and sent to all hosts on the network.
+# - ARP Reply. It is unicast and only sent to one host (the host that sent the request).
+
+
 ### Standard ACL
 
 # access-list number { deny | permit } ip wildcard-mask
