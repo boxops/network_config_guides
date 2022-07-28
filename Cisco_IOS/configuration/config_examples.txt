@@ -287,6 +287,42 @@ clear mac address-table dynamic interface G0/0
 # - ARP Reply. It is unicast and only sent to one host (the host that sent the request).
 
 
+### IP Addressing
+
+
+### Switch Interfaces
+
+
+### Subnetting
+
+
+### VLANs
+
+
+### DTP / VTP
+
+
+### Spanning Tree Protocol
+
+
+### Floating Static Routes
+
+
+### RIP and EIGRP
+
+
+### OSPF
+
+
+### IPv6
+
+
+
+
+
+
+
+
 ### Standard ACL
 
 # access-list number { deny | permit } ip wildcard-mask
