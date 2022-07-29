@@ -238,14 +238,198 @@ clear mac address-table dynamic interface G0/0
 
 ### IP Addressing
 
+# Free CCNA | IPv4 Addressing (Part 1) | Day 7 | CCNA 200-301 Complete Course
+# https://www.youtube.com/watch?v=3ROdsfEUuhs&list=PLxbwE86jKRgMpuZuLBivzlM8s2Dk5lXBQ&index=13
+
 
 ### Switch Interfaces
+
+## Half duplex:
+# - The device cannot send and receive data at the same time.
+# - If it is receiving a frame, it must wait before sending a frame.
+# - Devices attached to a hub must operate in half duplex.
+
+# Full duplex:
+# - The device can send and receive data at the same time. It does not have to wait.
+
+## Speed/Duplex Autonegotiation
+# Interfaces that can run at different speeds (10/100 or 10/100/1000) have default settings of speed auto and duplex auto.
+# Interfaces advertise their capabilities to the neighbouring device, and they negotiate the best speed and duplex settings they are both capable of.
+
+# What if autonegotiation is disabled on the device connected to the switch?
+# SPEED: 
+# - The switch will try to sense the speed that the other device is operating at.
+# - If it fails to sense the speed, it will use the slowest supported speed (ie. 10 Mbps on a 10/100/1000 interface)
+# DUPLEX:
+# - If the speed is 10 or 100 Mbps, the switch will use half duplex.
+# - If the speed is 1000 Mbps or greater, the switch will use full duplex.
+
+
+## Manually configure speed and duplex
+
+# SW1
+int f0/1
+description ## to R1 ##
+speed 100
+duplex full
+# If the other end is set to duplex auto, then the link will be half duplex.
+# This is because the other device cannot detect the duplex and speed settings.
 
 
 ### Subnetting
 
+## Classless Inter-Domain Routing (CIDR) Notations Table
+
+# CIDR prefix length	Dotted Decimal Netmask	Number of Usable IPs	
+# /1	128.0.0.0	2,147,483,646	
+# /2	192.0.0.0	1,073,741,822	
+# /3	224.0.0.0	536,870,910	
+# /4	240.0.0.0	268,435,454	
+# /5	248.0.0.0	134,217,726	
+# /6	252.0.0.0	67,108,862	
+# /7	254.0.0.0	33,554,430	
+# /8	255.0.0.0	16,777,214	
+			
+# /9	255.128.0.0	8,388,606	
+# /10	255.192.0.0	4,194,302	
+# /11	255.224.0.0	2,097,150	
+# /12	255.240.0.0	1,048,574	
+# /13	255.248.0.0	524,286	
+# /14	255.252.0.0	262,142	
+# /15	255.254.0.0	131,070	
+# /16	255.255.0.0	65,534	
+			
+# /17	255.255.128.0	32,766	
+# /18	255.255.192.0	16,382	
+# /19	255.255.224.0	8,190	
+# /20	255.255.240.0	4,094	
+# /21	255.255.248.0	2,046	
+# /22	255.255.252.0	1,022	
+# /23	255.255.254.0	510	
+# /24	255.255.255.0	254	
+			
+# /25	255.255.255.128	126	
+# /26	255.255.255.192	62	
+# /27	255.255.255.224	30	
+# /28	255.255.255.240	14	
+# /29	255.255.255.248	6	
+# /30	255.255.255.252	2	
+# /31	255.255.255.254	0	
+# /32	255.255.255.255	1	
+
+
+## Quiz
+# PC1 has an IP address of 10.217.182.223/11
+# Identify the following for PC1's subnet:
+# 1) Network address:
+# 2) Broadcast address:
+# 3) First usable address:
+# 4) Last usable address:
+# 5) Number of usable host addresses:
+
+# 10.217.182.223
+# 00001010.11011001.10110110.11011111
+
+# 1) To find the network address, change all of the host bits to 0.
+# 00001010.11000000.00000000.00000000
+# 10.192.0.0
+
+# 2) Change all the host bits to 1, and you will get the broadcast address.
+# 00001010.11011111.11111111.11111111
+# 10.223.255.255
+
+# 3) Add 1 to the network address, and you get the first usable address.
+# 10.192.0.1
+
+# 4) Subtract 1 from the broadcast address and you get the last usable address.
+# 10.223.255.254
+
+# 5) Determine the number of host addresses by counting the number of host bits, and raise 2 to the power of the host bits.
+# 21 host bits = 2 on the power of 21 - 2 = 2097150 hosts per subnet
+
+
+# Variable-Length Subnet Masks (VLSM)
+# VLSM is the process of creating subnets of different sizes, to make your use of network addresses more efficient.
+
+# VLSM Steps:
+# 1) Assign the largest subnet at the start of the address space.
+# 2) Assign the second-largest subnet after it.
+# 3) Repeat the process until all subnets have been assigned.
+
+# Example
+# Subnet: 192.168.1.0/24
+# Tokyo LAN A: 110 hosts
+# Tokyo LAN B: 8 hosts
+# Toronto LAN A: 29 hosts
+# Toronto LAN B: 45 hosts
+# Point-to-point connection: 2 hosts
+
+# Tokyo LAN A
+# - Network address: 192.168.1.0/25
+# - Broadcast address: 192.168.1.127/25
+# - First usable address: 192.168.1.1/25
+# - Last usable address: 192.168.1.126/25
+# - Number of usable host addresses: 126
+
+# Tokyo LAN B
+# - Network address: 192.168.1.224/28
+# - Broadcast address: 192.168.1.239/28
+# - First usable address: 192.168.1.225/28
+# - Last usable address: 192.168.1.238/28
+# - Number of usable host addresses: 14
+
+# Toronto LAN A
+# - Network address: 192.168.1.192/27
+# - Broadcast address: 192.168.1.223/27
+# - First usable address: 192.168.1.193/27
+# - Last usable address: 192.168.1.222/27
+# - Number of usable host addresses: 30
+
+# Toronto LAN B
+# - Network address: 192.168.1.128/26
+# - Broadcast address: 192.168.1.191/26
+# - First usable address: 192.168.1.129/26
+# - Last usable address: 192.168.1.190/26
+# - Number of usable host addresses: 62
+
+# Point-to-point connection
+# - Network address: 192.168.1.240/30
+# - Broadcast address: 192.168.1.243/30
+# - First usable address: 192.168.1.241/30
+# - Last usable address: 192.168.1.242/30
+# - Number of usable host addresses: 2
+
 
 ### VLANs
+
+# VLANs are configured on switches on a per-interface basis.
+# Logically separate end hosts at Layer 2.
+# Switches do not forward traffic directly between hosts in different VLANs.
+# VLANs 1, 1002-1005 exist by default and cannot be deleted.
+# An access port is a switchport which belongs to a single VLAN, and usually connects to end hosts like PCs.
+# Switchports carry multiple VLANs are called trunk ports.
+
+## VLAN Configuration
+
+# SW1
+int range g1/0-3
+switchport mode access
+switchport access vlan 10
+int range g2/0-3
+switchport mode access
+switchport access vlan 20
+int range g3/0-3
+switchport mode access
+switchport access vlan 30
+exit
+vlan 10
+name Engineering
+vlan 20
+name HR
+vlan 30
+name Sales
+
+do show vlan brief
 
 
 ### DTP / VTP
