@@ -1,0 +1,2 @@
+Ansible for Junos OS Developer Guide
+https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/index.html
