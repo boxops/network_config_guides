@@ -10,7 +10,6 @@
 # Reference
 # https://www.juniper.net/documentation/us/en/software/junos-pyez/junos-pyez-developer/topics/topic-map/junos-pyez-connection-methods.html
 
-
 import sys
 from getpass import getpass
 from jnpr.junos import Device
@@ -29,3 +28,9 @@ except ConnectError as err:
 except Exception as err:
     print (err)
     sys.exit(1)
+
+# Junos PyEZ automatically queries the default SSH configuration file at ~/.ssh/config, if one exists. 
+# However, starting with Junos PyEZ Release 1.2, you can specify a different SSH configuration file when you create the device instance by including the ssh_config parameter in the Device argument list. For example:
+# ssh_config_file = "~/.ssh/config_dc"
+# dev = Device(host='198.51.100.1', ssh_config=ssh_config_file)
+
