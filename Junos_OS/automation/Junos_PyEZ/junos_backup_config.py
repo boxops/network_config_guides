@@ -1,5 +1,8 @@
+# Purpose
+# Save the configuration of a device.
+
 # Requirements
-# pip3 install junos-eznc lxml
+# python -m pip install junos-eznc lxml
 
 # Usage
 # python3 junos_backup_config.py
