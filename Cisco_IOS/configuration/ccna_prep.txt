@@ -1,4 +1,9 @@
+
 ##### ---[ Cisco_IOS with CCNA Topics ]--- #####
+
+
+## Cisco Technologies Support Documentation:
+https://www.cisco.com/c/en/us/tech/index.html
 
 
 ### OSI Model and TCP/IP Suite
@@ -547,12 +552,143 @@ exit
 show vlans
 
 
+## Native VLAN on a router (ROAS)
+
+# The native VLAN feature does have one benefit.
+# Because frames in the native VLAN are not tagged, it is more efficient, each frame is smaller so it allows the device to send more frames per second.
+
+# There are 2 methods of configuring the native VLAn on a router:
+# 1) Use the command on the router subinterface:
+int g0/0.10
+encapsulation dot1q [vlan-id] native
+# 2) Configure the IP address for the native VLAN on the router's physical interface (the encapsulation dot1q vlan-id native command is not necessary)
+no int g0/0.10
+int g0/0
+ip address 192.168.1.62 255.255.255.192
+
+
+## Layer 3 (Multilayer) Switches
+# A multilayer switch is capable of both switching and routing.
+# It is Layer 3 aware.
+# You can assign IP addresses to its interfaces, like a router.
+# You can create virtual interfaces for each VLAN, and assign IP addresses to those interfaces.
+# You can configure routes on it, just like a router.
+# It can be used for inter-VLAN routing.
+# In large networks a multilayer switch is the preferred method of inter-VLAN routing.
+
+## Inter-VLAN Routing via SVI (Switch Virtual Interface)
+# SVIs are the virtual interfaces you can assign IP addresses to in a multilayer switch.
+# Configure each PC to use the SVI (NOT the router) as their gateway address.
+# To send traffic to different subnets/VLANs, the PCs will send traffic to the switch, and the switch will route the traffic.
+
+
+## Migrate from ROAS routing to SVI routing
+
+# R1
+no interface g0/0.10
+no interface g0/0.20
+no interface g0/0.30
+# Reset G0/0 interface to its default settings
+default interface g0/0
+int g0/0
+ip address 192.168.1.194 255.255.255.252
+
+do show ip int brief
+
+# SW1
+default int g0/1
+# Enable Layer 3 routing
+ip routing
+int g0/1
+# Configure the switch interface as a routed port
+no switchport
+ip address 192.168.1.193 2555.255.255.252
+# Default route pointing to R1
+ip route 0.0.0.0 0.0.0.0 192.168.1.194
+
+do show ip int brief
+do show int status
+
+# SW2
+# SVI configuration
+int vlan 10
+ip address 192.168.1.62 255.255.255.192
+no sh
+int vlan 20
+ip address 192.168.1.126 255.255.255.192
+no sh
+int vlan 30
+ip address 192.168.1.190 255.255.255.192
+no sh
+
+
+## Conditions required for an SVI to be UP/UP:
+# 1) The VLAN must exist on the switch.
+# 2) The switch must have at least one access port in the VLAN in an up/up state, and/or one trunk port that allows the VLAN that is in an up/up state.
+# 3) The VLAN must not be shutdown (you can use the shutdown command to disable a VLAN).
+
+
+### DTP / VTP (Removed from the CCNA exam topics)
+
+# DTP (Dynamic Trunking Protocol) is a Cisco proprietary protocol that allows Cisco switches to dynamically determine their interface status (access or trunk) without manual configuration.
+# DTP is enabled by default on all Cisco switch interfaces.
+# So far, we have been manually configuring switchports using these commands:
+switchport mode access
+switchport mode trunk
+# For security purposes, manual configuration is recommended.
+# DTP should be disabled on all switchports.
+
+## DTP Configuration
+switchport mode dynamic [auto|desirable]
+
+# A switchport in dynamic desirable mode will actively try to form a trunk with other Cisco switches.
+# It will form a trunk if connected to another switchport in the following modes:
+switchport mode trunk
+switchport mode dynamic desirable
+switchport mode dynamic auto
+
+show int g0/0 switchport
+
+# A switchport in dynamic auto mode will NOT actively try to form a trunk with other Cisco switches, however, it will form a trunk if the switch connected to it is actively trying to form a trunk.
+# It will form a trunk with a switchport in the following modes:
+switchport mode trunk
+switchport mode dynamic desirable
+
+
+## Chart Summarising the Resulting Operation Mode of DTP
+# | Administrative Mode | Trunk | Dynamic Desirable | Access | Dynamic Auto |
+# ---------------------------------------------------------------------------
+# | Trunk | Trunk | Trunk | X | Trunk |
+# | Dynamic Desirable | Trunk | Trunk | Access | Trunk |
+# | Access | X | Access | Access | Access |
+# | Dynamic Auto | Trunk | Trunk | Access | Access |
+
+
+# DTP will not form a trunk with a router, PC, etc. The switchport will be in access mode.
+# The default administrative mode on older switches is:
+switchport mode dynamic desirable
+# The default administrative mode on newer switches is:
+switchport mode dynamic auto
+# Disable DTP negotiation on an interface:
+int g0/0
+switchport nonegotiate
+# Configuring an access port with switchport mode access also disables DTP negotiation on an interface.
+
+# Switches that support both 802.1Q and ISL trunk encapsulations can use DTP to negotiate the encapsulation they will use.
+# This negotiation is enabled by default, as the default trunk encapsulation mode is:
+switchport trunk encapsulation negotiate
+# For DTP, ISL is favored over 802.1Q, so if both switches support ISL, then it will be selected.
+# DTP frames are sent in VLAN1 when using ISL, or in the native VLAN when using 802.1Q (the default native VLAn is VLAN1, however).
+
+
+## VTP (VLAn Trunking Protocol)
 
 
 
 
 
-### DTP / VTP
+
+
 
 
 ### Spanning Tree Protocol
