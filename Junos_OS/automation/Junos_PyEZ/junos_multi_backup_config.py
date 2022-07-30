@@ -1,11 +1,13 @@
-# Purpose
-# Save the configuration of multiple devices.
+"""
+Purpose
+Save the configuration of multiple devices.
 
-# Requirements
-# python -m pip install junos-eznc lxml
+Requirements
+python -m pip install junos-eznc lxml
 
-# Usage
-# python3 junos_multi_backup_config.py
+Usage
+python3 junos_multi_backup_config.py
+"""
 
 from jnpr.junos import Device
 from lxml import etree
