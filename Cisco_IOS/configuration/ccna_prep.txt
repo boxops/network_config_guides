@@ -728,6 +728,24 @@ switchport trunk encapsulation negotiate
 ### Spanning Tree Protocol
 
 
+# Spanning Tree Protocol priorities
+
+# 1. Lowest root bridge ID - Determines the root bridge
+# 2. Lowest cost to the root bridge - Favors the upstream switch with the least cost to root
+# 3. Lowest sender bridge ID - Serves as a tie breaker if multiple upstream switches have equal cost to root
+# 4. Lowest sender port ID - Serves as a tie breaker if a switch has multiple (non-Etherchannel) links to a single upstream switch
+
+
+
+
+
+
+
+
+
+
+
+
 ### Floating Static Routes
 
 
