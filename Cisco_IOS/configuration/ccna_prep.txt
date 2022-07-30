@@ -3755,3 +3755,51 @@ ntp master
 # | Agent-based or Agentless | Agentless | Agent-based (or Agentless) | Agent-based |
 # | Push or Pull Model | Push | Pull | Pull |
 
+
+### IP Routing: BGP Configuration Guide
+
+## How to Configure BGP 4 Soft Configuration
+# https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_bgp/configuration/xe-16/irg-xe-16-book/bgp-4-soft-configuration.html
+
+# SUMMARY STEPS
+
+enable
+configure terminal
+router bgp autonomous-system-number
+bgp log-neighbor-changes
+bgp soft-reconfig-backup
+neighbor {ip-address | peer-group-name } remote-as autonomous-system-number
+neighbor {ip-address | peer-group-name } soft-reconfiguration [inbound ]
+neighbor {ip-address | peer-group-name } route-map map-name {in | out }
+Repeat Steps 6 through 8 for every peer that is to be configured with inbound soft reconfiguration.
+exit
+route-map map-name [permit | deny ] [sequence-number ]
+set ip next-hop ip-address
+end
+show ip bgp neighbors [neighbor-address ]
+show ip bgp [network ] [network-mask ]
+
+
+
+### BGP Configuration on Cisco IOS
+# https://www.youtube.com/watch?v=zqTFyuiq9bg&t=25s
+
+# | R5 |<--- 10.56.0.0/24 --->| R6 |<--- 192.168.68.0 --->| R8 |
+
+# R6
+router bgp 3
+neighbor 192.168.68.8 remote-as 89
+neighbor 5.5.5.5 remote-as 3
+neighbor 5.5.5.5 next-hop-self
+# do show ip bgp summary
+# Reconfig outbound updates without clearing the entire BGP session
+# clear ip bgp 5.5.5.5 soft out
+
+# R5
+router bgp 3
+neighbor 6.6.6.6 remote-as 3
+# do ping 6.6.6.6 source lo0
+neighbor 6.6.6.6 update-source lo0
+neighbor 5.5.5.5 update-source lo0
+# show ip bgp summary
+# show ip route bgp
