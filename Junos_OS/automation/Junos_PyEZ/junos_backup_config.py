@@ -1,11 +1,13 @@
-# Purpose
-# Save the configuration of a device.
+"""
+Purpose
+Save the configuration of a device.
 
-# Requirements
-# python -m pip install junos-eznc lxml
+Requirements
+python -m pip install junos-eznc lxml
 
-# Usage
-# python3 junos_backup_config.py
+Usage
+python3 junos_backup_config.py
+"""
 
 from jnpr.junos import Device
 from lxml import etree
