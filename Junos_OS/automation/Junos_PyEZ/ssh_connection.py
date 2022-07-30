@@ -1,14 +1,16 @@
-# Purpose
-# Establish a NETCONF session over SSH with the device’s management interface 
+"""
+Purpose
+Establish a NETCONF session over SSH with the device’s management interface 
 
-# Requirements
-# python -m pip install junos-eznc lxml
+Requirements
+python -m pip install junos-eznc lxml
 
-# Usage
-# python3 ssh_connection.py
+Usage
+python ssh_connection.py
 
-# Reference
-# https://www.juniper.net/documentation/us/en/software/junos-pyez/junos-pyez-developer/topics/topic-map/junos-pyez-connection-methods.html
+Reference
+https://www.juniper.net/documentation/us/en/software/junos-pyez/junos-pyez-developer/topics/topic-map/junos-pyez-connection-methods.html
+"""
 
 import sys
 from getpass import getpass
@@ -29,8 +31,10 @@ except Exception as err:
     print (err)
     sys.exit(1)
 
-# Junos PyEZ automatically queries the default SSH configuration file at ~/.ssh/config, if one exists. 
-# However, starting with Junos PyEZ Release 1.2, you can specify a different SSH configuration file when you create the device instance by including the ssh_config parameter in the Device argument list. For example:
-# ssh_config_file = "~/.ssh/config_dc"
-# dev = Device(host='198.51.100.1', ssh_config=ssh_config_file)
+"""
+Junos PyEZ automatically queries the default SSH configuration file at ~/.ssh/config, if one exists. 
+However, starting with Junos PyEZ Release 1.2, you can specify a different SSH configuration file when you create the device instance by including the ssh_config parameter in the Device argument list. For example:
 
+ssh_config_file = "~/.ssh/config_dc"
+dev = Device(host='198.51.100.1', ssh_config=ssh_config_file)
+"""
