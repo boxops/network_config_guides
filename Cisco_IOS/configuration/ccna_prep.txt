@@ -681,14 +681,48 @@ switchport trunk encapsulation negotiate
 # DTP frames are sent in VLAN1 when using ISL, or in the native VLAN when using 802.1Q (the default native VLAn is VLAN1, however).
 
 
-## VTP (VLAn Trunking Protocol)
+## VTP (VLAN Trunking Protocol)
 
+# VTP allows you to configure VLANs on a central VTP server switch, and other switches (VTP clients) will synchronise their VLAN database to the server.
+# It is designed for large networks with many VLANs, so that you do not have to configure each VLAN on every switch.
+# It is rarely used, and it is recommended that you do NOT use it.
+# There are three VTP versions: 1, 2, and 3.
+# There are three VTP modes: server, client, and transparent.
+# Cisco switches operate in VTP server mode by default.
 
+# VTP Servers:
+# - Can add/modify/delete VLANs.
+# - Store the VLAN database in non-volatile RAM (NVRAM).
+# - Will increase the revision number every time a VLAN is added/modified/deleted/
+# - Will advertise the latest version of the VLAN database on trunk interfaces, and the VTP clients will synchronise their VLAn database to it.
+# - VTP servers also function as VTP clients, therefore, a VTP server will synchronise to another VTP server with a higher revision number.
 
+# VTP Clients:
+# - Cannot add/modify/delete VLANs.
+# - Do not store the VLAN database in NVRAM. (in VTPv3, they do)
+# - Will synchronise their VLAN database to the server with the highest revision number in their VTP domain.
+# - Will advertise their VLAN database, and forward VTP advertisements to other clients over their trunk ports.
 
+# VTPv1/v2 do not support the extended VLAN range (1006-4094). Only VTPv3 supports them.
+# If a switch with no VTP domain (domain null) receives a VTP advertisement with a VTP domain name, it will automatically join that VTP domain.
+# If a switch receives a VTP advertisement in the same VTP domain with a higher revision number, it will update its VLAN database to match.
 
+# One danger of VTP:
+# If you connect an old switch with a higher revision number to your network (and the VTP domain name matches), all switches in the domain will sync their VLAN database to that switch.
 
+# VTP Transparent mode:
+# - Does not participate in the VTP domain (does not synch its VLAN database).
+# - Maintains its own VLAN database in NVRAM. It can add/modify/delete VLANs, but they will not be advertised to other switches.
+# - Will forward VTP advertisements that are in the same domain as it.
 
+# Changing the VTP domain to an unused domain will reset the revision number to 0.
+# Changing the VTP mode to transparent will also reset the revision number to 0.
+# Changing the VTP version increases the revision number, and advertisements with this new revision number will be sent.
+# Other servers and clients will then sync and start operating in version 2 as well.
+
+# VTPv2 is not much different than VTPv1.
+# The major difference is that VTPv2 introduces support for Token Ring VLANs.
+# If you use Token Ring VLANs, you must enable VTPv2. Otherwise, there is no reason to use VTPv2.
 
 
 ### Spanning Tree Protocol
