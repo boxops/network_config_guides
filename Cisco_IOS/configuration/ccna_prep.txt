@@ -4012,6 +4012,8 @@ router bgp 3
 neighbor 192.168.68.8 remote-as 89
 neighbor 5.5.5.5 remote-as 3
 neighbor 5.5.5.5 next-hop-self
+# Advertise routes into the BGP routing table
+network 1.1.1.1 mask 255.255.255.255
 # do show ip bgp summary
 # Reconfig outbound updates without clearing the entire BGP session
 # clear ip bgp 5.5.5.5 soft out
@@ -4022,5 +4024,7 @@ neighbor 6.6.6.6 remote-as 3
 # do ping 6.6.6.6 source lo0
 neighbor 6.6.6.6 update-source lo0
 neighbor 5.5.5.5 update-source lo0
+# Advertise routes into the BGP routing table
+network 1.1.1.1 mask 255.255.255.255
 # show ip bgp summary
 # show ip route bgp
