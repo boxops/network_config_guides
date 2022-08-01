@@ -1139,11 +1139,294 @@ spanning-tree vlan 1 port-priority 32
 # If there are multiple entries to the same destination, then the most specific match (longest prefix match) will be selected.
 
 
+### RIP and EIGRP
+
+## RIP (Routing Information Protocol - industry standard)
+# Distance vector IGP (uses routing-by-rumour logic to learn/share routes)
+# Uses hop count as its metric. One router = one hop (bandwidth is irrelevant)
+# The maximum hop count is 15 (anything more than that is considered unreachable)
+# Has three versions:
+# - RIPv1 and RIPv2, used for IPv4
+# - RIPng (RIP Next Generation), used for IPv6
+# Uses two message types:
+# - Request: To ask RIP-enabled neighbor routers to send their routing table
+# - Response: To send the local router's routing table to neighboring routers
+# By default, RIP-enabled routers will share their routing table every 30 seconds
+
+# RIPv1
+# - Only advertises classful addresses (Class A, Class B, Class C)
+# - Does not support VLSM, CIDR
+# - Does not include subnet mask information in advertisements (Response messages)
+# 10.1.1.0/24 will become 10.0.0.0 (Class A address, so assumed to be /8)
+# 172.16.192.0/18 will become 182.16.0.0 (Class B address, so assumed to be /16)
+# 192.168.1.4/30 will become 192.168.1.0 (Class C address, so assumed to be /24)
+# - Messages are broadcast to 255.255.255.255
+
+# RIPv2
+# - Supports VLSM, CIDR
+# - Includes subnet mask information in advertisements
+# - Messages are multicast to 244.0.0.9
+
+# RIP Configuration
+# R1
+router rip
+version 2
+no auto-summary
+network 10.0.0.0
+network 172.16.0.0
+# The passive interface command tells the router to stop sending RIP advertisements out of the specified interface.
+passive-interface g0/2
+exit
+# Gateway of last resort
+# ip route [remote-network-address] [remote-wildcard] [neighbor-interface-address]
+ip route 0.0.0.0 0.0.0.0 203.0.113.2
+# Advertise a default route into RIP
+default-information originate
+
+do show ip protocols
+
+
+# The RIP network command is classful, it will automatically convert to classful networks.
+# For example, even if you enter the command 'network 10.0.12.0', it will be converted to 'network 10.0.0.0' (a Class A network).
+# There is no need to enter the network mask.
+
+# The network command tells the rotuer to:
+# - Look for interfaces with an IP address that is in the specified range
+# - Active RIP on the interfaces that fall in the range
+# - Form adjacencies with connected RIP neighbors
+# - Advertise the network prefix of the interface (NOT the prefix in the network command)
+# The OSPF and EIGRP network commands operate in the same way.
+
+# The network command does not tell the router which networks to advertise. It tells the router which interfacves to activate RIP on , and then the router will advertise the network prefix of those interfaces.
+
+## EIGRP (Enhanced Interior Gateway Routing Protocol)
+# Was Cisco proprietary, but Cisco has now published it openly so other vendors can implement it on their equipment.
+# Considered an advanced/hybrid distance vector routing protocol.
+# Much faster than RIP in reacting to changes in the network.
+# Does not have the 15 hop-count limit of RIP.
+# Sends messages using multicast address 224.0.0.10.
+# Is the only IGP that can perform unequal-cost load-balancing (by default it performs ECMP (Equal-Cost Multi-Path ) load-balancing over 4 paths like RIP).
+
+# EIGRP Configuration
+# R1
+# The AS number must match between routers, or they will not form an adjacency and share route information.
+# router eigrp [AS]
+router eigrp 1
+no auto-summary
+passive-interface g0/2
+# The network command will assume a classful address if you do not specify the mask.
+network 10.0.0.0
+# network [network-address] [wildcard-mask]
+network 172.16.1.0 0.0.0.15
+
+# A wildcard mask is an inverted subnet mask.
+
+## Wildcard mask summarisation:
+# R1 G0/1 IP:
+# 172.20.20.17
+# 10101100.00010100.00010100.00010001
+# R1 G0/2 IP:
+# 172.26.20.12
+# 10101100.00011010.00010100.00001100
+# EIGRP network command ():
+# 10000000.00000000.00000000.00000000
+# 128.0.0.0
+# Wildcard mask:
+# 01111111.11111111.11111111.11111111
+# 127.255.255.255
+
+# 0 in the wildcard mask must match
+# 1 in the wildcard mask must match
+
+
+# Router ID priority:
+# 1) Manual configuration: eigrp router-id [router-id]
+# 2) Highest IP address on a loopback interface
+# 3) Highest IP address on a physical interface
+
+
+### OSPF (Open Shortest Path First)
+# When using a link state routing protocol, every router creates a connectivity map of the network.
+# To allow this, each router advertises information about its interfaces (connected network) to its neighbors. 
+# These advertisemetns are passed along to other routers, until all routers in the network develop the same map of the network.
+# Each router independently uses this map to calculate the best routers to each destination.
+# Link state protocols use more resources (CPU) on the router, because more information is shared.
+# However, link state protocols tend to be faster in reacting to changes in the network that distance vector protocols.
+
+# OSPF uses the Shortest Path First algorithm of Dutch computer scientist Edsger Dijkstra (aka Dijkstra's algorithm).
+# Three versions:
+# - OSPFv1 (1989): OLD, not in use anymore
+# - OSPFv2 (1998): used for IPv4
+# - OSPFv3 (2008): Used for IPv6 (can also be used for IPv4, but usually v2 is used)
+# Routers store information about the network in LSAs (Link State Advertisements), which are organised in a structure called the LSDB (Link State Database).
+# Routers will flood LSAs until all routers in the OSPF area develop the same map of the network (LSDB).
+
+## LSA Flooding
+# 1) OSPF is enabled on a router interface.
+# 2) The router creates an LSA to tell its neighbors about the network.
+# 3) The LSA is flooded throughout the network until all routers have received it.
+# 4) This results in all routers sharing the same LSDB.
+# 5) Each router then uses the SPF algorithm to calculate its best route to the network.
+# Each LSA has an aging timer (30 min by default). The LSA will be flooded again after the timer expires.
+
+## OSPF Areas
+# OSPF uses areas to divide up the network.
+# Small networks can be single-area without any negative effects on performance.
+# In larger networks, a single-area design can have negative effects:
+# - The SPF algorithm takes more time to calculate routes
+# - The SPF algorithm requires exponentially more processing power on the routers
+# - The larger LSDB takes up more memory on the routers
+# - Any small change in the network causes every router to flood LSAs and run the SPF algorithm again.
+# By dividing a large OSPF network into several smaller areas, you can avoid the above negative effects.
+
+# An area is a set of routers and links that share the same LSDB.
+# The backbone area (area 0) is an area that all other areas must connect to.
+# Routers with all interfaces in the same area are called internal routers.
+
+# ABRs (Area Border Routers) are routers with interfaces in multiple areas.
+# ABRs maintain a separate LSDB for each area they are connected to.
+# It is recommended that you connect an ABR to a maximum of 2 areas.
+# Connecting an ABR to 3+ areas can overburden the router.
+
+# Backbone routers are connected to the backbone area (area 0).
+
+# An intra-area route is a route to a destination inside the same OSPF area.
+# An interarea route is a route to a destination in a different OSPF area.
+
+# An Autonomus System Boundary Router (ASBR) is an OSPF router that connects the OSPF network to an external network.
+# The 'default-information originate' command makes a router an ASBR.
+
+# OSPF areas should be contiguous.
+# All OSPF areas must have at least one ABR connected to the backbone area.
+# OSPF interfaces in the same subnet must be in the same area.
+
+## Basic OSPF Configuration
+# R1
+# The process ID is locally significant. Routers with different process IDs can become OSPF neighbors.
+# router ospf [process-id]
+router ospf 1
+# The network command requires an area.
+network 10.0.12.0 0.0.0.3 area 0
+network 10.0.13.0 0.0.0.3 area 0
+network 172.16.1.0 0.0.0.15 area 0
+# Stop sending OSPF hello messages out of the interface
+passive-interface g0/1
+exit
+# Advertise a default route into OSPF
+ip route 0.0.0.0 0.0.0.0 203.0.113.2
+router ospf 1
+default-information originate
+
+show ip protocols
+show ip ospf neighbor
+
+# Changing the router ID requires the OSPF process to be cleared.
+router-id 1.1.1.1
+exit
+clear ip osfp process
+
+
+## Route summarisation
+# Activate OSPF networks with a single command:
+# 10.0.12.1/28
+# 00001010.00000000.0000110|0.00000001
+# 10.0.13.1/26
+# 00001010.00000000.0000110|1.00000001
+# 8 + 8 + 7 identical octets = 23 is the summary subnet mask
+# network 10.0.12.0 0.0.1.255 area 0
+
+## OSPF Cost
+# OSPF's metric is called cost.
+# It is automatically calculated based on the bandwidth (speed) of the interface.
+# It is calculated by dividing a reference bandwidth value by the interface's bandwidth.
+# The default reference bandwidth is 100 Mbps.
+# - Reference: 100 Mbps / Interface: 10 Mbps = cost of 10
+# - Reference: 100 Mbps / Interface: 100 Mbps = cost of 1
+# - Reference: 100 Mbps / Interface: 1000 Mbps = cost of 1?
+# - Reference: 100 Mbps / Interface: 10000 Mbps = cost of 1?
+# All values less than 1 will be converted to 1.
+# Therefore FastEthernet, GigabitEthernet, 10 GigabitEthernet, etc. are equal and all have a cost of 1 by default.
+
+# You can (and should) change the reference bandwidth (default is 100) with this command:
+auto-cost reference-bandwidth [megabits-per-second]
+# 100000/100 = cost of 1000 for FastEthernet
+# 100000/1000 = cost of 100 for GigabitEthernet
+
+# You should configure a reference bandwidth greater than the fastest links in your network (to allow for future upgrades).
+# You should configure the same reference bandwidth on all OSPF routers in the network.
+
+# The OSPF cost to a destination is the total cost of the outgoing/exit interfaces.
+# Loopback interfaces have a cost of 1.
+# For example, 100 (R1 G1/0) + 1 (R2 L0) = 101
+
+# Manually configure the OSPF cost of an interface:
+interface g0/0
+ip ospf cost 10000
+
+# One more option to change the OSPF cost of an interface is to change the bandwidth of the interface with the bandwidth command.
+# The formula to calculate OSPF cost is reference bandwidth / interface bandwidth.
+# Although the bandwidth matches the interface speed by default, changing the interface bandwidth does not actually change the speed at which the interface operates.
+# The bandwidth is just a value that is used to calculate OSPF cost, EIGRP metric, etc.
+# To change the speed at which the interface operates, use the speed command.
+# Because the bandwidth value is used in other calculations, it is not recommended to change this value to alter the interface's OSPF cost.
+# It is recommended that you change the reference bandwidth, and then use the 'ip ospf cost' command to change the cost of individual interfaces if you want.
+
+# Three ways to modify the OSPF cost:
+# 1) Change the reference bandwidth
+auto-cost reference-bandwidth [megabits-per-second]
+# 2) Manual configuration
+interface g0/1
+ip ospf cost [cost]
+# 3) Change the interface bandwidth
+interface g0/1
+bandwidth [kilobits-per-second]
+
+# Look up OSPF cost of an interface:
+show ip ospf interface f0/1
+
+
+## OSPF Neighbour Requirements
+# 1. Area must match
+# 2. Area must be in the same subnet
+# 3. OSPF process must not be sutdown
+# 4. OSPF Router IDs must be unique
+# 5. Hello and Dead timers must match
+# 6. Autohentication settings must match
+# 7. IP MTU settings must match
+# 8. OSPF Network Type must match
+
+## OSPF Types of LSA
+# Type 1 (Router LSA)
+# - Every OSPF router generates this type of LSA.
+# - It identifies the router using its router ID.
+# - It also lists networks attached to the rotuer's OSPF-activated interfaces.
+# Type 2 (Network LSA)
+# - Generated by the DR of each 'multi-access' network (ie. the broadcast network type).
+# - Lists the routers which are attached to the multi-access network.
+# Type 5 (AS External LSA)
+# - Generated by ASBRs to describe routes to destinations outside of the AS (OSPF domain).
+
+
+
+
+
+
+
+
+
+
+
+
+### Static Routing
+
+# ip route [ remote-network ] [ remote-network-subnet ] [ next-hop-address ]
+ip route 10.1.1.0 255.255.255.0 10.1.2.1
+
 
 ### Floating Static Routes
 
 # A floating static route will be inactive (not in the routing table) unless the route learned by the dynamic routing protocol is removed (for example, the remote router stops advertising it for some reason, or an interface failure causes an adjacency with a neighbor to be lost).
-ip route [host-address] [host-subnet] [next-hop-address] [administrative-distance-metric]
+# ip route [ remote-network ] [ remote-network-subnet ] [ next-hop-address ] [administrative-distance-metric]
 
 
 
@@ -1152,13 +1435,6 @@ ip route [host-address] [host-subnet] [next-hop-address] [administrative-distanc
 
 
 
-
-
-
-### RIP and EIGRP
-
-
-### OSPF
 
 
 ### IPv6
@@ -1275,40 +1551,6 @@ deny 89 any any
 permit ip any any
 interface g0/2
 ip access-group 112 out
-
-
-### Static Routing
-
-# ip route [ remote network ] [ remote network subnet ] [ neighbour interface ]
-ip route 10.1.1.0 255.255.255.0 10.1.2.1
-
-### OSPF Dynamic Routing
-
-OSPF Neighbour Requirements
-
-1. Area must match
-2. Area must be in the same subnet
-3. OSPF process must not be sutdown
-4. OSPF Router IDs must be unique
-5. Hello and Dead timers must match
-6. Autohentication settings must match
-7. IP MTU settings must match
-8. OSPF Network Type must match
-
-
-OSPF Types of LSA
-
-Type 1 (Router LSA)
-- Every OSPF rotuer generates this type of LSA.
-- It identifies the router using its router ID.
-- It also lists networks attached to the rotuer's OSPF-activated interfaces.
-
-Type 2 (Network LSA)
-- Generated by the DR of each 'multi-access' network (ie. the broadcast network type).
-- Lists the routers which are attached to the multi-access network.
-
-Type 5 (AS External LSA)
-- Generated by ASBRs to describe routes to destinations outside of the AS (OSPF domain).
 
 
 ### Etherchannel
