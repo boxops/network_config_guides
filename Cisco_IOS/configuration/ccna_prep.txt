@@ -1052,8 +1052,107 @@ spanning-tree vlan 1 port-priority 32
 # - Shared: a connection to a hub. Must operate in half-duplex mode and it is automatically detected.
 
 
+### Dynamic Routing
+
+# Network route: A route to a network/subnet (mask length less than /32).
+# Host route: A route to a specific host (/32 mask).
+
+# Routers can use dynamic routing protocols to advertise information about the routes they know to other routers.
+# They form adjacencies / neighbor relationships / neighborships with adjacent routers to exchange this information.
+# If multiple routes to a destination are learned, the router determines which route is superior and adds it to the routing table.
+# It uses the metric of the route to decide which is superior (lower metric = superior).
+
+## Types of Dynamic Routing Protocols
+# Dynamic routing protocols can be divided into two main categories:
+# 1) IGP (Interior Gateway Protocol) is used to share routes within a single Autonomus System (AS), which is a single organisation (ie. company).
+# Algorithm Types: 
+# Distance Vector: 
+# - RIP (Routing Information Protocol)
+# - EIGRP (Enhanced Interior Gateway Routing Protocol)
+# Link State:
+# - OSPF (Open Shortest Path First)
+# - IS-IS (Intermediate System to Intermediate System)
+
+# 2) EGP (Exterior Gateway Protocol) is used to share routes between different autonomus systems.
+# Algorithm Type:
+# Path Vector:
+# - BGP (Border Gateway Protocol)
+
+
+## Distance Vector Routing Protocols
+# Distance vector protocols were invented before link state protocols.
+# Early examples are RIPv1 and Cisco's proprietary protocol IGRP (which was updated to EIGRP).
+# Distance vector protocols operate by sending the following to their directly connected neighbors:
+# - their known destination networks
+# - their metric to reach their know destination networks
+
+# This method of sharing route information is of ten called routing by rumour.
+# This is because the router does not know about the network beyond its neighbors.
+# It only knows the information that its neighbors tell it.
+# The reason for the name ‘distance vector’ is because the routers only learn the ‘distance’, which is the metric, and the ‘vector’, which is the direction to send the traffic, the next-hop router, of each route.
+
+## Link State Routing Protocols
+# When using a link state routing protocol, every router creates a connectivity map of the network.
+# To allow this, each router advertises information about its interfaces (connected networks) to its neighbors.
+# These advertisements are passed along to other routers, until all routers in the network develop the same map of the network.
+# Each router independently uses this map to calculate the best routes to each destination.
+# Link state protocols use more resources (CPU) on the router, because more information is shared.
+# However, link state protocols tend to be faster in reacting to changes in the network than distance vector protocols.
+
+## Dynamic Routing Protocol Metrics
+# | IGP | Metric | Explanation |
+# |----------------------------|
+# | RIP | Hop count | Each router in the path counts as one hop. The total metric is the total number of hops to the destination. Links of all speeds are equal. |
+# | EIGRP | Metric based on bandwidth and delay | Complex formula that can take into account many values. By default, the bandwidth of the slowest link in the route and the total delay of all links in the route are used. |
+# | OSPF | Cost | The cost of each link is calculated based on bandwidth. The total metric is the total cost of each link in the route. | 
+# | IS-IS | Cost | The total metric is the total cost of each link in the route. The cost of each link is not automatically calculated by default. All links have a cost of 10 by default. |
+
+## Administrative Distance
+# In most cases a company will only use a single IGP, usually OSPF or EIGRP.
+# However, in some cases they might use two. For example, if two companies connect their networks to share information, two different routing protocols might be in use.
+# Metric is used to compare routes learned via the same routing protocol.
+# Different routing protocols use totally different metrics, so they cannot be compared.
+# For example, an OSPF route to 192.168.4.0/24 might have a metric of 30, while an EIGRP route to the same destination might have a metric of 33280.
+# The administrative distance (AD) is used to determine which routing protocol is preferred.
+# A lower AD is preferred, and indicates that the routing protocol is considered more trustworthy (more likely to select good routes).
+
+## Administrative Distances of Common Types of Routing Protocols
+# | Route protocol/type | AD |
+# |--------------------------|
+# | Directly connected | 0 |
+# | Static | 1 |
+# | External BGP (eBGP) | 20 |
+# | EIGRP | 90 |
+# | IGRP | 100 |
+# | OSPF | 110 |
+# | IS-IS | 115 |
+# | RIP | 120 |
+# | EIGRP (external) | 170 |
+# | Internal BGP (iBGP) | 200 |
+# | Unusable route | 255 |
+
+# If the AD is 255, the router does not believe the source of that route and does not install the route in the routing table.
+
+# Metric is used to compare routes leared from the same routing protocol.
+# However, before comparing metrics, AD is used to select the best route.
+
+# If there are multiple entries to the same destination, then the most specific match (longest prefix match) will be selected.
+
+
 
 ### Floating Static Routes
+
+# A floating static route will be inactive (not in the routing table) unless the route learned by the dynamic routing protocol is removed (for example, the remote router stops advertising it for some reason, or an interface failure causes an adjacency with a neighbor to be lost).
+ip route [host-address] [host-subnet] [next-hop-address] [administrative-distance-metric]
+
+
+
+
+
+
+
+
+
 
 
 ### RIP and EIGRP
