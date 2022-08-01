@@ -2442,7 +2442,7 @@ show power inline police g0/0
 # RFC 4954 was developed with the help of Cisco to bring all of these values together and standardize their use.
 # The RFC offers many specific recommendations, but here are a few key ones:
 
-# Voice traffic: EF
+# Voice traffic: EF (Expedited Forwarding)
 # Interactive video: AF4x
 # Streaming video: AF3x
 # High priority data: AF2x
