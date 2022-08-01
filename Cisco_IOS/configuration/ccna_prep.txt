@@ -956,14 +956,100 @@ spanning-tree vlan 1 cost 200
 spanning-tree vlan 1 port-priority 32
 
 
+## Spanning Tree Versions - Industry Standards (IEEE)
+# 1) Spanning Tree Protocol (802.1D)
+# - The original STP
+# - All VLANs share one STP instance.
+# - Therefore, cannot load balance.
 
+# 2) Rapid Spanning Tree Protocol (802.1w)
+# - Much faster at converging/adapting to network changes than 802.1D
+# - All VLANs share one STP instance.
+# - Therefore, cannot load balance.
 
+# 3) Multiple Spanning Tree Protocol (802.1s)
+# - Uses modified RSTP mechanics.
+# - Can group multiple VLANs into instances (ie. VLANs 1-5 in instance 1, VLANs 6-10 in instance 2) to perform load balancing.
 
+## Spanning Tree Versions - Cisco Standards
+# 1) Per-VLAN Spanning Tree Plus (PVST+)
+# - Cisco's upgrade to 802.1D
+# - Each VLAN has its own STP instance.
+# - Can load balance by blocking different ports in each VLAN.
 
+# 2) Rapid Per-VLAN Spanning Tree Plus (Rapid PVST+)
+# - Cisco's upgrade to 802.1w
+# - Each VLAN has its own STP instance.
+# - Can load balance by blocking different ports in each VLAN.
 
+## Similarities between STP and RSTP:
+# - RSTP serves the same purpose as STP, blocking specific ports to prevent layer 2 loops.
+# - RSTP elects a root bridge with the same rules as STP.
+# - RST elects root ports with the same rules as STP.
+# - RSTP elects designated ports with the same rules as STP.
 
+## RSTP Port Cost Update
+# | Speed | STP Cost | RSTP Cost |
+# |------------------------------|
+# | 10 Mbps | 100 | 2000000 |
+# | 100 Mbps | 19 | 200000 |
+# | 1 Gbps | 4 | 20000 |
+# | 10 Gbps | 2 | 2000 |
+# | 100 Gbps | X | 200 |
+# | 1 Tbps | X | 20 |
 
+## RSTP Port States
+# | STP Port State | Send/Receive BPDUs | Frame forwarding (regular traffic) | MAC address learning | Stable/Transitional |
+# |-----------------------------------------------------------------------------------------------------------------------|
+# | Discarding | NO/YES | NO | NO | Stable |
+# | Learning | YES/YES | NO | YES | Transitional |
+# | Forwarding | YES/YES | YES | YES | Stable |
 
+# If a port is administratively disabled (shutdown command) = discarding state.
+# If a port is enabled but blocking traffic to prevent Layer 2 loops = discarding state.
+
+## RSTP Port Roles
+# The root port role remains unchanged in RSTP.
+# - The port that is closest to the root bridge becomes the root port for the switch.
+# - The root bridge is the only switch that does not have a root port.
+# The designated port role remains unchanged in RSTP.
+# - The port on a segment (collision domain) that sends the best BPDU is that segment's designated port (only one per segment)
+# The non-designated port role is split into two separate roles in RSTP:
+# - the alternate port role
+# - the backup port role
+
+## RSTP Alternate Port Role
+# The RSTP alternate port role is a discarding port that receives a superior BPDU from another switch.
+# This is the same as what you have learned about blocking ports in classic STP.
+# Functions as a backup to the root port.
+# If the root port fails, the switch can immediately move its best alternate port to forwarding.
+# This immediate move to forwarding state functions like a classic STP optional feature called UplinkFast.
+# - Because it is built into RSTP, you do not need to activate UplinkFast when using RSTP/Rapid PVST+.
+
+## RSTP BackboneFast Functionality
+# Another STP optional feature that was built into RSTP is BackboneFast.
+# BackboneFast allows a swtich to expire the made age timers on its interface and rapidly forward the superior BPDUs to the neighboring switches.
+# This functionality is built into RSTP, so it does not need to be configured.
+
+## RSTP Backup Port Role
+# The RSTP backup port role is a discarding port that receives a superior BPDU from another interface on the same switch.
+# This only happens when two interfaces are connected to the same collision domain (via a hub).
+# Hubs are not used in modern networks, so you will probably not encounter an RSTP backup port.
+# Function as a backup for a designated port.
+# The interface with the lowest port ID will be selected as the designated port, and the other will be the backup port.
+
+## RSTP Timers
+# All switches running Rapid STP send their own BPDUs every hello time (2 seconds).
+# Switches age the BPDU information much more quickly.
+# In classic STP, a switch waits 10 hello intervals (20 seconds).
+# In Rapid STP, a switch considers a neighbor lost if it misses 3 BPDUs (6 seconds).
+# It will then flush all MAC addresses learned on that interface.
+
+## RSTP Link Types
+# RSTP distinguishes between three different link types:
+# - Edge: a port that is connected to an end host. Moves directly to forwarding without negotiation. Edge ports are the same as Portfast.
+# - Point-to-point: a direct connection between two switches. They function in full-duplex and it is automatically detected.
+# - Shared: a connection to a hub. Must operate in half-duplex mode and it is automatically detected.
 
 
 
