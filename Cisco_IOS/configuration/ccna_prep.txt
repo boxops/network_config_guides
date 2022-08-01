@@ -768,11 +768,34 @@ switchport trunk encapsulation negotiate
 # The default bridge priority is 32768 on all switches, so by default the MAC address is used as the tie-breaker (lowest MAC address becomes the root bridge).
 # The Bridge Priority is compared first. If they tie, the MAC address is then compared.
 
-## Spanning Tree Protocol Priorities
-# 1. Lowest root bridge ID - (lowest MAC address) Determines the root bridge
-# 2. Lowest cost to the root bridge - Favors the upstream switch with the least cost to root
-# 3. Lowest sender bridge ID - Serves as a tie breaker if multiple upstream switches have equal cost to root
-# 4. Lowest sender port ID - Serves as a tie breaker if a switch has multiple (non-Etherchannel) links to a single upstream switch
+
+
+## Spanning Tree Protocol Priorities (Important!)
+# Step 1. Determine the root switch:
+# - Lowest bridge priority
+# - Tie breaker: The lowest root bridge ID (lowest MAC address) will determine the root switch if there are multiple switches with the same priority.
+# All ports on the root bridge are designated ports (forwarding state).
+
+# Step 2. Determine the root ports on switches:
+# All non-root switches have a root port which is the best port to use to get to the root switch.
+# - Lowest path cost to the root bridge - Favors the upstream switch with the least cost to root
+# - Tie breaker 1: The neighbor with the lowest priority wins.
+# - Tie breaker 2: The neighbor with the lowest bridge ID (lowest MAC address) wins. Does not work if there are multiple links to the same switch.
+# - Tie breaker 3: Lowest neighbor port priority wins. (128 by default on all ports)
+# - Tie breaker 4: Lowest neighbor interface number wins.
+
+# Step 2. Determine the designated ports on switches:
+# Designated ports are the best (closest) ports to use to get to the route switch when you are on that segment.
+# - Lowest path cost to the root bridge
+# - Tie breaker 1: The neighbor with the lowest priority wins.
+# - Tie breaker 2: The neighbor with the lowest bridge ID (lowest MAC address) wins. Does not work if there are multiple links to the same switch.
+# - Tie breaker 3: Lowest neighbor port priority wins. (128 by default on all ports)
+# - Tie breaker 4: Lowest neighbor interface number wins.
+
+# Step 3. Determine the blocked ports on switches:
+# All the remaining ports will be blocking (become an alternate port).
+
+
 
 # The Bridge Priority has been updated to be made of two parts:
 # - The bridge priority, which is 4 bits
