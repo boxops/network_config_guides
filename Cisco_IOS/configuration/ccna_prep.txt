@@ -2346,7 +2346,7 @@ show power inline police g0/0
 # Trunk links
 # Access links with a voice VLAN
 
-## IP Precedence (IPP)
+## IP Precedence (IPP) sets the most significant 3 bits of the TOS field; and is used to indicate the priority of packets in IPv4.
 # Standard IPP markings are similar to PCP:
 # 6 and 7 are reserved for network control traffic (ie. OSPF messages between routers)
 # 5 = voice
