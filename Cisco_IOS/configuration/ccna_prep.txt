@@ -1620,6 +1620,76 @@ ip mtu 1400
 
 
 
+### First Hop Redundancy Protocols
+
+
+
+
+
+
+
+
+### Free CCNA | STP & FHRP Synchronization | Day 52 Lab | CCNA 200-301 Complete Course
+# (Good LAN design principle)
+
+## HSRP and STP synchronizaion means that the HSRP active should be the STP root bridge, and the HSRP standby should be the STP secondary root bridge.
+# Why should the HSRP active and the STP root be synchronized or aligned?
+# It is to ensure that traffic from the end hosts frollows the most direct path to the default gateway.
+# If the HSRP active router is not the STP root, then traffic from PC1 to DSW1 might not take the direct path to DSW1, it might take a longer path.
+# This is not a disaster, but obviously not ideal.
+# Because STP works by finding the shortest path to the root, ensuring that the HSRP active router is synchronized with the STP root means that traffic will follow the most efficient path.
+# In this lab, we will make DSW1 the HSRP active and STP root for VLAN 10, and make DSW2 the HSRP active and STP root for VLAN20.
+
+# DSW1
+conf t
+spanning-tree vlan 10 root primary
+spanning-tree vlan 20 root secondary
+
+do show span vlan 10
+do show span vlan 20
+
+int vlan 10
+standby version 2
+standby 10 ip 10.0.10.254
+standby 10 priority 105
+standby 10 preempt
+
+int vlan 20
+standby version 2
+standby 20 ip 10.0.10.254
+standby 20 priority 95
+standby 20 preempt
+end
+
+# DSW2
+conf t
+spanning-tree vlan 10 root secondary
+spanning-tree vlan 20 root primary
+
+do show span vlan 10
+do show span vlan 20
+
+int vlan 10
+standby version 2
+standby 10 ip 10.0.10.254
+standby 10 priority 95
+standby 10 preempt
+
+int vlan 20
+standby version 2
+standby 20 ip 10.0.10.254
+standby 20 priority 105
+standby 20 preempt
+end
+
+show standby brief
+
+
+
+
+
+
+
 
 ### Static Routing
 
@@ -3294,62 +3364,6 @@ end
 
 show run
 show ip arp inspection interfaces
-
-
-### Free CCNA | STP & FHRP Synchronization | Day 52 Lab | CCNA 200-301 Complete Course
-# (Good LAN design principle)
-
-## HSRP and STP synchronizaion means that the HSRP active should be the STP root bridge, and the HSRP standby should be the STP secondary root bridge.
-# Why should the HSRP active and the STP root be synchronized or aligned?
-# It is to ensure that traffic from the end hosts frollows the most direct path to the default gateway.
-# If the HSRP active router is not the STP root, then traffic from PC1 to DSW1 might not take the direct path to DSW1, it might take a longer path.
-# This is not a disaster, but obviously not ideal.
-# Because STP works by finding the shortest path to the root, ensuring that the HSRP active router is synchronized with the STP root means that traffic will follow the most efficient path.
-# In this lab, we will make DSW1 the HSRP active and STP root for VLAN 10, and make DSW2 the HSRP active and STP root for VLAN20.
-
-# DSW1
-conf t
-spanning-tree vlan 10 root primary
-spanning-tree vlan 20 root secondary
-
-do show span vlan 10
-do show span vlan 20
-
-int vlan 10
-standby version 2
-standby 10 ip 10.0.10.254
-standby 10 priority 105
-standby 10 preempt
-
-int vlan 20
-standby version 2
-standby 20 ip 10.0.10.254
-standby 20 priority 95
-standby 20 preempt
-end
-
-# DSW2
-conf t
-spanning-tree vlan 10 root secondary
-spanning-tree vlan 20 root primary
-
-do show span vlan 10
-do show span vlan 20
-
-int vlan 10
-standby version 2
-standby 10 ip 10.0.10.254
-standby 10 priority 95
-standby 10 preempt
-
-int vlan 20
-standby version 2
-standby 20 ip 10.0.10.254
-standby 20 priority 105
-standby 20 preempt
-end
-
-show standby brief
 
 
 ### WAN Architectures
