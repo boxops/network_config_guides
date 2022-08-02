@@ -1408,6 +1408,112 @@ bandwidth [kilobits-per-second]
 show ip ospf interface f0/1
 
 
+## OSPF Neighbors
+# Making sure that routers successfully become OSPF neighbors is the main task in configuring and troubleshooting OSPF.
+# Once routers become neighbors, they automatically do the work of sharing network information, calculating routes, etc.
+# When OSPF is activated on an interface, the router starts sending OSPF hello messages out of the interface at regular intervals (determined by the hello timer).
+# These are used to introduce the router to potential OSPF neighbors.
+# The default hello timer is 10 seconds on an Ethernet connection.
+# Hello messages are multicast to 224.0.05 (multicast address for all OSPF routers).
+
+## OSPF Neighbor States
+
+# | R1 |-G0/0-<---10.0.12.0/30--->-G0/0-| R2 |
+
+# OSPF Neighbor States - Down State
+# Let's assume OSPF is already activated on R2's G0/0 interface.
+# Then OSPF is activated on R1's G0/0 interface.
+# It sends an OSPF hello message to 224.0.0.5.
+# There are more fields in the hello message, but two important ones are R1's router ID and the neighbor's router ID.
+# However, R1 does not know about R2 yet, so the neighbor router ID field is 0.0.0.0.
+# R1 does not know about any OSPF neighbors yet, so the current neighbor state is Down.
+# This is the first OSPF neighbor state.
+
+# OSPF Neighbor States - Init State
+# When R2 receives the Hello packet, it will add an entry for R1 to its OSPF neighbor table.
+# In R2's neighbor table, the relationship with R1 is now in the Init state.
+# Note that R1 still does not know about R2, so it will have no entries in its OSPF neighbor table.
+# The Init state means that a Hello packet was received, but R2's own router ID is not in the Hello packet.
+# R2's router ID is 2.2.2.2, but the neighbor router ID in R1's Hello packet is 0.0.0.0.
+
+# OSPF Neighbor States - 2-way State
+# R2 will send a Hello packet containing the RID of both routers.
+# R1 will insert R2 into its OSPF neighbor table in the 2-way state.
+# Then, R1 will send another Hello message, this time containing R2's router ID.
+# Now both routers are in the 2-way state.
+# The 2-way state means the router has received a Hello packet with its own router ID in it.
+# If both routers reach the 2-way state, it means that all of the conditions have been met for them to become OSPF neighbors.
+# They are now ready to share LSAs to build a common LSDB.
+# On the other hand, if they fail to reach this 2-way state, you know that you have to troubleshoot and find what's stopping them from reaching it.
+# In some network types, a DR (Designated Router) and BDR (Backup Designated Router) will be elected at this point.
+# At this point, the routers are already OSPF neighbors.
+# Over the next few neighbor states they will share LSAs and form a full OSPF adjacency.
+
+# OSPF Neighbor States - Exstart State
+# The two rotuers will now prepare to exchange information about their LSDB.
+# Before that, they have to choose which one will start the exchange.
+# So they will decide which one will be the Main router and which will be the Replica router.
+# Note that these are different than the DR and BDR.
+# This Main/Replica relationship is only needed for this initial exchange of LSDB information.
+# They decide which will be the Main and which will be the Replica in the exstart state.
+# The router with the higher router ID will become the Main and initiate the exchange.
+# The router with the lower router ID will become the Replica.
+# To decide the Main and Replica, they exchange DBD (Database Description) packets.
+# The exstart state is just to prepare for the next state.
+# R1 sends a DBD packet claiming to be the Main.
+# However, R2 corrects R1, as R2 has the higher router ID, and says that it will be the Main.
+# In the Exchange state, the rotuers exchange DBDs which contain a list of the LSAs in their LSDB.
+# These DBDs do not include detailed information about the LSAs, just basic information telling their neighbor what LSAs they have.
+# The routers are telling each other, 'I have these LSAs', but they are not sending the LSAs yet.
+# The routers compare the information in the DBD they received to the information in their own LSDB to determine their neighbor.
+
+# OSPF Neighbor States - Loading State
+# In the Loading state, routers send Link State Request (LSR) messages to request that their neighbors send them any LSAs they do not have.
+# In the Exchange state, they exchanged DBD packets, so they know which LSAs their neighbors are holding.
+# These LSRs are used to request any missing LSAs to make sure each router has the same LSAs.
+# Then the LSAs themselves are sent in Link State Update, LSU messages.
+# R2 sends R1 the requested LSAs in an LSU.
+# R1 will also do the same for R2.
+# Finally, the routers send LSAck messages, another kind of OSPF message to acknowledge that they received the LSAs.
+# Now the loading state is complete, and the routers have the same LSDB.
+
+# OSPF Neighbor States - Full State
+# In the full state, the routers have a full OSPF adjacency and identical LSDBs.
+# They continue to send and listen for Hello packets, once every 10 seconds by default to maintain the neighbor adjacency.
+# To maintain the adjacency, another timer called the Dead timer is used.
+# Every time a Hello packet is received, the Dead timer, which is 40 seconds by default, is reset.
+# However, if the Dead timer counts down to 0 and no Hello message is received, the neighbor is removed.
+# If the neighbors remain up, the routers will continue to share LSAs as the network changes to make sure each router has a complete and accurate map of the network.
+# This is the main advantage of dynamic routing protocols, the routers automatically react to changes in the network and add, remove, or change routes as necessary.
+
+## OSPF States in the Correct Order:
+# 1) Down
+# 2) Init
+# 3) 2-way
+# 4) Exstart
+# 5) Exchange
+# 6) Loading
+# 7) Full
+
+
+## OSFP Show Commands
+# Shows Neighbor ID, Priority, State, Dead Time, Address, and Interface.
+show ip ospf neighbor
+# Show OSPF details on a specific interface
+show ip ospf interface g0/0
+# Activate OSPF on an interface
+int g0/0
+ip ospf [process-id] area [area-number]
+# Configure All passive interfaces on OSPF
+router ospf 1
+passive-interface default
+# Then configure specific interfaces as active
+no passive-interface [interface-id]
+# If you configure OSPF directly on the interfaces, you will see slightly different output from 'show ip protcols' command.
+# The routing for networks section is empty, and instead the interfaces you activated OSPF on are displayed at section 'Routing on Interfaces Configured Explicitly'.
+show ip protocols
+
+
 ## OSPF Neighbour Requirements
 # 1. Area must match
 # 2. Area must be in the same subnet
