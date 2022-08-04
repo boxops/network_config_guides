@@ -1736,12 +1736,6 @@ end
 show standby brief
 
 
-
-
-
-
-
-
 ### Static Routing
 
 # ip route [ remote-network ] [ remote-network-subnet ] [ next-hop-address ]
@@ -1754,15 +1748,134 @@ ip route 10.1.1.0 255.255.255.0 10.1.2.1
 # ip route [ remote-network ] [ remote-network-subnet ] [ next-hop-address ] [administrative-distance-metric]
 
 
-
-
-
-
-
-
-
-
 ### IPv6
+
+## Hexadecimal Review
+# Binary / Base 2 / 0b - 0, 1
+# Decimal / Base 10 / 0d - 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+# Hexadecimal / Base 16 / 0x - 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F
+
+## Binary to Hexadecimal Conversion
+# 0b11011011 = 0x??
+
+# Split the number into 4-bit groups and convert each 4-bit group to decimal.
+# 0b1101 = 0d13
+# 0b1011 = 0d11
+
+# Convert the decimal numbers to hexadecimal.
+# 0d13 = 0xD
+# 0d11 = 0xB
+
+# 0b11011011 = 0xDB
+
+## Hexadecimal to Binary Conversion
+# Convert hexadecimal to decimal, then to binary.
+
+# 0xEC = 0b??
+
+# 0xE = 0d14
+# 0xC = 0d12
+
+# 0d14 = 0b1110
+# 0d12 = 0b1100
+
+# 0xEC = 0b11101100
+
+## Why IPv6?
+# The main reason is that there simply are not enough IPv4 addresses available.
+# There are 4,294,967,296 (2^32) IPv4 addresses available.
+# When IPv4 was being designed 30 years ago, the creators had no idea the Internet would be as large as it is today.
+# VLSM, private IPv4 addresses, and NAT have been used to conserve the use of IPv4 address space.
+# Those are short-term solutions.
+# The long-term solution is IPv6.
+# IPv4 address assignments are controlled by IANA (Internet Assigned Numbers Authority).
+# IANA distributes IPv4 address space to various RIRs (Regional Internet Registries), which then assign them to companies that need them.
+
+# An IPv6 address is 128 bits.
+# Example:
+# 2001:0DB8:5917:EABD:6562:17EA:C92D:59BD
+
+## Shortening (abbreviating) IPv6 Addresses
+# 1) Leading 0s (zeros) can be removed.
+# Leading zeros are any zeros at the beginning of any of the quartets of 4 hexadecimal digits.
+# 2001:0DB8:000A:001B:20A1:0020:0080:34BD
+# 2001:DB8:A:1B:20A1:20:80:34BD
+
+# 2) Consecutive quartets of all zeros can be replaced with a double colon (::).
+# 2001:0DB8:0000:0000:0000:0000:0080:34DB
+# 2001:0DB8::0080:34DB
+
+# Combine both 1 and 2 methods:
+# 2001:DB8::80:34DB
+
+# Consecutive quartets of zeros can only be abbreviated once in an IPv6 address.
+# 2001:0000:0000:0000:20A1:0000:0000:34DB
+# 2001::20A1:0:0:34BD
+
+## Expanding Shortened IPv6 Addresses
+# Put leading zeros where needed (all quartets should have 4 hexadecimal characters).
+# FE80::2:0:0:FB38
+# The full address should be 8 quartets.
+# FE80:0000:0000:0000:0002:0000:0000:FBE8
+
+## Finding the IPv6 prefix (global unicast addresses)
+# Typically, an enterprise requesting IPv6 addresses from their ISP will receive a /48 block.
+# Typically, IPv6 subnets use a /64 prefix length.
+# That means an enterprise has 16 bits to use to make subnets.
+# The remaining 64 bits can be used for hosts.
+
+# Example:
+# 2001:0DB8:8B00:0001:0000:0000:0000:0001/64
+
+# 48-bit global routing prefix assigned by the ISP:
+# 2001:0DB8:8B00
+# 16-bit subnet identifier, used by the enterprise to make various subnets:
+# 0001
+# 64-bit interface identifier, the host portion of the address
+# 0000:0000:0000:0001
+
+## Finding the IPv6 Prefix
+# 300D:00F2:0B34:2100:0000:0000:1200:0001/56
+# Find where the network portion ends, and change all digits after it to 0.
+# 56 is a multiple of 4 (the first 56 bits of the IPv6 address)
+# 300D:00F2:0B34:21
+# 300D:00F2:0B34:2100::/56
+
+# 2001:0DB8:8D00:0001:FB89:017B:0020:0011/93
+# 92 bits
+# 2001:0DB8:8D00:0001:FB89:017
+# Need to split the 'B' to get the 93 bits.
+# 0xB = 0d1011
+# Only the first bit is part of the network portion of the address.
+# Change all of the other bits to 0.
+# 0d1000
+# Change it back to decimal and then hexadecimal
+# 0d1000 = 0d8 = 0x8
+# The network prefix becomes:
+# 2001:0DB8:8D00:0001:FB89:0178::/93
+
+## Configuring IPv6 Addresses
+# Allow the router to perform IPv6 routing
+# R1
+ipv6 unicast-routing
+int g0/0
+ipv6 address 2001:db8:0:0::1/64
+no shutdown
+int g0/1
+ipv6 address 2001:db8:0:1::1/64
+no shutdown
+int g0/2
+ipv6 address 2001:0db8:0000:0002:0000:0000:0000:0001/64
+no shutdown
+exit
+
+show ipv6 interface brief
+# Link-Local addresses are automatically configured on an interface when IPv6 is enabled on the interface.
+
+
+
+
+
 
 
 
