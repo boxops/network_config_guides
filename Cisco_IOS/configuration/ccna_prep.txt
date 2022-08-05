@@ -1992,6 +1992,26 @@ no shutdown
 # - Organisation-local (FF08): Wider in scope than site-local (an entire company/organisation).
 # - Global (FF0E): No boundaries. Possible to be routed over the Internet.
 
+## Anycast Addresses
+# Anycast is a new feature of IPv6.
+# Anycast is one-to-one-to-many.
+# Multiple routers are configured with the same IPv6 address.
+# - They use a routing protocol to advertise the address.
+# - When hosts send packets to that destination address, routers will forward it to the nearest router configured with that IP address (based on routing metric).
+# There is no specific address range for anycast addresses.
+# Use a regular unicast address (global unicast, unique local) and specify it as an anycast address:
+ipv6 address 2001:db8:1:1::99/128 anycast
+
+## Other IPv6 Addresses
+# :: = The unspecified IPv6 address.
+# - Can be used when a device does not yet know its IPv6 address.
+# - IPv6 default routes are configured to ::/0
+# IPv4 equivalent: 0.0.0.0
+
+# ::1 = The loopback address.
+# - Used to test the protocol stack on the local device.
+# - Messages sent to this address are processed within the local device, but not sent to other devices.
+# - IPv4 equivalent: 127.0.0.0/8 address range.
 
 
 
