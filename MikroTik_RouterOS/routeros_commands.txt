@@ -3,10 +3,11 @@ https://help.mikrotik.com/docs/display/ROS/Command+Line+Interface
 https://wiki.mikrotik.com/wiki/Manual:Console
 
 # Default credentials (prompt to change default credentials when first logged in)
+# Note: SSH, Telnet and FTP will be enabled with these credentials
 Username: admin
 Password: [no password]
 
-# Change the password for a user in the CLI
+# Change the password of an existing user
 /user set [find name=username] password=password
 
 # CLI Navigation
