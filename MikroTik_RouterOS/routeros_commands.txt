@@ -2,9 +2,12 @@
 https://help.mikrotik.com/docs/display/ROS/Command+Line+Interface
 https://wiki.mikrotik.com/wiki/Manual:Console
 
-# Default credentials
-admin [no password]
+# Default credentials (prompt to change default credentials when first logged in)
+Username: admin
+Password: [no password]
 
+# Change the password for a user in the CLI
+/user set [find name=username] password=password
 
 # CLI Navigation
 [?]             Gives the list of available commands
@@ -16,7 +19,6 @@ command [?]     Gives help on the command and list of arguments
 /               Move up to base level
 ..              Move up one level
 /command        Use command at the base level
-
 
 # Configure a static IP
 ip address add address=10.10.10.1/24 interface=ether2
@@ -30,4 +32,3 @@ ip route print
 
 # Print the current config
 export
-
