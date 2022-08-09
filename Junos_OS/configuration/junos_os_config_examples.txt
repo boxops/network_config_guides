@@ -91,8 +91,16 @@ show interfaces
 ## Configure Static Routes
 set routing-options static route 192.168.112.0/24 next-hop 192.168.111.1
 
-## SSH configuration
+## Inbound SSH configuration
 edit
 set system login user admin class super-user authentication plain-text-password
 New password:
 set system services ssh
+
+## Outbound SSH Configuration
+set system services outbound-ssh client outbound-ssh device-id
+set system services outbound-ssh client outbound-ssh secret Juniper123
+set system services outbound-ssh client outbound-ssh services netconf
+# Node to connect to
+set system services outbound-ssh client outbound-ssh 192.168.112.2 port 2200
+
