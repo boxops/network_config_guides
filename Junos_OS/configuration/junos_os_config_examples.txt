@@ -64,7 +64,7 @@ exit
 request system reboot
 Reboot the system ? [yes,no] (no) yes
 
-## Configure SRX to Packet Mode (routing functionality) from Flow Mode (firewall functionality)
+## Configure SRX from Flow Mode (firewall functionality by default) to Packet Mode (routing functionality) 
 edit
 delete security 
 set security forwarding-options family mpls mode packet-based
