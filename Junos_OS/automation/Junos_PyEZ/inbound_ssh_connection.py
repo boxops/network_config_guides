@@ -10,6 +10,11 @@ python ssh_connection.py
 
 Reference
 https://www.juniper.net/documentation/us/en/software/junos-pyez/junos-pyez-developer/topics/topic-map/junos-pyez-connection-methods.html
+
+Inbound SSH Configuration on Juniper
+set system login user admin class super-user authentication plain-text-password
+New password:
+set system services ssh
 """
 
 import sys
