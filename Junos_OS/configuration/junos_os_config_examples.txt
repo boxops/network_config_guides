@@ -80,11 +80,16 @@ set interfaces ge-0/0/0 unit 0 family inet address 10.1.1.1/24
 # OR Configure DHCP IP on an Interface
 set interfaces ge-0/0/0 unit 0 family inet dhcp
 # Then configure a security zone for the interface:
-set security zones security-zone trust
-set security zones security-zone trust interfaces ge-0/0/1.0
+set security zones security-zone untrust
+set security zones security-zone untrust interfaces ge-0/0/1.0
+# Allow host inbound traffic from an interface (configure individual services or all)
+set security zones security-zone untrust interfaces ge-0/0/0.0 host-inbound-traffic system-services all
 # Verify existing security zones, and verify which interfaces have been assigned to the security zones by using one of the following commands:
 show security zones
 show interfaces
+
+## Configure Static Routes
+set routing-options static route 192.168.112.0/24 next-hop 192.168.111.1
 
 ## SSH configuration
 edit
