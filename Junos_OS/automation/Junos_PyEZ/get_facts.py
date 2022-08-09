@@ -8,9 +8,10 @@ from jnpr.junos.exception import ConnectError
 hostname = input("Device hostname: ")
 junos_username = input("Junos OS username: ")
 junos_password = getpass("Junos OS or SSH key password: ")
+port = 22
 
 try:
-    with Device(host=hostname, user=junos_username, passwd=junos_password) as dev:   
+    with Device(host=hostname, user=junos_username, passwd=junos_password, port=port) as dev:   
         print (dev.facts)
 except ConnectError as err:
     print ("Cannot connect to device: {0}".format(err))
