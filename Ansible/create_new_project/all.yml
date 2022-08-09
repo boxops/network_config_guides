@@ -1,0 +1,7 @@
+---
+
+# Default login credentials
+ansible_user: "admin"
+ansible_ssh_pass: "Cisco123"
+ansible_network_os: "cisco.ios.ios"
+ansible_connection: "network_cli"
