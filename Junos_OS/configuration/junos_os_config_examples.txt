@@ -74,6 +74,7 @@ show security flow status
 run request system reboot
 
 ## Configure Static IP on an Interface
+# Reference: https://supportportal.juniper.net/s/article/SRX-Getting-Started-Configure-Interfaces-and-Security-Zones?language=en_US
 edit
 set interfaces ge-0/0/0 unit 0 family inet address 10.1.1.1/24
 # OR Configure DHCP IP on an Interface
