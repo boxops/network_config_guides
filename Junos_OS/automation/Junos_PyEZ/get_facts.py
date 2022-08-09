@@ -1,21 +1,20 @@
 # Reference: https://junos-pyez.readthedocs.io/en/2.6.4/jnpr.junos.facts.html
 
-from jnpr.junos import Device
+import sys
 from getpass import getpass
+from jnpr.junos import Device
+from jnpr.junos.exception import ConnectError
 
-host = '192.168.111.123'
-user = 'admin'
-password = getpass()
-port = 22
+hostname = input("Device hostname: ")
+junos_username = input("Junos OS username: ")
+junos_password = getpass("Junos OS or SSH key password: ")
 
-with Device(host=host, user=user, password=password, port=port) as dev:
-    hostname = dev.facts['hostname']
-    islinux = dev.facts['_is_linux']
-    current_re = dev.facts['current_re']
-    domain = dev.facts['domain']
-    junos_info = dev.facts['junos_info']
-    personality = dev.facts['personality']
-    RE0 = dev.facts['RE0']
-    version = dev.facts['version']
-    virtual = dev.facts['virtual']
-    print(hostname)
+try:
+    with Device(host=hostname, user=junos_username, passwd=junos_password) as dev:   
+        print (dev.facts)
+except ConnectError as err:
+    print ("Cannot connect to device: {0}".format(err))
+    sys.exit(1)
+except Exception as err:
+    print (err)
+    sys.exit(1)
