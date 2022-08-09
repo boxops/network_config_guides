@@ -9,12 +9,13 @@ from sys import argv
 conf_xpath = argv[1] if len(argv) > 1 else "."
 
 # Username, password and device IP
-USER = "lab"
-PASSWD = "lab123"
-DEVICE_IP = "172.25.11.1"
+USER = "admin"
+PASSWD = "Juniper123"
+DEVICE_IP = "192.168.111.123"
+PORT = 22
 
 # Open NETCONF connection using PyEZ Device class
-with Device(host=DEVICE_IP, user=USER, password=PASSWD) as dev:
+with Device(host=DEVICE_IP, user=USER, password=PASSWD, port=PORT) as dev:
     # Read a complete config using <get-config> RPC
     full_config = dev.rpc.get_config()
     # Filter the config with provided XPath
