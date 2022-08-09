@@ -1,3 +1,5 @@
+# Reference: https://junos-pyez.readthedocs.io/en/2.6.4/jnpr.junos.facts.html
+
 from jnpr.junos import Device
 from getpass import getpass
 
