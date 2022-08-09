@@ -1,8 +1,8 @@
 ### Configure Hostname
 
-conf t
+configure terminal
 hostname R1
-do sh run | inc host
+do sh run | inc hostname
 
 
 ### Configure Interface with IP address
@@ -12,11 +12,10 @@ ip address 10.1.1.1 255.255.255.0
 no shutdown
 
 
-### Set Up an IOS Router or Switch as SSH Client
+### Configure SSH on IOS Router or Switch
 
 # There are four steps required to enable SSH support on a Cisco IOS:
-
-# 1. Configure the hostname command.
+# 1. Configure the hostname.
 # 2. Configure the DNS domain.
 # 3. Generate the SSH key to be used.
 # 4. Enable SSH transport support for the virtual type terminal (vtys).
@@ -25,26 +24,26 @@ configure terminal
 hostname R1
 ip domain name cisco.com
 username admin privilege 15 password Cisco123
-line con 0
-password cisco
-login
-exit
 line vty 0 4
-password cisco
-login local
-logging synchronous
-transport input all
+transport input ssh
 exit
 line vty 5 15
-password cisco
-login local
-logging synchronous
-transport input all
+transport input ssh
 exit
 crypto key generate rsa
 1024
 ip ssh version 2
-banner motd # Unauthorised access is strictly prohibited! #
 end
 wr
+
+
+## Note: Older IOS supports the kind of RSA with SHA-1, and SHA-1 is considered very weak. This essentially means that there are no secure ways to connect to it over SSH.
+# Workaround on client (However, be aware that this is a workaround and it's known to be insecure.):
+
+sudo tee -a ~/.ssh/config > /dev/null <<EOT
+Host 192.168.111.1
+    KexAlgorithms +diffie-hellman-group14-sha1
+    PubkeyAcceptedAlgorithms +ssh-rsa
+    HostkeyAlgorithms +ssh-rsa
+EOT
 
