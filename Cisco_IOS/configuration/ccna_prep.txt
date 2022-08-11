@@ -2258,7 +2258,135 @@ interface g0/2
 ip access-group 112 out
 
 
-### Etherchannel
+### EtherChannel
+
+# Oversubscription:
+# When the bandwidth of the interfaces connected to end hosts is greater than the bandwidth of the connection to the distribution switches.
+# Some oversubscription is acceptable, but too much will cause congestion.
+
+# If you connect two switches together with multiple links, all except one will be disabled by spanning tree.
+# If all of ASW1's interfaces were forwarding, Layer 2 loops would form between ASW1 and DSW1, leading to broadcast storms.
+# Other links will be unused unless the active link fails. In that case, one of the inactive links will start forwarding.
+
+# EtherChannel groups multiple interfaces together to act as a single interface.
+# STP will treat this group as a single interface.
+# Traffic using the EtherChannel will be load balanced among the physical interfaces in the group.
+# An algorithm is used to determine which traffic will use which physical interface.
+
+# Some other names for EtherChannel are:
+# - Port Channel
+# - LAG (Link Aggregation Group)
+
+# EtherChannel load balances based on flows.
+# A flow is a communication between two nodes in the network.
+# Frames in the same flow will be forwarded using the same physical interface.
+# If frames in the same flow were forwarded using different physical interfaces, some frames may arrive at the destination out of order, which can cause problems.
+
+# You can change the inputs used in the interface selection calculation.
+# Inputs that can be used:
+# - Source MAC
+# - Destination MAC
+# - Source AND Destination MAC
+# - Source IP
+# - Destination IP
+# - Source AND Destination IP
+
+## EtherChannel Load-Balancing
+# Change the load balancing option
+conf t
+port-channel load-balance ?
+port-channel load-balance src-dst-mac
+do show etherchannel load-balance
+
+## EtherChannel Configuration
+# There are three methods of EtherChannel configuration on Cisco switches:
+# 1) PAgP (Port Aggregation Protocol)
+# - Cisco proprietary protocol
+# - Dynamically negotiates the creation/maintenance of the EtherChannel (like DTP does for trunks)
+# 2) LACP (Link Aggregation Control Protocol)
+# - Industry standard protocol (IEEE 802.3ad)
+# - Dynamically negotiates the creation/maintenance of the EtherChannel (like DTP does for trunks)
+# 3) Static EtherChannel
+# - A protocol is not used to determine if an EtherChannel should be formed.
+# - Interfaces are statically configured to form an EtherChannel.
+# Up to 8 interfaces can be formed into a single EtherChannel (LACP allows up to 16, but only 8 will be active, the other 8 will be in standby mode, waiting for an active interface to fail).
+
+## PAgP Configuration
+int range g0/0-3
+channel-group 1 mode [auto|desirable]
+
+# Rules to form a PAgP EtherChannel:
+# auto + auto = No EtherChannel
+# desirable + auto = Etherchannel
+# desirable + desirable = EtherChannel
+
+# The channel-group number has to match for member interfaces on the same switch.
+# However, it does not have to match the channel-group number on the other switch.
+
+## LACP Configuration
+int range g0/0-3
+channel-group 1 mode [active|passive]
+
+# Instead of PAgP desirable, LACP uses active mode.
+# Instead of PAgP auto, LACP uses passive mode.
+
+# Rules to form a LACP EtherChannel:
+# passive + passive = No EtherChannel
+# active + passive = Etherchannel
+# active + active = EtherChannel
+
+## Static EtherChannel Configuration
+int range g0/0-3
+channel-group 1 mode on
+
+# Static EtherChannel on mode only works with on mode (on + desirable or on + active will not work).
+
+## Manually Configure the EtherChannel Negotiation Protocol (not necessary)
+# Note:
+# - If you configure "channel-group 1 mode [desirable|auto]", the interface will automatically use PAgP.
+# - If you configure "channel-group 1 mode [active|passive]", the interface will automatically use LACP.
+channel-group protocol [lacp|pagp]
+
+## Configure the Port-channel Interface for EtherChannel
+# After configuring the EtherChannel, in whatever mode, you can then configure the port-channel interface itself.
+int port-channel 1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+do show interfaces trunk
+
+## EtherChannel Forming Rules
+# Member interfaces must have matching configurations.
+# - Same duplex (full/half)
+# - Same speed
+# - Same switchport mode (access/trunk)
+# - Same allowed VLANs/native VLAN (for trunk interfaces)
+
+# If an interface's configuration do not match the others, it will be excluded from the EtherChannel.
+
+# Verify the status of the EtherChannel
+show etherchannel summary
+show etherchannel port-channel
+
+# In the STP configuration, only the port-channel interface is listed.
+# The physical interfaces do not appear in the output of the following command:
+show spanning-tree
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## EtherChannel Configuration
 
 # LACP SW1
 int range g0/1-2
@@ -2276,7 +2404,7 @@ int po1
 switchport trunk encapsulation dot1q
 switchport mode trunk
 
-# Static Etherchannel
+# Static EtherChannel
 # DSW1
 int range g0/1-2
 no switchport
@@ -2293,7 +2421,7 @@ ip add 10.0.0.2 255.255.255.252
 
 show etherchannel summary
 
-# Etherchannel load-balance
+# EtherChannel load-balance
 port-channel load-balance src-dst-ip
 
 show etherchannel load-balance
