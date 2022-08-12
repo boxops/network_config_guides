@@ -6,7 +6,7 @@ device = {
     "device_type": "autodetect",
     "host": "192.168.111.123",
     "username": "admin",
-    "password": getpass(),
+    "password": "Juniper123" # getpass()
 }
 
 guesser = SSHDetect(**device)
