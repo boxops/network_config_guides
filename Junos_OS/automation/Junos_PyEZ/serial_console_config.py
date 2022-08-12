@@ -4,6 +4,19 @@ Connect to a device running Junos OS using a serial console connection and also 
 
 Reference
 https://www.juniper.net/documentation/us/en/software/junos-pyez/junos-pyez-developer/topics/topic-map/junos-pyez-connection-methods.html#id-connecting-to-a-device-using-a-serial-console-connection
+
+Use this script to configure a USB to Serial cable port on Linux:
+---
+#! /bin/bash
+VENDOR=$(lsusb | grep 'FT232 Serial' | cut -d " " -f 6 | cut -d ':' -f 1)
+PRODUCT=$(lsusb | grep 'FT232 Serial' | cut -d " " -f 6 | cut -d ':' -f 2)
+echo modprobe usbserial vendor="0x${VENDOR}" product="0x${PRODUCT}"
+USB=$(dmesg | grep 'FTDI' | grep -o 'ttyUSB.' | tail -1)
+sudo chmod 777 "/dev/${USB}"
+---
+# now connect to serial port or use putty
+cu -l "/dev/${USB}" -s 9600
+# type ~. to quit
 '''
 
 import sys
