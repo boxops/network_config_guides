@@ -12,6 +12,16 @@ ip address 10.1.1.1 255.255.255.0
 no shutdown
 
 
+### Configure a Management IP on a Layer 2 Switch
+conf t
+int vlan 1
+ip add 192.168.111.100 255.255.255.0
+no sh
+exit
+ip default-gateway 192.168.111.1
+ip name-server 192.168.111.1
+
+
 ### Configure SSH on IOS Router or Switch
 
 # There are four steps required to enable SSH support on a Cisco IOS:
