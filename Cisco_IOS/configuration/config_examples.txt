@@ -35,13 +35,32 @@ crypto key generate rsa modulus 1024
 # 4. Enable SSH transport support for the virtual type terminal (vtys).
 line vty 0 15
 transport input ssh
+login local
 exit
 # 5. Enable SSH version 2.
 ip ssh version 2
 # 6. Create a user and password for SSH access.
 username admin privilege 15 password Cisco123
 end
-wr
+
+## (Optional SSH Security): Add an ACL to allow incoming SSH connections.
+# Apply a Standard ALC:
+conf t
+access-list 1 permit host 192.168.111.1
+access-list 1 permit host 192.168.111.2
+line vty 0 15
+access-class 1 in
+end
+# OR Apply an Extended Named ACL:
+ip access-list extended SSH_ACCESS_CONTROL
+permit udp 192.168.111.1 0.0.0.255 any eq 22
+permit tcp 192.168.111.1 0.0.0.255 any eq 22
+deny udp any any eq 22
+deny tcp any any eq 22
+permit ip any any
+line vty 0 15
+access-class SSH_ACCESS_CONTROL in
+end
 
 ## Note: Older IOS supports the kind of RSA with SHA-1, and SHA-1 is considered very weak. This essentially means that there are no secure ways to connect to it over SSH.
 # Workaround on client (However, be aware that this is a workaround and it's known to be insecure.):
