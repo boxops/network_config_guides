@@ -1,55 +1,50 @@
 ### Configure Hostname
-
 configure terminal
 hostname R1
 do sh run | inc hostname
 
 
-### Configure Interface with IP address
-
+### Configure an IP address on an Interface
 interface FastEthernet0/0
 ip address 10.1.1.1 255.255.255.0
 no shutdown
 
 
 ### Configure a Management IP on a Layer 2 Switch
+# 1. Enter the VLAN 1 configuration mode with the interface vlan 1 global configuration command and assign an IP address with the ip address IP_ADDRESS SUBNET_MASK interface subcommand, then enable the VLAN 1 interface with the no shutdown interface subcommand.
 conf t
 int vlan 1
 ip add 192.168.111.100 255.255.255.0
 no sh
 exit
+# 2. Use the ip default-gateway IP_ADDRESS global configuration command to configure the default gateway.
 ip default-gateway 192.168.111.1
+# 3. Add the ip name-server IP_ADDRESS global configuration command to configure the DNS server.
 ip name-server 192.168.111.1
 
 
 ### Configure SSH on IOS Router or Switch
-
 # There are four steps required to enable SSH support on a Cisco IOS:
 # 1. Configure the hostname.
-# 2. Configure the DNS domain.
-# 3. Generate the SSH key to be used.
-# 4. Enable SSH transport support for the virtual type terminal (vtys).
-
 configure terminal
 hostname R1
+# 2. Configure the DNS domain.
 ip domain name cisco.com
-username admin privilege 15 password Cisco123
-line vty 0 4
+# 3. Generate the SSH key to be used.
+crypto key generate rsa modulus 1024
+# 4. Enable SSH transport support for the virtual type terminal (vtys).
+line vty 0 15
 transport input ssh
 exit
-line vty 5 15
-transport input ssh
-exit
-crypto key generate rsa
-1024
+# 5. Enable SSH version 2.
 ip ssh version 2
+# 6. Create a user and password for SSH access.
+username admin privilege 15 password Cisco123
 end
 wr
 
-
 ## Note: Older IOS supports the kind of RSA with SHA-1, and SHA-1 is considered very weak. This essentially means that there are no secure ways to connect to it over SSH.
 # Workaround on client (However, be aware that this is a workaround and it's known to be insecure.):
-
 sudo tee -a ~/.ssh/config > /dev/null <<EOT
 Host 192.168.111.1
     KexAlgorithms +diffie-hellman-group14-sha1
