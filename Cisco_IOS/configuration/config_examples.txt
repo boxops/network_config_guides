@@ -131,3 +131,14 @@ show running-config | begin pubkey
 # SSH to the Cisco device from both Windows and Linux:
 ssh -l admin 192.168.111.1
 
+
+### IPv6 Address with RIPng Configuration
+ipv6 unicast-routing
+ipv6 router rip [process-id-string]
+
+interface g0/0
+ipv6 address 2001:0:1:0::1/64
+ipv6 rip [process-id-string] enable
+no sh
+exit
+
