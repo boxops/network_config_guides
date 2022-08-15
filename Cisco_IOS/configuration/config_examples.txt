@@ -142,3 +142,4 @@ ipv6 rip [process-id-string] enable
 no sh
 exit
 
+ping ipv6 2001:0:1:0::2
