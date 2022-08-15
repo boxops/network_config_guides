@@ -143,3 +143,28 @@ no sh
 exit
 
 ping ipv6 2001:0:1:0::2
+
+
+### Configuring VTP Client Mode on Switches
+# SW1 VTP Server
+int range f0/11 - 12
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+vtp domain cisco
+
+# SW2 VTP Client
+int range f0/11 - 12
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+vtp domain cisco
+vtp mode client
+
+# SW1 VTP Server - Create VLANs
+vlan 10
+vlan 100
+
+# Verify that VLAN 10 and VLAN 100 were created on SW2
+sh vtp status
+
