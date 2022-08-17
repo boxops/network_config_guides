@@ -168,3 +168,20 @@ vlan 100
 # Verify that VLAN 10 and VLAN 100 were created on SW2
 sh vtp status
 
+
+### Switchport Commands
+# Access mode
+switchport mode access
+switchport access vlan [vlan-id]
+# Trunk mode
+switchport mode trunk
+switchport trunk encapsulation dot1q
+# Allow VLANs on the trunk port
+switchport trunk allowed vlan [vlan-list]
+# Verify trunk configuration
+sh interfaces trunk
+# Configure the VLAN membership mode of a port (DTP)
+switchport mode {access | dynamic {auto | desirable} | trunk}
+# Disable DTP
+switchport nonegotiate
+
