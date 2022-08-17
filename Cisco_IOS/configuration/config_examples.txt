@@ -184,9 +184,12 @@ sh interfaces trunk
 switchport mode {access | dynamic {auto | desirable} | trunk}
 # Disable DTP
 switchport nonegotiate
+# Set switchport trunk characteristics
+switchport trunk {allowed vlan [vlan-list] | native vlan [vlan-id]}
 
 
 ### ROAS (Router On a Stick) Configuration
+# R1
 int g0/0
 no sh
 int g0/0.10
@@ -197,4 +200,35 @@ encapsulation dot1q 20
 ip address 192.168.100.129 255.255.255.128
 # Verify the Configuration
 do sh run | section Gig
+
+## At a workstation level, interVLAN routing problems can be caused by:
+# - incorrect IP addresses
+# - incorrect subnet masks
+# - incorrect default gateways
+
+## At the Layer 2 switching level, VLAN routing can be caused by:
+# - incorrect VLAN port configurations
+# - incorrect trunk configurations
+# - mismatched native VLANs
+
+# Verify switchport problems:
+sh run | section Fast
+sh vlan brief
+sh int trunk
+sh int status
+sh int [interface-id] switchport
+# Find and filter specific MAC address entries of end hosts on a switch
+sh mac | section 000C.6066.7031
+
+## InterVLAN routing problems on routers can be caused by:
+# - misconfigured IP addresses
+# - misconfigured trunk ports
+# - misconfigured routing protocols
+
+# Verify InterVLAN routing problems:
+sh int G0/0
+sh protocols
+sh ip route
+sh run int G0/0.20
+sh int G0/0.20
 
