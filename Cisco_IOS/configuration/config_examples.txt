@@ -241,7 +241,7 @@ sh int G0/0.20
 # Disable/Enable CDP on an interface
 [no] cdp enable
 # Disable/Enable CDP globally
-[no] cdp enable
+[no] cdp run
 # Specify or modify the amount of time the receiving device should hold a CDP packet before disdarding it
 cdp holdtime [seconds]
 # Specify how often the Cisco IOS software sends CDP packets
