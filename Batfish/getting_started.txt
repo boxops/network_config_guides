@@ -1,18 +1,10 @@
 # Reference: Community Webinar: Network Security Verification with Batfish
 # URL: https://www.youtube.com/watch?v=I9UkGu5aD9Y
+# Demo: https://github.com/networktocode/2022-ntc-content/tree/main/webinars/batfish-security
 
-
-## Batfish Docker Installation
-
-# Option 1: Batfish only docker container
-docker pull batfish/batfish
-docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfish/batfish
-
-# Option 2: Batfish all-in-one docker container (comes with jupyter notebooks - recommended installation)
-docker pull batfish/allinone
-docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfish/batfish
 
 ## Top use cases for Batfish
+
 # 1) Pre-change validation
 # - Configuration consistency
 # - Routing table verification
@@ -26,4 +18,26 @@ docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfis
 # 4) Network CI/CD pipelines
 # - Accelerated network changes with confidence
 # - Minimize network distruptions
+
+## What can we do with Batfish?
+
+# 1) Unused configuration
+# - Returns structures such as ACLs, routemaps and other configurations that are defined but not used.
+# 2) Undefined references
+# - Finds configurations that have references to structures (e.g. ACLs) that are not defined.
+# - Such occurences can have serious consequences in some cases.
+# 3) Unreachable lines
+# - Finds all lines in the specified filters that will not match any packet
+# -- either because of being shadowed by prior lines
+# -- or because of its match condition being empty.
+
+## Batfish Docker Installation
+
+# Option 1: Batfish only docker container
+docker pull batfish/batfish
+docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfish/batfish
+
+# Option 2: Batfish all-in-one docker container (comes with jupyter notebooks - recommended installation)
+docker pull batfish/allinone
+docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfish/batfish
 
