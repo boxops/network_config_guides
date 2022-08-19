@@ -1,0 +1,29 @@
+# Reference: Community Webinar: Network Security Verification with Batfish
+# URL: https://www.youtube.com/watch?v=I9UkGu5aD9Y
+
+
+## Batfish Docker Installation
+
+# Option 1: Batfish only docker container
+docker pull batfish/batfish
+docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfish/batfish
+
+# Option 2: Batfish all-in-one docker container (comes with jupyter notebooks - recommended installation)
+docker pull batfish/allinone
+docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfish/batfish
+
+## Top use cases for Batfish
+# 1) Pre-change validation
+# - Configuration consistency
+# - Routing table verification
+# 2) Path analysis and verification
+# - Route tracing and path validation
+# - Packet forwarding
+# - Security flow analysis
+# 3) Network data imports
+# - Data population (network importer)
+# - Configuration propery affirmation
+# 4) Network CI/CD pipelines
+# - Accelerated network changes with confidence
+# - Minimize network distruptions
+
