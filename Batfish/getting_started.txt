@@ -41,3 +41,6 @@ docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfis
 docker pull batfish/allinone
 docker run --name batfish -v batfish-data:/data -p 9997:9997 -p 9996:9996 batfish/batfish
 
+## Batfish demo setup
+# https://github.com/networktocode/2022-ntc-content/tree/main/webinars/batfish-security
+
