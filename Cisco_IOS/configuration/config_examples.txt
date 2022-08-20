@@ -288,3 +288,51 @@ show lldp interface [type number]
 # Display information about neighbors, including device type, interface type and number, holdtime settings, capabilities, and port ID
 show lldp neighbors [interface-id] [detail]
 
+
+### EtherChannel
+
+# Assign an Ethernet interface to an EtherChannel group
+channel-group [port-channel-number] mode {auto [non-silent] | desirable [non-silent] on | active | passive}
+# Configure the EtherChannel negotiation protocol for the interface
+channel-protocol {lacp | pagp}
+# Configure the LACP priority for the interface
+lacp port-priority [priority-value]
+# Configure the LACP priority for the system
+lacp system-priority [priority-value]
+# Display EtherChannel information for the channel
+show etherchannel [channel-group-number] {detail | load-balance | port | port-channel | summary | protocol}
+
+## EtherChannel Configuration
+# ASW1
+int r f0/1 - 10
+channel-protocol lacp
+channel-group 1 mode passive
+# DSW1
+int r f0/1 - 10
+channel-protocol lacp
+channel-group 1 mode active
+# Verify portchannel configuration
+show interfaces port-channel
+# Determine the administrative mode of the switchport
+show interfaces port-channel switchport
+# Change the administrative mode to form a trunk unconditionally on the portchannel
+# ASW1
+int port-channel 1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+# DSW1
+int port-channel 1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+# Verify the etherchannel operation
+show etherchannel summary
+# Determine port priorities
+show etherchannel port
+# Increase the port priority of an interface (lower number is higher priority)
+int f0/9
+lacp port-prioirty 100
+# Note: Lower device ID will decide which interfaces are active for EtherChannel regardless of the port priority configurations on the device with a higher device ID.
+# LACP allows only one switch to make decisions about which interfaces are actively participating in the EtherChannel.
+# The LACP system priority and the device ID (switch MAC address) are used to determine which switch is the decision maker.
+# Change the LACP system priority value to make it the decision maker about active ports in the EtherChannel
+lacp system-priority 100
