@@ -273,14 +273,14 @@ show cdp traffic
 
 # Specify the amoun of time a receiving device should hold the information sent by a device before descarding it
 lldp holdtime [seconds]
-# Receives LLDP packets on the interface
-lldp receive
-# Enable LLDP
+# Enable LLDP globally on all interfaces (disabled by default on Cisco devices)
 lldp run
 # Set the transmission frequency of LLDP updates in seconds
 lldp timer
-# Sends LLDP packets on the interface
-lldp transmit
+# Disable/Enable LLDP packets to be sent from an interface
+[no] lldp transmit
+# Disable/Enable LLDP packets to be received from an interface
+[no] lldp receive
 # Display global information, such as frequency of transmissions, the holdtime for packets being sent, delay time for LLDP to initialise on an interface
 show lldp
 # Display information about interfaces where LLDP is enabled
