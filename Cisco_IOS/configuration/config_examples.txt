@@ -302,7 +302,9 @@ lacp system-priority [priority-value]
 # Display EtherChannel information for the channel
 show etherchannel [channel-group-number] {detail | load-balance | port | port-channel | summary | protocol}
 
-## EtherChannel Configuration
+## Layer 2 EtherChannel Configuration
+# A requirement for EtherChannel is that all ports must be indentically configured before a port-channel group can be created.
+
 # ASW1
 int r f0/1 - 10
 channel-protocol lacp
@@ -336,3 +338,29 @@ lacp port-prioirty 100
 # The LACP system priority and the device ID (switch MAC address) are used to determine which switch is the decision maker.
 # Change the LACP system priority value to make it the decision maker about active ports in the EtherChannel
 lacp system-priority 100
+
+## EtherChannel 'mode on' will bundle interfaces irrespective of the configuration of the interfaces on the opposite side of the link.
+# Once interfaces are up and bundled, the port-channel interface will change to an up state and will be added to the spanning tree as a single logical link, replacing bundled member interfaces.
+# You shoud shut down the interfaces before configuring EtherChannel on mode to prevent a spanning tree loop, then re-enable the interfaces.
+# SW1
+int range f0/5 - 6
+shutdown
+channel-group 1 mode on
+# SW2
+int range f0/5 - 6
+shutdown
+channel-group 1 mode on
+# SW1
+int range f0/5 - 6
+no shutdown
+# SW2
+int range f0/5 - 6
+no shutdown
+
+# Verify configuration
+sh ip int b
+sh int tr
+sh span vlan 1
+sh int po1
+sh etherchannel port-channel
+sh etherchannel summary
