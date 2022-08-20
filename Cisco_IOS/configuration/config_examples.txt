@@ -1,16 +1,19 @@
 ### Configure Hostname
+
 configure terminal
 hostname R1
 do sh run | inc hostname
 
 
 ### Configure an IP address on an Interface
+
 interface FastEthernet0/0
 ip address 10.1.1.1 255.255.255.0
 no shutdown
 
 
 ### Configure a Management IP on a Layer 2 Switch
+
 # 1. Enter the VLAN 1 configuration mode with the interface vlan 1 global configuration command and assign an IP address with the ip address IP_ADDRESS SUBNET_MASK interface subcommand, then enable the VLAN 1 interface with the no shutdown interface subcommand.
 conf t
 int vlan 1
@@ -24,6 +27,7 @@ ip name-server 192.168.111.1
 
 
 ### Configure SSH on IOS Router or Switch
+
 # There are four steps required to enable SSH support on a Cisco IOS:
 # 1. Configure the hostname.
 configure terminal
@@ -133,6 +137,7 @@ ssh -l admin 192.168.111.1
 
 
 ### IPv6 Address with RIPng Configuration
+
 ipv6 unicast-routing
 ipv6 router rip [process-id-string]
 
@@ -146,6 +151,7 @@ ping ipv6 2001:0:1:0::2
 
 
 ### Configuring VTP Client Mode on Switches
+
 # SW1 VTP Server
 int range f0/11 - 12
 switchport trunk encapsulation dot1q
@@ -170,6 +176,7 @@ sh vtp status
 
 
 ### Switchport Commands
+
 # Access mode
 switchport mode access
 switchport access vlan [vlan-id]
@@ -189,6 +196,7 @@ switchport trunk {allowed vlan [vlan-list] | native vlan [vlan-id]}
 
 
 ### ROAS (Router On a Stick) Configuration
+
 # R1
 int g0/0
 no sh
@@ -234,6 +242,7 @@ sh int G0/0.20
 
 
 ### CDP
+
 # Cisco Discovery Protocol allows devices to share basic configuration information and will operate without any IP addresses or protocol-specific information being configured.
 # CDP, which is enabled by default on all interfaces, is a Data Link protocol at Layer 2 of the OSI model.
 # CDP is not routable, it can travel only to directly connected devices.
@@ -258,4 +267,24 @@ show cdp neighbors
 show cdp neighbor detail
 # Display information about traffic between devices gathered by using CDP
 show cdp traffic
+
+
+### LLDP
+
+# Specify the amoun of time a receiving device should hold the information sent by a device before descarding it
+lldp holdtime [seconds]
+# Receives LLDP packets on the interface
+lldp receive
+# Enable LLDP
+lldp run
+# Set the transmission frequency of LLDP updates in seconds
+lldp timer
+# Sends LLDP packets on the interface
+lldp transmit
+# Display global information, such as frequency of transmissions, the holdtime for packets being sent, delay time for LLDP to initialise on an interface
+show lldp
+# Display information about interfaces where LLDP is enabled
+show lldp interface [type number]
+# Display information about neighbors, including device type, interface type and number, holdtime settings, capabilities, and port ID
+show lldp neighbors [interface-id] [detail]
 
