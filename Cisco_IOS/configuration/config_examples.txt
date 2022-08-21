@@ -364,3 +364,24 @@ sh span vlan 1
 sh int po1
 sh etherchannel port-channel
 sh etherchannel summary
+
+
+## Layer 3 EtherChannel Configuration
+# A requirement for EtherChannel is that all ports must be indentically configured before a port-channel group can be created.
+
+# Enable Layer 3 processing
+ip routing
+# Convert an interface from switched (Layer 2) to routed (Layer 3)
+int f0/1
+no switchport
+# Assign an Ethernet interface to an EtherChannel group
+channel-group [port-channel-number] mode {on | auto [non-silent] | desirable [non-silent]}
+# Configure the load balancing method used by port-channel interfaces on the device
+port-channel load-balance {dst-ip | dst-mac | src-dst-ip | src-dst-mac | src-ip | src-mac}
+# Display EtherChannel information for a channel
+show etherchannel [channel-group-number] {load-balance | port | port-channel | summary}
+
+# Determine the number of links that can be configured as part of the port-channel group
+show cdp neighbors
+# Display the line and protocol state of each interface
+show ip interface brief
