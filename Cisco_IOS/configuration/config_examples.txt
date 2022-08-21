@@ -404,7 +404,7 @@ disconnect {ip-address | console}
 # Display information about local-area transport (LAT), Telnet, or rlogin connections
 show sessions
 # Resume an active Telnet session (select the Conn number from the show sessions list, then press Enter)
-[session-number]
+resume [session-number]
 # Display users currently logged in to the router
 show users
 
