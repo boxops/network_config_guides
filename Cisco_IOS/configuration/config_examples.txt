@@ -385,3 +385,26 @@ show etherchannel [channel-group-number] {load-balance | port | port-channel | s
 show cdp neighbors
 # Display the line and protocol state of each interface
 show ip interface brief
+
+
+### Telnet
+
+# Enter configuration mode for the selected virtual terminal (Telnet) lines
+line vty 0 4
+# Specify a password that is required for a user to login (vty mode)
+password [password]
+# Enable password checking (vty mode)
+login
+# Starts the terminal emulation program that permits you to access devices remotely over the networklessons
+telnet [ip-address]
+# Suspend an active Telnet session without breaking it:
+# - Press Ctrl+Shift+6 then press X
+# Close an active console port or Telnet session
+disconnect {ip-address | console}
+# Display information about local-area transport (LAT), Telnet, or rlogin connections
+show sessions
+# Resume an active Telnet session (select the Conn number from the show sessions list, then press Enter)
+[session-number]
+# Display users currently logged in to the router
+show users
+
