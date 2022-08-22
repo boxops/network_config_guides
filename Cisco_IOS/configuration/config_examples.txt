@@ -408,3 +408,43 @@ resume [session-number]
 # Display users currently logged in to the router
 show users
 
+
+### OSPF
+
+# Before implementing OSPF on a network, you should always determine the desired precedence for DR and BDR election.
+# Factors such as device speed, age of hardware, and the location of the device in relation to the rest of the devices in the broadcast network should be considered because they could affect network performance.
+# Once the OSPF process is started on a router, it does not elect a new DR unless the DR and BDR fail or the OSPF process is restarted on all participating devices.
+# If only the DR fails, the BDR will become the DR and a BDR will be elected from the remaining devices in the subnet.
+
+# Enter router configuration mode for an OSPF process
+router ospf [process-id]
+# Sets the router priority, whic helps determine the designated router (DR) for the network
+ip ospf priority [number-value]
+# Activates OSPF on the specified network and places the matching interface in the specified area
+network [network-address] [wildcard-mask] area [area-id]
+# Display the OSPF link state database
+show ip ospf [process-id [area-id]] database [router]
+# Display OSPF interface information
+show ip ospf interface [type number] [brief]
+# Display OSPF neighbor information
+show ip ospf [process-id [area-id]] neighbor
+# Display the routing table
+show ip route
+# Display information on OSPF-related events, such as adjacencies, flooding information, DR selection, and shortest path first (SFP) calculation
+debug ip ospf [[adjacency] [database-timer] [events] [flooding] [hello]]
+# Display information about active routing protocols
+show ip protocols
+# Turn of all debugging
+undebug all
+# Restart the OSPF process
+clear ip ospf process
+
+## Force a router to become the DR for each of their respective broadcast networks:
+# - Configure each router with a higher loopback IP interface address
+# - Configure a higher router ID than the neighbor router
+# - Configure higher OSPF priorities (takes precedence over the router ID) on the router you want to become the DR for the broadcast network.
+
+# Configure a router with an OSPF priority of 0 to prevent it from being elected as a DR or BDR.
+int g0/0
+ip ospf priority 0
+
