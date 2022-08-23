@@ -459,8 +459,17 @@ ip nat inside
 # Define the outside interface for NAT
 int g0/1
 ip nat outside
+# Create an ACL that denies or permits IP traffic from the specified address or address range
+access-list [access-list-number] {deny | permit} [source-address] [source-wildcard]
 # Translates anything that matches the ACL to an address from the pool (from global config mode, starts the NAT process)
 ip nat inside source list [access-list-number] pool [pool-name]
+# Translates anything matching the access list to the IP address of the interface specified
+# - overload indicates that PAT will be used
+ip nat inside source list [access-list-number] interface [type-number] overload
+# Enable NAT translation of the inside source address
+ip nat inside source static [inside-local-address] [inside-global-address]
+# Enable NAT translation of the outside source address
+ip nat outside source static [inside-local-address] [inside-global-address]
 
 ## NAT Configuration Example
 # R1 (Internet facing router)
