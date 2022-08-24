@@ -490,3 +490,18 @@ show ip nat translations
 # Display NAT information
 sh ip nat statistics
 
+## Static NAT is most often used when you want to make a host on a privately addressed internal network appear as if it is connected directly to the Internet with a public IP address.
+# Internet facing router
+conf t
+int g0/1
+ip nat inside
+int g0/0
+ip nat outside
+exit
+# On a NAT router, allow a server with IP 192.168.101.3 to be accessed by using the public IP address 200.5.22.21:
+ip nat inside source static 192.168.101.3 200.5.22.21
+# Create an access list to match the IP addresses of all the hosts that should be able to use NAT:
+access-list 1 permit 192.168.100.0 0.0.0.255
+# Begin the NAT process by configuring NAT overloading to use the ACL that was created:
+ip nat inside source list 1 int s0/0 overload
+
