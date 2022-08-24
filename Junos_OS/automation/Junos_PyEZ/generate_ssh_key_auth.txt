@@ -2,7 +2,8 @@ Authenticate Junos PyEZ Users Using SSH Keys
 
 Reference
 https://www.juniper.net/documentation/us/en/software/junos-pyez/junos-pyez-developer/topics/topic-map/junos-pyez-authentication.html#task-junos-pyez-authenticating-using-ssh-keys
-
+Video Guide
+https://www.youtube.com/watch?v=WYL3x5F4LhM
 
 Generate and Configure SSH Keys
 To generate SSH keys on the configuration management server and configure the public key on devices running Junos OS:
