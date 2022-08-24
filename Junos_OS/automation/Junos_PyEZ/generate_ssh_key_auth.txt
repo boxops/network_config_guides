@@ -15,12 +15,15 @@ Enter file in which to save the key (/home/user/.ssh/id_rsa): id_rsa_dc
 Enter passphrase (empty for no passphrase):  *****
 Enter same passphrase again: *****
 
-2. (Optional) Load the key into the native SSH key agent.
+2. Load the key from the server into the native SSH key agent (Juniper):
+user@server:~$ scp /home/user/.ssh/id_rsa_dc.pub admin@192.168.100.1:/var/home/admin
+Look up the key in the SSH agent:
+user@router> file list /var/home/admin
 
 3. Configure the public key on each device to which the Junos PyEZ application will connect, which could include devices running Junos OS or a console server connected to the device running Junos OS.
 One method to configure the public key under the appropriate user account on a device running Junos OS is to load the public key from a file.
 [edit]
-user@router# set system login user username authentication load-key-file URL
+user@router# set system login user username class super-user authentication load-key-file /var/home/admin/id_rsa_dc.pub
 user@router# commit
 
 4. Verify that the key works by logging in to the device using the key.
