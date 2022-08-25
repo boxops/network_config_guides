@@ -1,0 +1,2 @@
+delete
+set system root-authentication plain-text-password My12Super34Secure56Password!

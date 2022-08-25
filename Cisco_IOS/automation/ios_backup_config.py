@@ -55,9 +55,8 @@ for x in myswitches:
     showver = net_connect.send_command("show version", use_textfsm=True)
     showrun = net_connect.send_command("show run")
     hostname = showver[0]['hostname']
-    backupfilename = hostname + "_" + dt_string + ".txt"
-    file = open(backupfilename, "w")
-    file.write(showrun)
-    file.close()
-    print(hostname + " has been backed up" + "\n")
+    backupfilename = f"{hostname}_{dt_string}.txt"
+    with open(backupfilename, "w") as file:
+        file.write(showrun)
+    print(f"{hostname} has been backed up" + "\n")
     net_connect.disconnect()

@@ -18,7 +18,7 @@
 import argparse
 
 def print_set_command(lcommands, leaf):
-    print(("%s %s" % (" ".join(lcommands), leaf)))
+    print(f'{" ".join(lcommands)} {leaf}')
 
 
 def get_set_config(filein, ignore_annotations):

@@ -17,7 +17,7 @@ pe_template = templateEnv.get_template(pe_template_file)
 
 variable_path=os.path.join(os.path.dirname(__file__),'./variables')
 
-variable_file = variable_path + "/all_variables.yml"
+variable_file = f"{variable_path}/all_variables.yml"
 
 configuration_path=os.path.join(os.path.dirname(__file__),'./configurations')
 

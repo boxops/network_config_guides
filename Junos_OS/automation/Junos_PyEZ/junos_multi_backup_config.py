@@ -9,6 +9,10 @@ Usage
 python3 junos_multi_backup_config.py
 """
 
+
+
+
+
 from jnpr.junos import Device
 from lxml import etree
 import os
@@ -30,12 +34,12 @@ exception_errors = []
 
 for host in hosts:
     ping = None
-    ping = os.system("ping -n 2 " + host)
+    ping = os.system(f"ping -n 2 {host}")
     if ping == 0:
-        print(host + " is online.")
+        print(f"{host} is online.")
         online_hosts.append(host)
         filename = None
-        filename = host + ".txt"
+        filename = f"{host}.txt"
         try:
             with Device(host=host, user=user, password=password, port=port) as dev:
                 data = dev.rpc.get_config(options={'format':'text'})
@@ -47,7 +51,7 @@ for host in hosts:
             print(e)
             exception_errors.append(e)
     else:
-        print(host + " is offline.")
+        print(f"{host} is offline.")
         offline_hosts.append(host)
 
 print("---[ Online Hosts ]---)")

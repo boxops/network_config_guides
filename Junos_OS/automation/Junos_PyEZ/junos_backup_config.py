@@ -9,6 +9,7 @@ Usage
 python3 junos_backup_config.py
 """
 
+
 from jnpr.junos import Device
 from lxml import etree
 
@@ -16,7 +17,7 @@ host = "11.11.11.11"
 user = "admin"
 password = "Super23Secure34Password?"
 port = 22
-filename = host + ".txt"
+filename = f"{host}.txt"
 
 with Device(host=host, user=user, password=password, port=port) as dev:
     data = dev.rpc.get_config(options={'format':'text'})

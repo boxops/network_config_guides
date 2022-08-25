@@ -64,9 +64,9 @@ for x in devices:
     net_connect = Netmiko(**x)
     showver = net_connect.send_command("show version", use_textfsm=True)
     hostname = showver[0]['hostname']
-    ping = net_connect.send_command("ping " + client)
+    ping = net_connect.send_command(f"ping {client}")
     if "....." in ping:
         print(hostname + " can't connect.")
     else:
-        print(hostname + " -------> is good")
+        print(f"{hostname} -------> is good")
     net_connect.disconnect()

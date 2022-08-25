@@ -25,7 +25,7 @@ myswitches = [flswitch, access1]
 
 for x in myswitches:
     net_connect = Netmiko(**x)
-    ping = net_connect.send_command("show mac address-table address " + mac_address, use_textfsm=True)
+    ping = net_connect.send_command(f"show mac address-table address {mac_address}", use_textfsm=True)
     showver = net_connect.send_command("show version", use_textfsm=True)
     hostname = showver[0]['hostname']
     try:
@@ -33,6 +33,6 @@ for x in myswitches:
     except TypeError:
         thehost = "nope"
     if thehost != "nope":
-        print("The host is connected to " + hostname)
+        print(f"The host is connected to {hostname}")
 
 print("done")
