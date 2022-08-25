@@ -517,3 +517,24 @@ ip nat inside
 int s0/0
 ip nat outside
 
+
+### NTP
+
+# Set the system software clock
+# e.g. clock set 09:00:00 25 July 2013
+clock set [hh:mm:ss] [day] [month] [year]
+# Configure the Cisco IOS software as an NTP master clock to which peers synchronize themselves
+ntp master [stratum]
+# Allow the Cisco IOS software clock to be synchronized by an NTP time server
+ntp server [ip-address] [key [key-id]]
+# Define an authentication key for NTP
+ntp authentication-key [number] md5 [value]
+# Authenticates the identity of a system to which NTP will synchronize
+ntp trusted-key [key-number]
+# Display the time and date from the system software clock
+show clock [detail]
+# Show the status of NTP associations
+show ntp associations [detail]
+# Show the status of the NTP
+show ntp status
+
