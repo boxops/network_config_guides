@@ -1,5 +1,5 @@
 ---
-# Playbook to setup folder sturctures for new project on localhost
+# Playbook to setup folder sturctures for a new Ansible project on the localhost
 # Usage: ansible-playbook new_project.yml
 
 - name: Prompt for project / folder name

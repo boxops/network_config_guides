@@ -1,0 +1,594 @@
+### Configure Hostname
+
+configure terminal
+hostname R1
+do sh run | inc hostname
+
+
+### Configure an IP address on an Interface
+
+interface FastEthernet0/0
+ip address 10.1.1.1 255.255.255.0
+no shutdown
+
+
+### Configure a Management IP on a Layer 2 Switch
+
+# 1. Enter the VLAN 1 configuration mode with the interface vlan 1 global configuration command and assign an IP address with the ip address IP_ADDRESS SUBNET_MASK interface subcommand, then enable the VLAN 1 interface with the no shutdown interface subcommand.
+conf t
+int vlan 1
+ip add 192.168.111.100 255.255.255.0
+no sh
+exit
+# 2. Use the ip default-gateway IP_ADDRESS global configuration command to configure the default gateway.
+ip default-gateway 192.168.111.1
+# 3. Add the ip name-server IP_ADDRESS global configuration command to configure the DNS server.
+ip name-server 192.168.111.1
+
+
+### Configure SSH on IOS Router or Switch
+
+# There are four steps required to enable SSH support on a Cisco IOS:
+# 1. Configure the hostname.
+configure terminal
+hostname R1
+# 2. Configure the DNS domain.
+ip domain name cisco.com
+# 3. Generate the SSH key to be used.
+crypto key generate rsa modulus 1024
+# 4. Enable SSH transport support for the virtual type terminal (vtys).
+line vty 0 15
+transport input ssh
+login local
+exit
+# 5. Enable SSH version 2.
+ip ssh version 2
+# 6. Create a user and password for SSH access.
+username admin privilege 15 password Cisco123
+end
+
+## (Optional SSH Security): Add an ACL to allow incoming SSH connections.
+# Apply a Standard ALC:
+conf t
+access-list 1 permit host 192.168.111.1
+access-list 1 permit host 192.168.111.2
+line vty 0 15
+access-class 1 in
+end
+# OR Apply an Extended Named ACL:
+ip access-list extended SSH_ACCESS_CONTROL
+permit udp 192.168.111.1 0.0.0.255 any eq 22
+permit tcp 192.168.111.1 0.0.0.255 any eq 22
+deny udp any any eq 22
+deny tcp any any eq 22
+permit ip any any
+line vty 0 15
+access-class SSH_ACCESS_CONTROL in
+end
+
+## Note: Older IOS supports the kind of RSA with SHA-1, and SHA-1 is considered very weak. This essentially means that there are no secure ways to connect to it over SSH.
+# Workaround on client (However, be aware that this is a workaround and it's known to be insecure.):
+sudo tee -a ~/.ssh/config > /dev/null <<EOT
+Host 192.168.111.1
+    KexAlgorithms +diffie-hellman-group14-sha1
+    PubkeyAcceptedAlgorithms +ssh-rsa
+    HostkeyAlgorithms +ssh-rsa
+EOT
+
+
+### SSH Public Key Authentication
+# Reference: https://networklessons.com/uncategorized/ssh-public-key-authentication-cisco-ios
+# 1.1 Windows Configuration
+# Create a .ssh directory in your home directory if it does not already exist:
+mkdir /Users/username/.ssh
+# Go to the .ssh folder:
+cd /Users/username/.ssh
+# Run ssh-keygen to generate an SSH key-pair:
+ssh-keygen -t rsa
+# 1.2 Linux Configuration
+# Generate an RSA keypair:
+ssh-keygen -b 1024 -t rsa
+# 2. Enable SSH on Cisco IOS (refer to configuration above).
+# Optionally, you can configure the router to disable SSH password authentication:
+no ip ssh server authenticate user password
+no ip ssh server authenticate user keyboard
+# 3.1 Windows Public Key
+# You can open the public key file (windows_user.pub) in your favorite text editor.
+# Remove the “begin”, “end” and “comment” so that we only have the public key left.
+# On the Cisco device, add the public key for a username we choose. we will call this user “WINDOWS_USER”. Once you enter the key-string command, you can keep adding lines until you type exit:
+R1(config)#ip ssh pubkey-chain 
+R1(conf-ssh-pubkey)#username WINDOWS_USER
+R1(conf-ssh-pubkey-user)#key-string
+R1(conf-ssh-pubkey-data)#AAAAB3NzaC1yc2EAAAABJQAAAQEAijoMF9oBwyQxwYbVlFprz+fG8oe5uAcCxwMw       
+R1(conf-ssh-pubkey-data)#eIR1lyAnDJIsYbTbcdm+n5KiQnCt2561MpN4yOFpajFNM/dqH7/jYaqaicHCSV2F       
+R1(conf-ssh-pubkey-data)#RGauEp7FzN/uXxsX7mii6qOuxovl9OflLpXcvH5QH6551ycmL8nIv8UCY8uayiGI        
+R1(conf-ssh-pubkey-data)#INsC0LyKEctWDW6qWp43T7rhcP0y4JoMraTCZLIPNE0Bo0bHgnGLg6fEvJmyB3sX       
+R1(conf-ssh-pubkey-data)#H+7BaxHdYKg2OcIgVqYzclWhDwxj32kqd1BCq089iBMrb4QppDU2eM/t22iK29mn      
+R1(conf-ssh-pubkey-data)#eqOGTiCkxB80ix+KULT9okmqkj3TbhCpunTfuPCCRNrjqndBsw==
+R1(conf-ssh-pubkey-data)#exit
+R1(conf-ssh-pubkey-user)#exit
+R1(conf-ssh-pubkey)#exit
+# The router now knows the public key of our windows users.
+# 3.2 Linux Public Key
+# Take a look at the public key:
+cat /home/ubuntu/.ssh/id_rsa.pub
+# The key is printed on a single line, that’s fine but Cisco IOS only supports a maximum of 254 characters on a single line so you won’t be able to paste this in one go. 
+# There is a useful Linux command you can use to break the public key in multiple parts:
+fold -b -w 72 /home/ubuntu/.ssh/id_rsa.pub
+# Remove the “ssh-rsa” part at the beginning and the comment at the end.
+# Add the key to the router, we will use the username “LINUX_USER”:
+R1(config)#ip ssh pubkey-chain 
+R1(conf-ssh-pubkey)#username LINUX_USER
+R1(conf-ssh-pubkey-user)#key-string
+R1(conf-ssh-pubkey-data)#AAAAB3NzaC1yc2EAAAADAQABAAABAQC80DsOF4nkk15V0V2U7r4Q2MyAwIbgQX/7    
+R1(conf-ssh-pubkey-data)#rqdUyNCTulliYZWdxnQHaI0WpvcEHQTrSXCauFOBqUrLZglI2VExOgu0TmmWCajW/vnp8J5b
+R1(conf-ssh-pubkey-data)#ArzwIk83ct35IHFozPtl3Rj79U58HwMlJ2JhBTkyTrZYRmsP+r9VF7pYMVcuKgFS+gDvhbux
+R1(conf-ssh-pubkey-data)#M8DNLmS1+eHDw9DNHYBA+dIaEIC+ozxDV7kF6wKOx59E/Ni2/dT9TJ5Qge+Rw7zn+O0i1Ib9
+R1(conf-ssh-pubkey-data)#5djzNfVdHq+174mchGx3zV6l/6EXvc7G7MyXj89ffLdXIp/Xy/wdWkc1P9Ei8feFBVLTWijX
+R1(conf-ssh-pubkey-data)#iilbYWwdLhrk7L2EQv5x
+R1(conf-ssh-pubkey-data)#exit
+R1(conf-ssh-pubkey-user)#exit
+R1(conf-ssh-pubkey)#exit
+# 4. Verification
+# Once you added the public key to the router, Cisco IOS will calculate a key hash:
+show running-config | begin pubkey
+# SSH to the Cisco device from both Windows and Linux:
+ssh -l admin 192.168.111.1
+
+
+### IPv6 Address with RIPng Configuration
+
+ipv6 unicast-routing
+ipv6 router rip [process-id-string]
+
+interface g0/0
+ipv6 address 2001:0:1:0::1/64
+ipv6 rip [process-id-string] enable
+no sh
+exit
+
+ping ipv6 2001:0:1:0::2
+
+
+### Configuring VTP Client Mode on Switches
+
+# SW1 VTP Server
+int range f0/11 - 12
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+vtp domain cisco
+
+# SW2 VTP Client
+int range f0/11 - 12
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+vtp domain cisco
+vtp mode client
+
+# SW1 VTP Server - Create VLANs
+vlan 10
+vlan 100
+
+# Verify that VLAN 10 and VLAN 100 were created on SW2
+sh vtp status
+
+
+### Switchport Commands
+
+# Access mode
+switchport mode access
+switchport access vlan [vlan-id]
+# Trunk mode
+switchport mode trunk
+switchport trunk encapsulation dot1q
+# Allow VLANs on the trunk port
+switchport trunk allowed vlan [vlan-list]
+# Verify trunk configuration
+sh interfaces trunk
+# Configure the VLAN membership mode of a port (DTP)
+switchport mode {access | dynamic {auto | desirable} | trunk}
+# Disable DTP
+switchport nonegotiate
+# Set switchport trunk characteristics
+switchport trunk {allowed vlan [vlan-list] | native vlan [vlan-id]}
+
+
+### ROAS (Router On a Stick) Configuration
+
+# R1
+int g0/0
+no sh
+int g0/0.10
+encapsulation dot1q 10
+ip address 192.168.100.1 255.255.255.128
+int g0/0.20
+encapsulation dot1q 20
+ip address 192.168.100.129 255.255.255.128
+# Verify the Configuration
+do sh run | section Gig
+
+## At a workstation level, interVLAN routing problems can be caused by:
+# - incorrect IP addresses
+# - incorrect subnet masks
+# - incorrect default gateways
+
+## At the Layer 2 switching level, VLAN routing can be caused by:
+# - incorrect VLAN port configurations
+# - incorrect trunk configurations
+# - mismatched native VLANs
+
+# Verify switchport problems:
+sh run | section Fast
+sh vlan brief
+sh int trunk
+sh int status
+sh int [interface-id] switchport
+# Find and filter specific MAC address entries of end hosts on a switch
+sh mac | section 000C.6066.7031
+
+## InterVLAN routing problems on routers can be caused by:
+# - misconfigured IP addresses
+# - misconfigured trunk ports
+# - misconfigured routing protocols
+
+# Verify InterVLAN routing problems:
+sh int G0/0
+sh protocols
+sh ip route
+sh run int G0/0.20
+sh int G0/0.20
+
+
+### CDP
+
+# Cisco Discovery Protocol allows devices to share basic configuration information and will operate without any IP addresses or protocol-specific information being configured.
+# CDP, which is enabled by default on all interfaces, is a Data Link protocol at Layer 2 of the OSI model.
+# CDP is not routable, it can travel only to directly connected devices.
+
+# Disable/Enable CDP on an interface
+[no] cdp enable
+# Disable/Enable CDP globally
+[no] cdp run
+# Specify or modify the amount of time the receiving device should hold a CDP packet before disdarding it
+cdp holdtime [seconds]
+# Specify how often the Cisco IOS software sends CDP packets
+cdp timer [seconds]
+# Display global CDP information including timer and hold-time information
+show cdp
+# Display information about a specific neighboring device using CDP
+show cdp entry {* | entry-name [protocol | version]}
+# Display information about the interfaces on which CDP is enabled
+show cdp interface [type number]
+# Display information about directly connected neighbors
+show cdp neighbors
+# Display directly connected neighbor devices and their device types, interface names, and IP addresses
+show cdp neighbor detail
+# Display information about traffic between devices gathered by using CDP
+show cdp traffic
+
+
+### LLDP
+
+# Specify the amoun of time a receiving device should hold the information sent by a device before descarding it
+lldp holdtime [seconds]
+# Enable LLDP globally on all interfaces (disabled by default on Cisco devices)
+lldp run
+# Set the transmission frequency of LLDP updates in seconds
+lldp timer
+# Disable/Enable LLDP packets to be sent from an interface
+[no] lldp transmit
+# Disable/Enable LLDP packets to be received from an interface
+[no] lldp receive
+# Display global information, such as frequency of transmissions, the holdtime for packets being sent, delay time for LLDP to initialise on an interface
+show lldp
+# Display information about interfaces where LLDP is enabled
+show lldp interface [type number]
+# Display information about neighbors, including device type, interface type and number, holdtime settings, capabilities, and port ID
+show lldp neighbors [interface-id] [detail]
+
+
+### EtherChannel
+
+# Assign an Ethernet interface to an EtherChannel group
+channel-group [port-channel-number] mode {auto [non-silent] | desirable [non-silent] on | active | passive}
+# Configure the EtherChannel negotiation protocol for the interface
+channel-protocol {lacp | pagp}
+# Configure the LACP priority for the interface
+lacp port-priority [priority-value]
+# Configure the LACP priority for the system
+lacp system-priority [priority-value]
+# Display EtherChannel information for the channel
+show etherchannel [channel-group-number] {detail | load-balance | port | port-channel | summary | protocol}
+
+## Layer 2 EtherChannel Configuration
+# A requirement for EtherChannel is that all ports must be indentically configured before a port-channel group can be created.
+
+# ASW1
+int r f0/1 - 10
+channel-protocol lacp
+channel-group 1 mode passive
+# DSW1
+int r f0/1 - 10
+channel-protocol lacp
+channel-group 1 mode active
+# Verify portchannel configuration
+show interfaces port-channel
+# Determine the administrative mode of the switchport
+show interfaces port-channel switchport
+# Change the administrative mode to form a trunk unconditionally on the portchannel
+# ASW1
+int port-channel 1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+# DSW1
+int port-channel 1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+# Verify the etherchannel operation
+show etherchannel summary
+# Determine port priorities
+show etherchannel port
+# Increase the port priority of an interface (lower number is higher priority)
+int f0/9
+lacp port-prioirty 100
+# Note: Lower device ID will decide which interfaces are active for EtherChannel regardless of the port priority configurations on the device with a higher device ID.
+# LACP allows only one switch to make decisions about which interfaces are actively participating in the EtherChannel.
+# The LACP system priority and the device ID (switch MAC address) are used to determine which switch is the decision maker.
+# Change the LACP system priority value to make it the decision maker about active ports in the EtherChannel
+lacp system-priority 100
+
+## EtherChannel 'mode on' will bundle interfaces irrespective of the configuration of the interfaces on the opposite side of the link.
+# Once interfaces are up and bundled, the port-channel interface will change to an up state and will be added to the spanning tree as a single logical link, replacing bundled member interfaces.
+# You shoud shut down the interfaces before configuring EtherChannel on mode to prevent a spanning tree loop, then re-enable the interfaces.
+# SW1
+int range f0/5 - 6
+shutdown
+channel-group 1 mode on
+# SW2
+int range f0/5 - 6
+shutdown
+channel-group 1 mode on
+# SW1
+int range f0/5 - 6
+no shutdown
+# SW2
+int range f0/5 - 6
+no shutdown
+
+# Verify configuration
+sh ip int b
+sh int tr
+sh span vlan 1
+sh int po1
+sh etherchannel port-channel
+sh etherchannel summary
+
+
+## Layer 3 EtherChannel Configuration
+# A requirement for EtherChannel is that all ports must be indentically configured before a port-channel group can be created.
+
+# Enable Layer 3 processing
+ip routing
+# Convert an interface from switched (Layer 2) to routed (Layer 3)
+int f0/1
+no switchport
+# Assign an Ethernet interface to an EtherChannel group
+channel-group [port-channel-number] mode {on | auto [non-silent] | desirable [non-silent]}
+# Configure the load balancing method used by port-channel interfaces on the device
+port-channel load-balance {dst-ip | dst-mac | src-dst-ip | src-dst-mac | src-ip | src-mac}
+# Display EtherChannel information for a channel
+show etherchannel [channel-group-number] {load-balance | port | port-channel | summary}
+
+# Determine the number of links that can be configured as part of the port-channel group
+show cdp neighbors
+# Display the line and protocol state of each interface
+show ip interface brief
+
+
+### Telnet
+
+# Enter configuration mode for the selected virtual terminal (Telnet) lines
+line vty 0 4
+# Specify a password that is required for a user to login (vty mode)
+password [password]
+# Enable password checking (vty mode)
+login
+# Starts the terminal emulation program that permits you to access devices remotely over the networklessons
+telnet [ip-address]
+# Suspend an active Telnet session without breaking it:
+# - Press Ctrl+Shift+6 then press X
+# Close an active console port or Telnet session
+disconnect {ip-address | console}
+# Display information about local-area transport (LAT), Telnet, or rlogin connections
+show sessions
+# Resume an active Telnet session (select the Conn number from the show sessions list, then press Enter)
+resume [session-number]
+# Display users currently logged in to the router
+show users
+
+
+### OSPF
+
+# Before implementing OSPF on a network, you should always determine the desired precedence for DR and BDR election.
+# Factors such as device speed, age of hardware, and the location of the device in relation to the rest of the devices in the broadcast network should be considered because they could affect network performance.
+# Once the OSPF process is started on a router, it does not elect a new DR unless the DR and BDR fail or the OSPF process is restarted on all participating devices.
+# If only the DR fails, the BDR will become the DR and a BDR will be elected from the remaining devices in the subnet.
+
+# Enter router configuration mode for an OSPF process
+router ospf [process-id]
+# Sets the router priority, whic helps determine the designated router (DR) for the network
+ip ospf priority [number-value]
+# Activates OSPF on the specified network and places the matching interface in the specified area
+network [network-address] [wildcard-mask] area [area-id]
+# Display the OSPF link state database
+show ip ospf [process-id [area-id]] database [router]
+# Display OSPF interface information
+show ip ospf interface [type number] [brief]
+# Display OSPF neighbor information
+show ip ospf [process-id [area-id]] neighbor
+# Display the routing table
+show ip route
+# Display information on OSPF-related events, such as adjacencies, flooding information, DR selection, and shortest path first (SFP) calculation
+debug ip ospf [[adjacency] [database-timer] [events] [flooding] [hello]]
+# Display information about active routing protocols
+show ip protocols
+# Turn of all debugging
+undebug all
+# Restart the OSPF process
+clear ip ospf process
+
+## Force a router to become the DR for each of their respective broadcast networks:
+# - Configure each router with a higher loopback IP interface address
+# - Configure a higher router ID than the neighbor router
+# - Configure higher OSPF priorities (takes precedence over the router ID) on the router you want to become the DR for the broadcast network.
+
+# Configure a router with an OSPF priority of 0 to prevent it from being elected as a DR or BDR.
+int g0/0
+ip ospf priority 0
+
+
+### NAT
+
+# Create an address pool
+ip nat pool [pool-name] [start-address] [end-address] netmask [subnet-mask]
+# Define the inside interface for NAT
+int g0/0
+ip nat inside
+# Define the outside interface for NAT
+int g0/1
+ip nat outside
+# Create an ACL that denies or permits IP traffic from the specified address or address range
+access-list [access-list-number] {deny | permit} [source-address] [source-wildcard]
+# Translates anything that matches the ACL to an address from the pool (from global config mode, starts the NAT process)
+ip nat inside source list [access-list-number] pool [pool-name]
+# Translates anything matching the access list to the IP address of the interface specified
+# - overload indicates that PAT will be used
+ip nat inside source list [access-list-number] interface [type-number] overload
+# Enable NAT translation of the inside source address
+ip nat inside source static [inside-local-address] [inside-global-address]
+# Enable NAT translation of the outside source address
+ip nat outside source static [inside-local-address] [inside-global-address]
+
+## NAT Configuration Example
+# R1 (Internet facing router)
+conf t
+int g0/1
+ip nat inside
+int g0/0
+ip nat outside
+exit
+# Create a pool of public IP addresses for NAT translation
+ip nat pool NAT_POOL 200.152.100.65 200.152.100.70 netmask 255.255.255.248
+# Create an ACL to cover the allowed host range for NAT translation (192.168.100.[129-130])
+access-list 1 permit 192.168.100.128 0.0.0.3
+# Begin the address translation process
+ip nat inside source list 1 pool NAT_POOL
+# Test ping connectivity from hosts then display the NAT translations table
+show ip nat translations
+# Display NAT information
+sh ip nat statistics
+
+## Static NAT is most often used when you want to make a host on a privately addressed internal network appear as if it is connected directly to the Internet with a public IP address.
+# Internet facing router
+conf t
+int g0/1
+ip nat inside
+int g0/0
+ip nat outside
+exit
+# On a NAT router, allow a server with IP 192.168.101.3 to be accessed by using the public IP address 200.5.22.21:
+ip nat inside source static 192.168.101.3 200.5.22.21
+# Create an access list to match the IP addresses of all the hosts that should be able to use NAT:
+access-list 1 permit 192.168.100.0 0.0.0.255
+# Begin the NAT process by configuring NAT overloading to use the ACL that was created:
+ip nat inside source list 1 int s0/0 overload
+
+## NAT Example
+# On R1, configure NAT so that any host conected to R1's F0/0 interface can be translated to an IP address from a pool of 100 available addresses of the subnet 192.168.200.0/24.
+# Begin the pool with address 192.168.200.2, use the pool name goodpool, and use ACL 10.
+# R1
+ip nat pool goodpool 192.168.200.2 192.168.200.102 netmask 255.255.255.0
+access-list 10 permit 192.168.101.0 0.0.0.255
+ip nat inside source list 10 pool goodpool
+int f0/0
+ip nat inside
+int s0/0
+ip nat outside
+
+
+### NTP
+
+# Set the system software clock
+# e.g. clock set 09:00:00 25 July 2013
+clock set [hh:mm:ss] [day] [month] [year]
+# Configure the Cisco IOS software as an NTP master clock to which peers synchronize themselves
+ntp master [stratum]
+# Allow the Cisco IOS software clock to be synchronized by an NTP time server
+ntp server [ip-address] [key [key-id]]
+# Define an authentication key for NTP
+ntp authentication-key [number] md5 [value]
+# Authenticates the identity of a system to which NTP will synchronize
+ntp trusted-key [key-number]
+# Enable NTP authentication
+ntp authenticate
+# Display the time and date from the system software clock
+show clock [detail]
+# Show the status of NTP associations
+show ntp associations [detail]
+# Show the status of the NTP
+show ntp status
+
+
+### IP Routing: BGP Configuration Guide
+
+## How to Configure BGP 4 Soft Configuration
+# https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_bgp/configuration/xe-16/irg-xe-16-book/bgp-4-soft-configuration.html
+
+# SUMMARY STEPS
+
+enable
+configure terminal
+router bgp autonomous-system-number
+bgp log-neighbor-changes
+bgp soft-reconfig-backup
+neighbor {ip-address | peer-group-name } remote-as autonomous-system-number
+neighbor {ip-address | peer-group-name } soft-reconfiguration [inbound ]
+neighbor {ip-address | peer-group-name } route-map map-name {in | out }
+Repeat Steps 6 through 8 for every peer that is to be configured with inbound soft reconfiguration.
+exit
+route-map map-name [permit | deny ] [sequence-number ]
+set ip next-hop ip-address
+end
+show ip bgp neighbors [neighbor-address ]
+show ip bgp [network ] [network-mask ]
+
+
+### BGP Configuration on Cisco IOS
+# https://www.youtube.com/watch?v=zqTFyuiq9bg&t=25s
+
+# | R5 |<--- 10.56.0.0/24 --->| R6 |<--- 192.168.68.0 --->| R8 |
+
+# R6
+router bgp 3
+neighbor 192.168.68.8 remote-as 89
+neighbor 5.5.5.5 remote-as 3
+neighbor 5.5.5.5 next-hop-self
+# Advertise routes into the BGP routing table
+network 1.1.1.1 mask 255.255.255.255
+# do show ip bgp summary
+# Reconfig outbound updates without clearing the entire BGP session
+# clear ip bgp 5.5.5.5 soft out
+
+# R5
+router bgp 3
+neighbor 6.6.6.6 remote-as 3
+# do ping 6.6.6.6 source lo0
+neighbor 6.6.6.6 update-source lo0
+neighbor 5.5.5.5 update-source lo0
+# Advertise routes into the BGP routing table
+network 1.1.1.1 mask 255.255.255.255
+# show ip bgp summary
+# show ip route bgp
+

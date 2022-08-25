@@ -1,3 +1,3 @@
 # Network Config Guides
 
-### Work In Progress..
+### Your user-friendly network management guides and scripts in a single location.
