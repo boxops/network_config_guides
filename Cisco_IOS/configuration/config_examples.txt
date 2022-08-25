@@ -531,6 +531,8 @@ ntp server [ip-address] [key [key-id]]
 ntp authentication-key [number] md5 [value]
 # Authenticates the identity of a system to which NTP will synchronize
 ntp trusted-key [key-number]
+# Enable NTP authentication
+ntp authenticate
 # Display the time and date from the system software clock
 show clock [detail]
 # Show the status of NTP associations
