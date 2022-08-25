@@ -505,3 +505,15 @@ access-list 1 permit 192.168.100.0 0.0.0.255
 # Begin the NAT process by configuring NAT overloading to use the ACL that was created:
 ip nat inside source list 1 int s0/0 overload
 
+## NAT Example
+# On R1, configure NAT so that any host conected to R1's F0/0 interface can be translated to an IP address from a pool of 100 available addresses of the subnet 192.168.200.0/24.
+# Begin the pool with address 192.168.200.2, use the pool name goodpool, and use ACL 10.
+# R1
+ip nat pool goodpool 192.168.200.2 192.168.200.102 netmask 255.255.255.0
+access-list 10 permit 192.168.101.0 0.0.0.255
+ip nat inside source list 10 pool goodpool
+int f0/0
+ip nat inside
+int s0/0
+ip nat outside
+
