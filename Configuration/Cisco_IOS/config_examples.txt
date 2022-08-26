@@ -540,6 +540,28 @@ show ntp associations [detail]
 # Show the status of the NTP
 show ntp status
 
+## NTP configuration
+# R1
+# Configure the date and time
+clock set 09:00:00 4 July 2015
+# Configure the NTP server to operate as the master and to use a stratum of 5.
+ntp master 5
+# Configure an NTP authentication key with an ID of 1 and a key value of client
+ntp authentication-key 1 md5 client
+# Configure an NTP authentication key with an ID of 2 and a key value of server
+ntp authentication-key 2 md5 server
+# Enable NTP authentication
+ntp authenticate
+# R2
+# Configure R2 to sync its time with R1's directly connected interface
+ntp server 203.0.113.1
+# Configure the NTP client to trust authentication key 2
+# An NTP trusted key is used on a client to indicate what locally configured key is valid for NTP server validation.
+ntp trusted-key 2
+# Verify that the authentication has worked
+show ntp associations detail
+# Output: 203.0.113.1 configured, our_master, sane, valid, stratum 5
+
 
 ### IP Routing: BGP Configuration Guide
 
@@ -592,3 +614,98 @@ network 1.1.1.1 mask 255.255.255.255
 # show ip bgp summary
 # show ip route bgp
 
+
+### DHCP
+
+# Specify the IP address of a default gateway for DHCP clients
+default-router [address]
+# Specify the domain name for a DHCP client
+domain-name [domain]
+# Configure a router interface IP as a DHCP client
+int g0/0
+ip address dhcp
+# Request a customer lease duration for DHCP clients
+int g0/0
+ip dhcp client lease {days [hours] [minutes] | infinite}
+# Configure a range of excluded addresses from the DHCP pool
+ip dhcp excluded-address [low-ip-address] [high-ip-address]
+# Create an IP address pool for DHCP
+ip dhcp pool [pool-name]
+# Enable a DHCP server for a partticular network segment
+network [ip-address] [subnet-mask]
+# Configure the router to respond to any DHCP requests
+# The no form disables the DHCP service and prevents a DHCP relay agent from forwarding DHCP requests
+[no] service dhcp
+# Configure a DHCP relay agent for a particular interface (the DHCP service must be enabled)
+int g0/0
+ip helper-address [ip-address]
+# Display the IP address lease duration
+show dhcp lease
+# Display IP configuration information contained in DHCPOFFER packets
+show dhcp server
+# Display active DHCP-assigned IP addresses
+show ip dhcp binding
+# Display a basic summary of a configured DHCP pool
+show ip dhcp pool
+# Display general operating statistics for a DHCP server process
+show ip dhcp server statistics
+
+
+## DHCP lab
+# R1 (DHCP server)
+service dhcp
+ip dhcp excluded-address 172.16.10.17
+ip dhcp pool pool_one
+network 172.16.10.16 255.255.255.240
+default-router 172.16.10.17
+domain-name boson.com
+dns-server 1.1.1.1
+# Lease for 48 hours
+lease 2
+
+# R2 (DHCP server)
+service dhcp
+ip dhcp excluded-address 172.16.10.33
+ip dhcp pool pool_one
+network 172.16.10.32 255.255.255.240
+default-router 172.16.10.33
+domain-name boson.com
+dns-server 1.1.1.1
+# Lease for 30 hours
+lease 1 6
+
+
+## DHCP relay agent lab
+
+# RouterA (relay agent)
+service dhcp
+# Client facing interface
+int f0/1
+# Point to an interface IP on the DHCP server
+ip helper-address 172.16.10.1
+
+# RouterB (relay agent)
+service dhcp
+# Client facing interface
+int f0/0
+# Point to an interface IP on the DHCP server
+ip helper-address 172.16.10.5
+
+# RouterC (DHCP server)
+service dhcp
+# Exclude RouterA's client facing interface for DHCP
+ip dhcp excluded-address 172.16.10.17
+# Exclude RouterB's client facing interface for DHCP
+ip dhcp excluded-address 172.16.10.33
+# Configure DHCP pool 1
+ip dhcp pool pool_one
+network 172.16.10.16 255.255.255.240
+# Default router IP is RouterA's client facing interface
+default-router 172.16.10.17
+lease 2
+# Configure DHCP pool 2
+ip dhcp pool pool_two
+network 172.16.10.32 255.255.255.240
+# Default router IP is RouterB's client facing interface
+default-router 172.16.10.33
+lease 1 6
