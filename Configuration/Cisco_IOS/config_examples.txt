@@ -656,6 +656,7 @@ ip dhcp pool pool_one
 network 172.16.10.16 255.255.255.240
 default-router 172.16.10.17
 domain-name boson.com
+dns-server 1.1.1.1
 # Lease for 48 hours
 lease 2
 
@@ -666,6 +667,7 @@ ip dhcp pool pool_one
 network 172.16.10.32 255.255.255.240
 default-router 172.16.10.33
 domain-name boson.com
+dns-server 1.1.1.1
 # Lease for 30 hours
 lease 1 6
 
