@@ -625,6 +625,7 @@ domain-name [domain]
 int g0/0
 ip address dhcp
 # Request a customer lease duration for DHCP clients
+int g0/0
 ip dhcp client lease {days [hours] [minutes] | infinite}
 # Configure a range of excluded addresses from the DHCP pool
 ip dhcp excluded-address [low-ip-address] [high-ip-address]
@@ -645,4 +646,26 @@ show ip dhcp binding
 show ip dhcp pool
 # Display general operating statistics for a DHCP server process
 show ip dhcp server statistics
+
+
+## DHCP lab
+# R1
+service dhcp
+ip dhcp excluded-address 172.16.10.17
+ip dhcp pool pool_one
+network 172.16.10.16 255.255.255.240
+default-router 172.16.10.17
+domain-name boson.com
+# Lease for 48 hours
+lease 2
+
+# R2
+service dhcp
+ip dhcp excluded-address 172.16.10.33
+ip dhcp pool pool_one
+network 172.16.10.32 255.255.255.240
+default-router 172.16.10.33
+domain-name boson.com
+# Lease for 30 hours
+lease 1 6
 
