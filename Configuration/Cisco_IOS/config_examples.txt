@@ -540,6 +540,28 @@ show ntp associations [detail]
 # Show the status of the NTP
 show ntp status
 
+## NTP configuration
+# R1
+# Configure the date and time
+clock set 09:00:00 4 July 2015
+# Configure the NTP server to operate as the master and to use a stratum of 5.
+ntp master 5
+# Configure an NTP authentication key with an ID of 1 and a key value of client
+ntp authentication-key 1 md5 client
+# Configure an NTP authentication key with an ID of 2 and a key value of server
+ntp authentication-key 2 md5 server
+# Enable NTP authentication
+ntp authenticate
+# R2
+# Configure R2 to sync its time with R1's directly connected interface
+ntp server 203.0.113.1
+# Configure the NTP client to trust authentication key 2
+# An NTP trusted key is used on a client to indicate what locally configured key is valid for NTP server validation.
+ntp trusted-key 2
+# Verify that the authentication has worked
+show ntp associations detail
+# Output: 203.0.113.1 configured, our_master, sane, valid, stratum 5
+
 
 ### IP Routing: BGP Configuration Guide
 
