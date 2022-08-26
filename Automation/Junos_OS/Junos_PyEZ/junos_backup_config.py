@@ -20,9 +20,20 @@ port = 22
 filename = f"{host}.txt"
 
 with Device(host=host, user=user, password=password, port=port) as dev:
-    data = dev.rpc.get_config(options={'format':'text'})
+    # # XML format (default)
+    # data = dev.rpc.get_config()
+    # config = etree.tostring(data, encoding='unicode', pretty_print=True)
+
+    # # Text format
+    # data = dev.rpc.get_config(options={'format':'text'})
+    # config = etree.tostring(data, encoding='unicode', pretty_print=True)
+
+    # Junos OS set format
+    data = dev.rpc.get_config(options={'format':'set'})
     config = etree.tostring(data, encoding='unicode', pretty_print=True)
-    # print(config)
+
+    # # JSON format
+    # config = dev.rpc.get_config(options={'format':'json'})
 
 with open(filename, "w+") as file:
     file.write(config)
