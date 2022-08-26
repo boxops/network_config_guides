@@ -636,6 +636,9 @@ network [ip-address] [subnet-mask]
 # Configure the router to respond to any DHCP requests
 # The no form disables the DHCP service and prevents a DHCP relay agent from forwarding DHCP requests
 [no] service dhcp
+# Configure a DHCP relay agent for a particular interface (the DHCP service must be enabled)
+int g0/0
+ip helper-address [ip-address]
 # Display the IP address lease duration
 show dhcp lease
 # Display IP configuration information contained in DHCPOFFER packets
@@ -649,7 +652,7 @@ show ip dhcp server statistics
 
 
 ## DHCP lab
-# R1
+# R1 (DHCP server)
 service dhcp
 ip dhcp excluded-address 172.16.10.17
 ip dhcp pool pool_one
@@ -660,7 +663,7 @@ dns-server 1.1.1.1
 # Lease for 48 hours
 lease 2
 
-# R2
+# R2 (DHCP server)
 service dhcp
 ip dhcp excluded-address 172.16.10.33
 ip dhcp pool pool_one
@@ -671,3 +674,38 @@ dns-server 1.1.1.1
 # Lease for 30 hours
 lease 1 6
 
+
+## DHCP relay agent lab
+
+# RouterA (relay agent)
+service dhcp
+# Client facing interface
+int f0/1
+# Point to an interface IP on the DHCP server
+ip helper-address 172.16.10.1
+
+# RouterB (relay agent)
+service dhcp
+# Client facing interface
+int f0/0
+# Point to an interface IP on the DHCP server
+ip helper-address 172.16.10.5
+
+# RouterC (DHCP server)
+service dhcp
+# Exclude RouterA's client facing interface for DHCP
+ip dhcp excluded-address 172.16.10.17
+# Exclude RouterB's client facing interface for DHCP
+ip dhcp excluded-address 172.16.10.33
+# Configure DHCP pool 1
+ip dhcp pool pool_one
+network 172.16.10.16 255.255.255.240
+# Default router IP is RouterA's client facing interface
+default-router 172.16.10.17
+lease 2
+# Configure DHCP pool 2
+ip dhcp pool pool_two
+network 172.16.10.32 255.255.255.240
+# Default router IP is RouterB's client facing interface
+default-router 172.16.10.33
+lease 1 6
