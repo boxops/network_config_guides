@@ -614,3 +614,35 @@ network 1.1.1.1 mask 255.255.255.255
 # show ip bgp summary
 # show ip route bgp
 
+
+### DHCP
+
+# Specify the IP address of a default gateway for DHCP clients
+default-router [address]
+# Specify the domain name for a DHCP client
+domain-name [domain]
+# Configure a router interface IP as a DHCP client
+int g0/0
+ip address dhcp
+# Request a customer lease duration for DHCP clients
+ip dhcp client lease {days [hours] [minutes] | infinite}
+# Configure a range of excluded addresses from the DHCP pool
+ip dhcp excluded-address [low-ip-address] [high-ip-address]
+# Create an IP address pool for DHCP
+ip dhcp pool [pool-name]
+# Enable a DHCP server for a partticular network segment
+network [ip-address] [subnet-mask]
+# Configure the router to respond to any DHCP requests
+# The no form disables the DHCP service and prevents a DHCP relay agent from forwarding DHCP requests
+[no] service dhcp
+# Display the IP address lease duration
+show dhcp lease
+# Display IP configuration information contained in DHCPOFFER packets
+show dhcp server
+# Display active DHCP-assigned IP addresses
+show ip dhcp binding
+# Display a basic summary of a configured DHCP pool
+show ip dhcp pool
+# Display general operating statistics for a DHCP server process
+show ip dhcp server statistics
+
