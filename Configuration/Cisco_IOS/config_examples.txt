@@ -709,3 +709,21 @@ network 172.16.10.32 255.255.255.240
 # Default router IP is RouterB's client facing interface
 default-router 172.16.10.33
 lease 1 6
+
+
+### DNS
+
+# Enables DNS-based host name-to-address translation. This command is enabled by default.
+ip domain-lookup
+# Specifies the address of one or more name servers.
+ip name-server
+# Defines a default domain name that the Cisco IOS software uses to complete unqualified host names.
+ip domain name
+# Enable the DNS server on a router
+ip dns server
+# Configure a static host-name-to-address mapping in the host cache of a device
+ip host [host-name] [ip-address]
+# Display the default domain name, a list of name server hosts, and a cached list of host names and addresses
+show hosts
+
+## DNS Configuration Example
