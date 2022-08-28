@@ -727,3 +727,13 @@ ip host [host-name] [ip-address]
 show hosts
 
 ## DNS Configuration Example
+
+# Router1
+conf t
+ip dns server
+ip host Router1 10.0.0.1
+ip host Switch1 10.0.0.2
+
+# Switch1
+ip name-server 10.0.0.1
+ip domain-loopkup
