@@ -780,3 +780,20 @@ ip host Switch1 10.0.0.2
 # Switch1
 ip name-server 10.0.0.1
 ip domain-loopkup
+
+
+### ACL
+
+## Standard ACLs
+
+# Note: Standard ACLs block traffic based on the source address. 
+# Place standard ACLs as close as possible to the destination that you want to prevent traffic from reaching.
+# Placing the standard ACL too close to the sourcde of the traffic would prevent any traffic from getting past that device.
+
+# Create an ACT that denies or permits IP traffic from the specified address or address range
+access-list [access-list-number] {deny|permit} [source-address] [source-wildcard]
+# Control access to an interface
+ip access-group {access-list-number|access-list-name} {in|out}
+# Displays the contents of current ACLs
+show access-lists [access-list-number | access-list-name]
+
