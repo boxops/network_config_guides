@@ -26,6 +26,30 @@ ip default-gateway 192.168.111.1
 ip name-server 192.168.111.1
 
 
+### SSH
+
+# Generate RSA key pairs and enable SSH
+crypto key generate rsa
+# Configure the time interval that the router waits for the SSH client to respond
+ip ssh time-out [seconds]
+# Specify the version of SSH to be run on a device (version 2 is preferrable to use)
+ip ssh version [1] [2]
+# Create a local username and password pair and set the privilege level for the user
+username [name] privilege [privilege-level] password [password]
+# Configure the device to use its local database for authentication at login (VTY mode)
+login local
+# Defines which protocols to connect to a specific line of a router (VTY mode)
+transport input {all|none [ssh] [telnet]}
+# Display the version and configuration data for SSH
+show ip ssh
+# Display the status of SSH server connections on the device
+show ssh
+# Start an encrypted session with a remote host
+ssh [-l user-id] {ip-address | host-name}
+# Starts the terminal emulation program that permits you to access devices remotely
+telnet [ip-address]
+
+
 ### Configure SSH on IOS Router or Switch
 
 # There are four steps required to enable SSH support on a Cisco IOS:
