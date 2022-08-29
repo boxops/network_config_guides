@@ -160,6 +160,25 @@ show running-config | begin pubkey
 ssh -l admin 192.168.111.1
 
 
+### TFTP
+
+# Copy the running configuration of a device to another destination
+copy running-config {rcp | startup-config | tftp | [device:filename]}
+# Copy a file from a TFTP server to another destination
+copy tftp {running-config | startup-config | [device:filename]}
+
+## TFTP configuration
+# R4 - backup config to a remote server
+copy running-config tftp
+192.168.1.2
+R4backup.rtr
+
+# R4 - load running config from a remote server
+copy tftp running-config
+192.168.1.2
+R4backup.rtr
+
+
 ### IPv6 Address with RIPng Configuration
 
 ipv6 unicast-routing
