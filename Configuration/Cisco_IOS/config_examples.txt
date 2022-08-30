@@ -875,5 +875,88 @@ show ip int s0/0
 show ip int f0/0
 
 
-## Numbered ACLs
+## Named ACLs
+
+# Note: ACLs are often applied to inbound traffic when you intend to test all incoming packets with the same set of parameters.
+# For example, you should apply an ACL to inbound traffic if you want to check the source IP address of all incoming packets to determine whether those packets should be forwarded to an internal server.
+# You can reduce the volume of packets the router must process before forwarding by testing the packets in the inbound direction on the interface closest to the source of the traffic.
+
+# Create a named ACL and place the router into ACL configuration mode
+ip access-list {standard | extended} [name]
+# Control access to an interface
+int g0/0
+ip access-group [acl-identifier] {in|out}
+# Display the contents of current ACLs
+show access-lists [number | name]
+
+## Named ACL configuration
+
+# Router1
+hostname Router1
+int s0/0
+ip add 192.168.2.1 255.255.255.0
+no sh
+cl r 64000
+int f0/0
+ip add 192.168.3.1 255.255.255.0
+no sh
+exit
+router eigrp 100
+no auto
+network 192.168.2.0 0.0.0.255
+network 192.168.3.0 0.0.0.255
+exit
+line vty 0 4
+pass netsim
+login
+exit
+
+# Router2
+hostname Router2
+int s0/0
+ip add 192.168.2.2 255.255.255.0
+no sh
+int f0/0
+ip add 192.168.1.129 255.255.255.128
+no sh
+int f0/1
+ip add 192.168.1.1 255.255.255.128
+no sh
+exit
+router eigrp 100
+no auto
+network 192.168.2.0 0.0.0.255
+network 192.168.1.0 0.0.0.255
+exit
+line vty 0 4
+pass netsim
+login
+exit
+! Configure an ACL to restrict Network Users (PC2 and PC3) from accessing any network except the Admin and HQ networks.
+ip access-list extended restrict_net_users
+deny ip any host 192.168.3.1
+deny ip any host 192.168.1.1
+deny ip any host 192.168.1.129
+permit ip any 192.168.3.0 0.0.0.255
+permit ip any 192.168.1.0 0.0.0.255
+exit
+int f0/0
+ip access-group restrict_net_users in
+exit
+
+! Edit the ACL configuration to permit PC2 and PC3 to ping Router1 and Router2 but block them from accessing routers via Telnet
+ip access-list extended restrict_net_users
+! Remove the deny statements that prevent PCs from accessing routers
+no 10
+no 20
+no 30
+! Insert ACLs to prevent Telnet from PCs
+5 deny tcp any 192.168.2.0 0.0.0.255 eq telnet
+10 deny tcp any host 192.168.3.1 eq telnet
+15 deny tcp any host 192.168.1.1 eq telnet
+20 deny tcp any host 192.168.1.129 eq telnet
+permit ip any 192.168.2.0 0.0.0.255
+exit
+
+show ip access-lists
 
