@@ -797,3 +797,83 @@ ip access-group {access-list-number|access-list-name} {in|out}
 # Displays the contents of current ACLs
 show access-lists [access-list-number | access-list-name]
 
+## Standard ACL examples
+# R1
+access-list 1 deny host 24.17.2.18
+access-list 1 permit any
+int g0/0
+ip access-group 1 in
+
+show access-lists
+show ip int g0/0
+
+
+## Extended ACLs
+
+# Define an extended IP ACL for the traffic type specified by the protocol parameter
+access-list [access-list-number] {deny|permit} [protocol] [source] [source-wildcard [operator [port]]] [destination-wildcard [operator [port]]]
+# Control access to an interface
+ip access-group {access-list-number | access-list-name} {in|out}
+# Display the contents of current ACLs
+show access-lists [access-list-number | access-list-name]
+
+## Extended ACL examples
+
+# Router1
+hostname Router1
+int f0/0
+ip add 24.17.2.1 255.255.255.240
+no sh
+int s0/0
+ip add 24.17.2.17 255.255.255.240
+no sh
+cl r 64000
+exit
+router rip
+version 2
+network 24.0.0.0
+exit
+! R1 - create ACL 101 to permit only Telnet traffic from 24.17.2.16/28 subnet and log matches agains this entry
+access-list 101 permit tcp 24.17.2.16 0.0.0.15 any eq telnet log
+! R1 - create ACL 102 to permit all traffic from the subnet 24.17.2.0/28 and log the matches
+access-list 102 permit ip 24.17.2.0 0.0.0.15 any
+! R1 - assign ACL 101 to s0/0 inbound direction
+int s0/0
+ip access-group 101 in
+! R1 - assign ACL 102 to f0/0 inbound direction
+int f0/0
+ip access-group 102 in
+exit
+line vty 0 4
+pass boson
+login
+exit
+
+# Router2
+hostname Router2
+int f0/0
+ip add 24.17.2.2 255.255.255.240
+no sh
+exit
+router rip
+version 2
+network 24.0.0.0
+
+# Router4
+hostname Router4
+int s0/0
+ip add 24.17.2.18 255.255.255.240
+no sh
+exit
+router rip
+version 2
+network 24.0.0.0
+
+# Verification
+show access-lists
+show ip int s0/0
+show ip int f0/0
+
+
+## Numbered ACLs
+
