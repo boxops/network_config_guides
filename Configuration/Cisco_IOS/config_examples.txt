@@ -961,6 +961,50 @@ exit
 show ip access-lists
 
 
+## Free CCNA | Standard ACLs | Day 34 Lab | CCNA 200-301 Complete Course
+
+! Note: Standard ACLs block traffic based on the source address.
+! Place standard ACLs as close as possible to the destination that you want to prevent traffic from reaching.
+
+! R1
+! standard numbered ACL
+
+! 3. 172.16.1.0/24 can't access 172.16.2.0/24
+access-list 3 deny 172.16.1.0 0.0.0.255
+access-list 3 permit any
+int g0/1
+access-group 3 out
+exit
+
+! 4. 172.16.2.0/24 can't access 172.16.1.0/24
+access-list 4 deny 172.16.2.0 0.0.0.255
+access-list 4 permit any
+int g0/0
+access-group 4 out
+exit
+
+! R2
+! standard named ACL
+
+! 1. Only PC1 and PC3 can access 192.168.1.0/24
+ip access-list standard ACL_1
+permit 172.16.1.1
+permit 172.16.2.1
+deny any
+exit
+int g0/0
+ip access-group ACL_1 out
+exit
+
+! 2. Hosts in 172.16.2.0/24 can't access 192.168.2.0/24
+ip access-list standard ACL_2
+deny 172.16.2.0 0.0.0.255
+permit any
+int g0/1
+access-group ACL_2 out
+exit
+
+
 ## Named Extended ACLs
 
 # Define an IP access list by name
