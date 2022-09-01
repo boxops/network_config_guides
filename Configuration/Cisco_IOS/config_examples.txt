@@ -960,3 +960,58 @@ exit
 
 show ip access-lists
 
+
+## Named Extended ACLs
+
+# Define an IP access list by name
+ip access-list {standard | extended} [access-list-name]
+# Sets condition to allow packets for a specific protocol to pass a named access list
+[sequence-number] permit {protocol} {any | source source-wildcard} {any | destination destination-wildcard} [operator [port]] [log]
+# Define an extended IP ACL
+permit {protocol} {any | source source-wildcard} {any | destination destination-wildcard} [operator [port]] [log]
+# Control access to an interface
+ip access-group {access-list-number | access-list-name} {in | out}
+
+
+## Named Extended ACL configuration
+
+! Router1
+hostname Router1
+int s0/0
+ip add 192.168.1.1 255.255.255.240
+no sh
+cl r 64000
+exit
+router rip
+ver 2
+network 192.168.1.0
+exit
+
+! Router4
+hostname Router4
+int s0/0
+ip add 192.168.1.2 255.255.255.240
+no sh
+int f0/0
+ip add 192.168.1.17 255.255.255.240
+no sh
+exit
+router rip
+ver 2
+network 192.168.1.0
+exit
+! Create an extended named ACL that prevents ping traffic originating from PC1 and destined for Router1 from reaching Router1.
+! The ACL should be configured on Router4, which is the closest router to the srouce (PC1).
+ip access-list extended deny_ping
+deny icmp host 192.168.1.18 192.168.1.1 0.0.0.0 log
+permit ip any any log
+exit
+! Apply the ACL to an interface
+int f0/0
+ip access-group deny_ping in
+exit
+
+! PC1
+ipc /ip 192.168.1.18 255.255.255.240
+ipc /dg 192.168.1.17
+
