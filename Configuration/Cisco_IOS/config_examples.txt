@@ -973,14 +973,14 @@ show ip access-lists
 access-list 3 deny 172.16.1.0 0.0.0.255
 access-list 3 permit any
 int g0/1
-access-group 3 out
+ip access-group 3 out
 exit
 
 ! 4. 172.16.2.0/24 can't access 172.16.1.0/24
 access-list 4 deny 172.16.2.0 0.0.0.255
 access-list 4 permit any
 int g0/0
-access-group 4 out
+ip access-group 4 out
 exit
 
 ! R2
@@ -1001,7 +1001,7 @@ ip access-list standard ACL_2
 deny 172.16.2.0 0.0.0.255
 permit any
 int g0/1
-access-group ACL_2 out
+ip access-group ACL_2 out
 exit
 
 
