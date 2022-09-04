@@ -2403,6 +2403,14 @@ show etherchannel load-balance
 
 ### CDP
 
+# CDP:
+# - Has a 60 second update frequency by default
+# - Has a 180 second hold timer by default
+# - Is enabled by default
+# - Is a Layer 2 protocol
+# - Is a proprietary protocol
+# - Can convey VTP information
+
 # Enable / disable CDP globally
 [no] cdp run
 
@@ -2429,6 +2437,13 @@ show cdp entry (name)
 
 
 ### LLDP
+
+# LLDP:
+# - Has a 30 second update frequency by default
+# - Has a 120 second hold timer by default
+# - Is disabled by default
+# - Is a Layer 2 protocol
+# - Is an open-standard protocol
 
 # Enable / disable LLDP
 [no] lldp run
