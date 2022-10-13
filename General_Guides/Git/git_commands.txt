@@ -49,7 +49,7 @@ git status
 
 ### Connect to a remote repository
 # If you haven't connected your local repository to a remote server, add the server to be able to push to it:
-git remote add origin <server>
+git remote add origin <server> (e.g. git@github.com:boxops/network_config_guides.git)
 
 # List all currently configured remote repositories:
 git remote -v
