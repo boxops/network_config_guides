@@ -13,4 +13,4 @@ ssh-keygen -t rsa -b 4096 -N '' -f ~/.ssh/$filename <<<y >/dev/null 2>&1
 
 eval $(ssh-agent -s)
 
-ssh-add
+ssh-add ~/.ssh/$filename
