@@ -61,3 +61,29 @@ cisco_xrv () {
     # Move image to folder
     mv /opt/unetlab/addons/qemu/hda.qcow2 /opt/unetlab/addons/qemu/$FOLDER/
 }
+
+cisco_iosvl2 () {
+    FOLDER='viosl2-adventerprisek9-m.03.2017'
+    IMAGE='vios_l2-adventerprisek9-m.03.2017.qcow2'
+    # Create image folder
+    mkdir /opt/unetlab/addons/qemu/$FOLDER
+    # Move and rename image to folder
+    mv /opt/unetlab/addons/qemu/$IMAGE /opt/unetlab/addons/qemu/$FOLDER/virtioa.qcow2
+    # Fix permissions
+    /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+}
+
+cisco_vios () {
+    FOLDER='vios-adventerprisek9-m.vmdk.SPA.157-3'
+    IMAGE='vios-adventerprisek9-m.vmdk.SPA.157-3.M3'
+    # Create image folder
+    mkdir /opt/unetlab/addons/qemu/$FOLDER
+    # Move and rename original image filename to have .vmdk extension
+    mv /opt/unetlab/addons/qemu/$IMAGE /opt/unetlab/addons/qemu/$FOLDER/$IMAGE.vmdk
+    # Covert vmdk file to qcow format
+    /opt/qemu/bin/qemu-img convert -f vmdk -O qcow2 /opt/unetlab/addons/qemu/$FOLDER/$IMAGE.vmdk virtioa.qcow2
+    # Delete raw vmdk image file from image folder
+    rm /opt/unetlab/addons/qemu/$FOLDER/$IMAGE.vmdk
+    # Fix permissions
+    /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+}
