@@ -50,3 +50,14 @@ juniper_vmx () {
     # Start VCP and VFP set and wait till it is fully boots. Once VCP will be fully booted it will automatically start communicate with VFP. WAIT till on VFP cli appears that interfaces are UP. When VFP will say interfaces are UP, on the VCP appears ge-0/0/X interfaces and node is ready for work.
     # Default username is admin without password.
 }
+
+cisco_xrv () {
+    FOLDER='xrv-k9-6.0.1'
+    VMDK_IMAGE='iosxrv-demo.vmdk'
+    # Convert the disk to the qcow2 format
+    # /opt/qemu/bin/qemu-img convert -f vmdk -O qcow2 $VMDK_IMAGE hda.qcow2
+    # Create the folder for HDD image
+    mkdir /opt/unetlab/addons/qemu/$FOLDER
+    # Move image to folder
+    mv /opt/unetlab/addons/qemu/hda.qcow2 /opt/unetlab/addons/qemu/$FOLDER/
+}
