@@ -3,9 +3,8 @@
 # Upload the downloaded images to the EVE "/opt/unetlab/addons/qemu/" folder.
 # Example: scp <image.qcow2> root@eve.local:/opt/unetlab/addons/qemu/
 
-# Load Juniper vSRX
-# https://www.eve-ng.net/index.php/documentation/howtos/howto-add-juniper-vsrx-ng-15-x-and-later/
 juniper_vsrx () {
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-add-juniper-vsrx-ng-15-x-and-later/
     FOLDER='vsrxng-20.1R1.11'
     IMAGE='junos-vsrx3-x86-64-20.1R1.11.qcow2'
     # Create the image folder
@@ -16,9 +15,8 @@ juniper_vsrx () {
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
 }
 
-# Load Juniper vMX
-# https://www.eve-ng.net/index.php/documentation/howtos/howto-add-juniper-vmx-16-x-17-x/
 juniper_vmx () {
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-add-juniper-vmx-16-x-17-x/
     FOLDER_VCP='vmxvcp-18.2R1.9-domestic-VCP'
     IMAGE_VCP_A='junos-vmx-x86-64-18.2R1.9.qcow2'
     IMAGE_VCP_B='vmxhdd.img'
@@ -52,6 +50,7 @@ juniper_vmx () {
 }
 
 cisco_xrv () {
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-add-cisco-xrv/
     FOLDER='xrv-k9-6.0.1'
     VMDK_IMAGE='iosxrv-demo.vmdk'
     # Convert the disk to the qcow2 format
@@ -63,6 +62,7 @@ cisco_xrv () {
 }
 
 cisco_iosvl2 () {
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-add-cisco-vios-from-virl/
     FOLDER='viosl2-adventerprisek9-m.03.2017'
     IMAGE='vios_l2-adventerprisek9-m.03.2017.qcow2'
     # Create image folder
@@ -74,6 +74,7 @@ cisco_iosvl2 () {
 }
 
 cisco_vios () {
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-add-cisco-vios-from-virl/
     FOLDER='vios-adventerprisek9-m.vmdk.SPA.157-3'
     IMAGE='vios-adventerprisek9-m.vmdk.SPA.157-3.M3'
     # Create image folder
