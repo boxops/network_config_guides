@@ -1,0 +1,14 @@
+---
+- name: NTP
+  hosts: all
+  become: true
+  tasks:
+  - name: Install chrony (NTP)
+    apt:
+      name: chrony
+      state: latest
+  - name: Enable chrony
+    systemd:
+      name: chrony.service
+      state: started
+      enabled: true
