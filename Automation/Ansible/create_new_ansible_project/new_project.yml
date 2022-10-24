@@ -2,38 +2,37 @@
 # Playbook to setup folder sturctures for a new Ansible project on the localhost
 # Usage: ansible-playbook new_project.yml
 
-- name: Prompt for project / folder name
+- name: Prompt for project path and folder name
   hosts: localhost
   vars:
-    source_directory: /home/user/ansible
-    destination_directory: /home/user/ansible
+    ansible_source_directory: /etc/ansible
 
   vars_prompt:
-    - name: project
-      prompt: Name of Project/Customer?
+    - name: project_directory_path
+      prompt: What is the absolute directory path to the project?
       private: no
 
   tasks:
     - name: Create project directory and group vars folder
       file:
-        path: "{{ destination_directory }}/{{ project }}/group_vars"
+        path: "{{ project_directory_path }}/group_vars"
         state: directory
       delegate_to: localhost
 
     - name: Copy ansible.cfg
       copy:
-        src: "{{ source_directory }}/ansible.cfg"
-        dest: "{{ destination_directory }}/{{ project }}/ansible.cfg"
+        src: "{{ ansible_source_directory }}/ansible.cfg"
+        dest: "{{ project_directory_path }}/ansible.cfg"
       delegate_to: localhost
 
     - name: Copy sample Hosts file
       copy: 
-        src: "{{ source_directory }}/hosts"
-        dest: "{{ destination_directory }}/{{ project }}/hosts"
+        src: "{{ ansible_source_directory }}/hosts"
+        dest: "{{ project_directory_path }}/hosts"
       delegate_to: localhost
 
     - name: Copy all.yml file
       copy: 
-        src: "{{ source_directory }}/all.yml"
-        dest: "{{ destination_directory }}/{{ project }}/group_vars/all.yml"
+        src: "{{ ansible_source_directory }}/all.yml"
+        dest: "{{ project_directory_path }}/group_vars/all.yml"
       delegate_to: localhost
