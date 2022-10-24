@@ -1,0 +1,17 @@
+# Basic workflow to run with Github Actions
+name: Ansible CI
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  lint_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Lint Ansible Playbook
+        uses: ansible/ansible-lint-action@master
+      - name: Deploy Ansible Playbook
+        run: ansible-playbook -i ci_inventory main.yml
