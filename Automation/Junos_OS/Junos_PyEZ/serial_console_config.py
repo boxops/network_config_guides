@@ -28,8 +28,8 @@ junos_username = input("Junos OS username: ") # Default username is: root
 junos_password = getpass("Junos OS password: ") # No password by default
 mode = 'serial'
 port = "/dev/ttyUSB0"
+del_factory_conf = '/tmp/serial_console_del_factory_conf.txt' # Load the file first to delete the factory default config
 config_path = '/tmp/config_mx.conf'
-# config_path = '/tmp/serial_console_del_factory_conf.txt' # Load the file first to delete the factory default config
 
 def upload_config_from_file():
     try:
@@ -37,6 +37,8 @@ def upload_config_from_file():
             print (dev.facts)
             cu = Config(dev)
             cu.lock()
+            cu.load(path=del_factory_conf)
+            cu.commit()
             cu.load(path=config_path)
             cu.commit()
             cu.unlock()
