@@ -17,7 +17,7 @@ juniper_vsrx () {
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
     # Readd exe permissions
-    add_exe_perm
+    readd_exe_perm
 }
 
 juniper_vmx () {
@@ -52,7 +52,7 @@ juniper_vmx () {
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
 
     # Readd exe permissions
-    add_exe_perm
+    readd_exe_perm
 
     # Clean up the vmx folder
     # rm -rf /opt/unetlab/addons/qemu/vmx
@@ -75,7 +75,7 @@ cisco_xrv () {
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
     # Readd exe permissions
-    add_exe_perm
+    readd_exe_perm
 }
 
 cisco_iosvl2 () {
@@ -89,7 +89,7 @@ cisco_iosvl2 () {
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
     # Readd exe permissions
-    add_exe_perm
+    readd_exe_perm
 }
 
 cisco_vios () {
@@ -107,10 +107,45 @@ cisco_vios () {
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
     # Readd exe permissions
-    add_exe_perm
+    readd_exe_perm
 }
 
-add_exe_perm () {
+linux_new () {
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-create-own-linux-host-image/
+    # Install new ubuntu images downloaded from the source
+    FOLDER='linux-ubuntu-desktop-22.04.01'
+    IMAGE='ubuntu-22.04.1-desktop-amd64.iso'
+    # Create new image directory
+    mkdir /opt/unetlab/addons/qemu/$FOLDER
+    # Move the image to the new directory and rename it to cdrom.iso
+    mv /opt/unetlab/addons/qemu/$IMAGE /opt/unetlab/addons/qemu/$FOLDER/cdrom.iso
+    # Create new HDD virtioa.qcow2. Example below is HDD 30Gb. Size you can change per your needs.
+    /opt/qemu/bin/qemu-img create -f qcow2 /opt/unetlab/addons/qemu/$FOLDER/virtioa.qcow2 30G
+    # Create new lab and add newly created node
+    # Connect it to your home LAN cloud/internet, this need to get updates from internet
+    # Start node in lab and do install of your Linux, customize it as you like, as you have connected it to home LAN and internet this install will be like normal Linux installation.
+    # Remove cdrom.iso at the end
+    # rm -rf /opt/unetlab/addons/qemu/$FOLDER/cdrom.iso
+
+    # IMPORTANT: Commit the installation to set it as the default image for further use in EVE-NG
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-create-own-linux-host-image/
+}
+
+linux_rdy () {
+    # https://www.eve-ng.net/index.php/documentation/howtos/howto-create-own-linux-host-image/
+    # Install ready to use Linux images supplied by EVE
+    IMAGE='linux-ubuntu-22.04-desktop.tar.gz'
+    # Unzip the uploaded image file
+    tar xzvf /opt/unetlab/addons/qemu/$IMAGE
+    # Remove the raw zipped image file
+    rm -rf /opt/unetlab/addons/qemu/$IMAGE
+    # Fix permissions
+    /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+    # Readd exe permissions
+    readd_exe_perm
+}
+
+readd_exe_perm () {
     # Readd removed execute permissions to itself
     chmod +x /opt/unetlab/addons/qemu/self_add_images.sh
 }
