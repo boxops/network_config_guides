@@ -3,6 +3,9 @@
 # Upload the downloaded images to the EVE "/opt/unetlab/addons/qemu/" folder.
 # Example: scp <image.qcow2> root@eve.local:/opt/unetlab/addons/qemu/
 
+# Usage: Call a function by passing its name as an argument to the script when executing it
+# e.g ./self_add_images.sh cisco_vios
+
 juniper_vsrx () {
     # https://www.eve-ng.net/index.php/documentation/howtos/howto-add-juniper-vsrx-ng-15-x-and-later/
     FOLDER='vsrxng-20.1R1.11'
@@ -13,6 +16,8 @@ juniper_vsrx () {
     mv /opt/unetlab/addons/qemu/$IMAGE /opt/unetlab/addons/qemu/$FOLDER/virtioa.qcow2
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+    # Readd exe permissions
+    add_exe_perm
 }
 
 juniper_vmx () {
@@ -46,6 +51,9 @@ juniper_vmx () {
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
 
+    # Readd exe permissions
+    add_exe_perm
+
     # Clean up the vmx folder
     # rm -rf /opt/unetlab/addons/qemu/vmx
 
@@ -64,6 +72,10 @@ cisco_xrv () {
     mkdir /opt/unetlab/addons/qemu/$FOLDER
     # Move image to folder
     mv /opt/unetlab/addons/qemu/hda.qcow2 /opt/unetlab/addons/qemu/$FOLDER/
+    # Fix permissions
+    /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+    # Readd exe permissions
+    add_exe_perm
 }
 
 cisco_iosvl2 () {
@@ -76,6 +88,8 @@ cisco_iosvl2 () {
     mv /opt/unetlab/addons/qemu/$IMAGE /opt/unetlab/addons/qemu/$FOLDER/virtioa.qcow2
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+    # Readd exe permissions
+    add_exe_perm
 }
 
 cisco_vios () {
@@ -87,9 +101,19 @@ cisco_vios () {
     # Move and rename original image filename to have .vmdk extension
     mv /opt/unetlab/addons/qemu/$IMAGE /opt/unetlab/addons/qemu/$FOLDER/$IMAGE.vmdk
     # Covert vmdk file to qcow format
-    /opt/qemu/bin/qemu-img convert -f vmdk -O qcow2 /opt/unetlab/addons/qemu/$FOLDER/$IMAGE.vmdk virtioa.qcow2
+    /opt/qemu/bin/qemu-img convert -f vmdk -O qcow2 /opt/unetlab/addons/qemu/$FOLDER/$IMAGE.vmdk /opt/unetlab/addons/qemu/$FOLDER/virtioa.qcow2
     # Delete raw vmdk image file from image folder
     rm /opt/unetlab/addons/qemu/$FOLDER/$IMAGE.vmdk
     # Fix permissions
     /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+    # Readd exe permissions
+    add_exe_perm
 }
+
+add_exe_perm () {
+    # Readd removed execute permissions to itself
+    chmod +x /opt/unetlab/addons/qemu/self_add_images.sh
+}
+
+# Expand to the arguments of the command line
+"$@"
