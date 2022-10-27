@@ -9,12 +9,12 @@ now = datetime.now()
 dt_string = now.strftime("%d%m%Y_%H-%M-%S")
 
 username = "admin"
-password = "Password123!"
+password = "Cisco123"
 
 
 
 Switch1 = {
-    "host": "192.168.243.146",
+    "host": "192.168.111.1",
     "username": username,
     "password": password,
     "device_type": "cisco_ios",
