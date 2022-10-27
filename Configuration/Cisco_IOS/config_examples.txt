@@ -138,7 +138,7 @@ R1(conf-ssh-pubkey)#exit
 cat /home/ubuntu/.ssh/id_rsa.pub
 # The key is printed on a single line, that’s fine but Cisco IOS only supports a maximum of 254 characters on a single line so you won’t be able to paste this in one go. 
 # There is a useful Linux command you can use to break the public key in multiple parts:
-fold -b -w 72 /home/ubuntu/.ssh/id_rsa.pub
+fold -b -w 64 /home/ubuntu/.ssh/id_rsa.pub
 # Remove the “ssh-rsa” part at the beginning and the comment at the end.
 # Add the key to the router, we will use the username “LINUX_USER”:
 R1(config)#ip ssh pubkey-chain 
