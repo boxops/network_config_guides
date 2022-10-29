@@ -104,3 +104,11 @@ set system services outbound-ssh client outbound-ssh services netconf
 # Node to connect to
 set system services outbound-ssh client outbound-ssh 192.168.112.2 port 2200
 
+# SSH Public Key authentication
+# https://rayka-co.com/lesson/junos-ssh-public-key-authentication/
+# Assuming that an RSA keypair was already generated and stored in ~/.ssh/ directory
+# Upload the public key to the Juniper
+scp ~/.ssh/my_key.pub root@my_juniper_box.net:/var/home/admin/
+# Create user on the Juniper box and assign the ssh key to the user
+set system login user admin class super-user authentication load-key-file /var/home/admin/my_key.pub
+# Test SSH without a password.
