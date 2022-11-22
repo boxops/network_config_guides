@@ -1,7 +1,10 @@
 ## Referenced from learnpython.org
+
+# Table of Contents
+
 # Learn the Basics
 
-* [Hello, World!](#Hello, World!)
+* [Hello, World!](#Hello,-World!)
 * Variables and Types
 * Lists
 * Basic Operators
