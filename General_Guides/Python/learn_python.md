@@ -908,23 +908,486 @@ __all__ = ["bar"]
 
 ## Numpy Arrays
 
+### Getting started
+
+Numpy arrays are great alternatives to Python Lists. Some of the key advantages of Numpy arrays are that they are fast, easy to work with, and give users the opportunity to perform calculations across entire arrays.
+
+In the following example, you will first create two Python lists. Then, you will import the numpy package and create numpy arrays out of the newly created lists.
+```
+# Create 2 new lists height and weight
+height = [1.87,  1.87, 1.82, 1.91, 1.90, 1.85]
+weight = [81.65, 97.52, 95.25, 92.98, 86.18, 88.45]
+
+# Import the numpy package as np
+import numpy as np
+
+# Create 2 numpy arrays from height and weight
+np_height = np.array(height)
+np_weight = np.array(weight)
+```
+
+Print out the type of np_height
+```
+print(type(np_height))
+```
+
+### Element-wise calculations
+
+Now we can perform element-wise calculations on height and weight. For example, you could take all 6 of the height and weight observations above, and calculate the BMI for each observation with a single equation. These operations are very fast and computationally efficient. They are particularly helpful when you have 1000s of observations in your data.
+```
+# Calculate bmi
+bmi = np_weight / np_height ** 2
+
+# Print the result
+print(bmi)
+```
+
+### Subsetting
+
+Another great feature of Numpy arrays is the ability to subset. For instance, if you wanted to know which observations in our BMI array are above 23, we could quickly subset it to find out.
+```
+# For a boolean response
+bmi > 23
+
+# Print only those observations above 23
+bmi[bmi > 23]
+```
+
 ## Pandas Basics
+
+### Pandas DataFrames
+
+Pandas is a high-level data manipulation tool developed by Wes McKinney. It is built on the Numpy package and its key data structure is called the DataFrame. DataFrames allow you to store and manipulate tabular data in rows of observations and columns of variables.
+
+There are several ways to create a DataFrame. One way way is to use a dictionary. For example:
+```
+dict = {"country": ["Brazil", "Russia", "India", "China", "South Africa"],
+       "capital": ["Brasilia", "Moscow", "New Dehli", "Beijing", "Pretoria"],
+       "area": [8.516, 17.10, 3.286, 9.597, 1.221],
+       "population": [200.4, 143.5, 1252, 1357, 52.98] }
+
+import pandas as pd
+brics = pd.DataFrame(dict)
+print(brics)
+```
+
+As you can see with the new brics DataFrame, Pandas has assigned a key for each country as the numerical values 0 through 4. If you would like to have different index values, say, the two letter country code, you can do that easily as well.
+```
+# Set the index for brics
+brics.index = ["BR", "RU", "IN", "CH", "SA"]
+
+# Print out brics with new index values
+print(brics)
+```
+
+Another way to create a DataFrame is by importing a csv file using Pandas. Now, the csv cars.csv is stored and can be imported using pd.read_csv:
+```
+# Import pandas as pd
+import pandas as pd
+
+# Import the cars.csv data: cars
+cars = pd.read_csv('cars.csv')
+
+# Print out cars
+print(cars)
+```
+
+### Indexing DataFrames
+
+There are several ways to index a Pandas DataFrame. One of the easiest ways to do this is by using square bracket notation.
+
+In the example below, you can use square brackets to select one column of the cars DataFrame. You can either use a single bracket or a double bracket. The single bracket will output a Pandas Series, while a double bracket will output a Pandas DataFrame.
+```
+# Import pandas and cars.csv
+import pandas as pd
+cars = pd.read_csv('cars.csv', index_col = 0)
+
+# Print out country column as Pandas Series
+print(cars['cars_per_cap'])
+
+# Print out country column as Pandas DataFrame
+print(cars[['cars_per_cap']])
+
+# Print out DataFrame with country and drives_right columns
+print(cars[['cars_per_cap', 'country']])
+```
+
+Square brackets can also be used to access observations (rows) from a DataFrame. For example:
+```
+# Import cars data
+import pandas as pd
+cars = pd.read_csv('cars.csv', index_col = 0)
+
+# Print out first 4 observations
+print(cars[0:4])
+
+# Print out fifth and sixth observation
+print(cars[4:6])
+```
+
+You can also use loc and iloc to perform just about any data selection operation. loc is label-based, which means that you have to specify rows and columns based on their row and column labels. iloc is integer index based, so you have to specify rows and columns by their integer index like you did in the previous exercise.
+```
+# Import cars data
+import pandas as pd
+cars = pd.read_csv('cars.csv', index_col = 0)
+
+# Print out observation for Japan
+print(cars.iloc[2])
+
+# Print out observations for Australia and Egypt
+print(cars.loc[['AUS', 'EG']])
+```
 
 # Advanced Tutorials
 
 ## Generators
 
+Generators are very easy to implement, but a bit difficult to understand.
+
+Generators are used to create iterators, but with a different approach. Generators are simple functions which return an iterable set of items, one at a time, in a special way.
+
+When an iteration over a set of item starts using the for statement, the generator is run. Once the generator's function code reaches a "yield" statement, the generator yields its execution back to the for loop, returning a new value from the set. The generator function can generate as many values (possibly infinite) as it wants, yielding each one in its turn.
+
+Here is a simple example of a generator function which returns 7 random integers:
+```
+import random
+
+def lottery():
+    # returns 6 numbers between 1 and 40
+    for i in range(6):
+        yield random.randint(1, 40)
+
+    # returns a 7th number between 1 and 15
+    yield random.randint(1, 15)
+
+for random_number in lottery():
+       print("And the next number is... %d!" %(random_number))
+```
+
+This function decides how to generate the random numbers on its own, and executes the yield statements one at a time, pausing in between to yield execution back to the main for loop.
+
+### Exercise
+
+Write a generator function which returns the Fibonacci series. They are calculated using the following formula: The first two numbers of the series is always equal to 1, and each consecutive number returned is the sum of the last two numbers. Hint: Can you use only two variables in the generator function? Remember that assignments can be done simultaneously. The code will simultaneously switch the values of a and b.
+```
+# fill in this function
+def fib():
+    a, b = 1, 1
+    while 1:
+        yield a
+        a, b = b, a + b
+
+# testing code
+import types
+if type(fib()) == types.GeneratorType:
+    print("Good, The fib function is a generator.")
+
+    counter = 0
+    for n in fib():
+        print(n)
+        counter += 1
+        if counter == 10:
+            break
+```
+
 ## List Comprehensions
+
+List Comprehensions is a very powerful tool, which creates a new list based on another list, in a single, readable line.
+
+For example, let's say we need to create a list of integers which specify the length of each word in a certain sentence, but only if the word is not the word "the".
+```
+sentence = "the quick brown fox jumps over the lazy dog"
+words = sentence.split()
+word_lengths = []
+for word in words:
+      if word != "the":
+          word_lengths.append(len(word))
+print(words)
+print(word_lengths)
+```
+
+Using a list comprehension, we could simplify this process to this notation:
+```
+sentence = "the quick brown fox jumps over the lazy dog"
+words = sentence.split()
+word_lengths = [len(word) for word in words if word != "the"]
+print(words)
+print(word_lengths)
+```
+
+### Exercise
+
+Using a list comprehension, create a new list called "newlist" out of the list "numbers", which contains only the positive numbers from the list, as integers.
+```
+numbers = [34.6, -203.4, 44.9, 68.3, -12.2, 44.6, 12.7]
+newlist = [number for number in numbers if number > 0]
+print(newlist)
+```
 
 ## Lambda functions
 
+Normally we define a function using the def keyword somewhere in the code and call it whenever we need to use it.
+```
+def sum(a,b):
+    return a + b
+
+a = 1
+b = 2
+c = sum(a,b)
+print(c)
+```
+
+Now instead of defining the function somewhere and calling it, we can use python's lambda functions, which are inline functions defined at the same place we use it. So we don't need to declare a function somewhere and revisit the code just for a single time use.
+
+They don't need to have a name, so they also called anonymous functions. We define a lambda function using the keyword lambda.
+```
+your_function_name = lambda inputs : output
+```
+
+So the above sum example using lambda function would be,
+```
+a = 1
+b = 2
+sum = lambda x,y : x + y
+c = sum(a,b)
+print(c)
+```
+
+Here we are assigning the lambda function to the variable sum, and upon giving the arguments i.e. a and b, it works like a normal function.
+
+### Exercise
+
+Write a program using lambda functions to check if a number in the given list is odd. Print "True" if the number is odd or "False" if not for each element.
+```
+l = [2,4,7,3,14,19]
+for i in l:
+    # your code here
+    odd = lambda i : i % 2 != 0
+    print(odd(i))
+```
+
 ## Multiple Function Arguments
+
+Every function in Python receives a predefined number of arguments, if declared normally, like this:
+```
+def myfunction(first, second, third):
+    # do something with the 3 variables
+    ...
+```
+
+It is possible to declare functions which receive a variable number of arguments, using the following syntax:
+```
+def foo(first, second, third, *therest):
+    print("First: %s" % first)
+    print("Second: %s" % second)
+    print("Third: %s" % third)
+    print("And all the rest... %s" % list(therest))
+```
+
+The "therest" variable is a list of variables, which receives all arguments which were given to the "foo" function after the first 3 arguments. So calling foo(1, 2, 3, 4, 5) will print out:
+```
+def foo(first, second, third, *therest):
+    print("First: %s" %(first))
+    print("Second: %s" %(second))
+    print("Third: %s" %(third))
+    print("And all the rest... %s" %(list(therest)))
+
+foo(1, 2, 3, 4, 5)
+```
+
+It is also possible to send functions arguments by keyword, so that the order of the argument does not matter, using the following syntax. The following code yields the following output: The sum is: 6 Result: 1
+```
+def bar(first, second, third, **options):
+    if options.get("action") == "sum":
+        print("The sum is: %d" %(first + second + third))
+
+    if options.get("number") == "first":
+        return first
+
+result = bar(1, 2, 3, action = "sum", number = "first")
+print("Result: %d" %(result))
+```
+
+The "bar" function receives 3 arguments. If an additional "action" argument is received, and it instructs on summing up the numbers, then the sum is printed out. Alternatively, the function also knows it must return the first argument, if the value of the "number" parameter, passed into the function, is equal to "first".
+
+### Exercise
+
+Fill in the foo and bar functions so they can receive a variable amount of arguments (3 or more) The foo function must return the amount of extra arguments received. The bar must return True if the argument with the keyword magicnumber is worth 7, and False otherwise.
+```
+# edit the functions prototype and implementation
+def foo(a, b, c, *args):
+    return len(args)
+
+def bar(a, b, c, **kwargs):
+    return kwargs["magicnumber"] == 7
+
+
+# test code
+if foo(1, 2, 3, 4) == 1:
+    print("Good.")
+if foo(1, 2, 3, 4, 5) == 2:
+    print("Better.")
+if bar(1, 2, 3, magicnumber=6) == False:
+    print("Great.")
+if bar(1, 2, 3, magicnumber=7) == True:
+    print("Awesome!")
+```
 
 ## Regular Expressions
 
+Regular Expressions (sometimes shortened to regexp, regex, or re) are a tool for matching patterns in text. In Python, we have the re module. The applications for regular expressions are wide-spread, but they are fairly complex, so when contemplating using a regex for a certain task, think about alternatives, and come to regexes as a last resort.
+
+An example regex is r"^(From|To|Cc).*?python-list@python.org" Now for an explanation: the caret ^ matches text at the beginning of a line. The following group, the part with (From|To|Cc) means that the line has to start with one of the words that are separated by the pipe |. That is called the OR operator, and the regex will match if the line starts with any of the words in the group. The .*? means to un-greedily match any number of characters, except the newline \n character. The un-greedy part means to match as few repetitions as possible. The . character means any non-newline character, the * means to repeat 0 or more times, and the ? character makes it un-greedy.
+
+So, the following lines would be matched by that regex: From: python-list@python.org To: !asp]<,. python-list@python.org
+
+A complete reference for the re syntax is available at the python docs.
+https://docs.python.org/3/library/re.html#regular-expression-syntax%22RE%20syntax
+
+As an example of a "proper" email-matching regex (like the one in the exercise), see this
+http://www.ex-parrot.com/pdw/Mail-RFC822-Address.html
+```
+# Example: 
+import re
+pattern = re.compile(r"\[(on|off)\]") # Slight optimization
+print(re.search(pattern, "Mono: Playback 65 [75%] [-16.50dB] [on]"))
+# Returns a Match object!
+print(re.search(pattern, "Nada...:-("))
+# Doesn't return anything.
+# End Example
+
+# Exercise: make a regular expression that will match an email
+def test_email(your_pattern):
+    pattern = re.compile(your_pattern)
+    emails = ["john@example.com", "python-list@python.org", "wha.t.`1an?ug{}ly@email.com"]
+    for email in emails:
+        if not re.match(pattern, email):
+            print("You failed to match %s" % (email))
+        elif not your_pattern:
+            print("Forgot to enter a pattern!")
+        else:
+            print("Pass")
+pattern = r"" # Your pattern here!
+test_email(pattern)
+```
+
 ## Exception Handling
 
+When programming, errors happen. It's just a fact of life. Perhaps the user gave bad input. Maybe a network resource was unavailable. Maybe the program ran out of memory. Or the programmer may have even made a mistake!
+
+Python's solution to errors are exceptions. You might have seen an exception before.
+```
+print(a)
+
+#error
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'a' is not defined
+</module></stdin>
+```
+
+Oops! Forgot to assign a value to the 'a' variable.
+
+But sometimes you don't want exceptions to completely stop the program. You might want to do something special when an exception is raised. This is done in a try/except block.
+
+Here's a trivial example: Suppose you're iterating over a list. You need to iterate over 20 numbers, but the list is made from user input, and might not have 20 numbers in it. After you reach the end of the list, you just want the rest of the numbers to be interpreted as a 0. Here's how you could do that:
+```
+def do_stuff_with_number(n):
+    print(n)
+
+def catch_this():
+    the_list = (1, 2, 3, 4, 5)
+
+    for i in range(20):
+        try:
+            do_stuff_with_number(the_list[i])
+        except IndexError: # Raised when accessing a non-existing index of a list
+            do_stuff_with_number(0)
+
+catch_this()
+```
+
+There, that wasn't too hard! You can do that with any exception. For more details on handling exceptions, look no further than the Python Docs
+https://docs.python.org/3/tutorial/errors.html#handling-exceptions
+
+### Exercise
+
+Handle all the exception! Think back to the previous lessons to return the last name of the actor.
+```
+actor = {"name": "John Cleese", "rank": "awesome"}
+
+def get_last_name():
+    return actor["name"].split()[1]
+
+get_last_name()
+print("All exceptions caught! Good job!")
+print("The actor's last name is %s" % get_last_name())
+```
+
 ## Sets
+
+Sets are lists with no duplicate entries. Let's say you want to collect a list of words used in a paragraph:
+```
+print(set("my name is Eric and Eric is my name".split()))
+```
+
+This will print out a list containing "my", "name", "is", "Eric", and finally "and". Since the rest of the sentence uses words which are already in the set, they are not inserted twice.
+
+Sets are a powerful tool in Python since they have the ability to calculate differences and intersections between other sets. For example, say you have a list of participants in events A and B:
+```
+a = set(["Jake", "John", "Eric"])
+print(a)
+b = set(["John", "Jill"])
+print(b)
+```
+
+To find out which members attended both events, you may use the "intersection" method:
+```
+a = set(["Jake", "John", "Eric"])
+b = set(["John", "Jill"])
+
+print(a.intersection(b))
+print(b.intersection(a))
+```
+
+To find out which members attended only one of the events, use the "symmetric_difference" method:
+```
+a = set(["Jake", "John", "Eric"])
+b = set(["John", "Jill"])
+
+print(a.symmetric_difference(b))
+print(b.symmetric_difference(a))
+```
+
+To find out which members attended only one event and not the other, use the "difference" method:
+```
+a = set(["Jake", "John", "Eric"])
+b = set(["John", "Jill"])
+
+print(a.difference(b))
+print(b.difference(a))
+```
+
+To receive a list of all participants, use the "union" method:
+```
+a = set(["Jake", "John", "Eric"])
+b = set(["John", "Jill"])
+
+print(a.union(b))
+```
+
+### Exercise
+
+In the exercise below, use the given lists to print out a set containing all the participants from event A which did not attend event B.
+```
+a = ["Jake", "John", "Eric"]
+b = ["John", "Jill"]
+
+A = set(a)
+B = set(b)
+
+print(A.difference(B))
+```
 
 ## Serialization
 
