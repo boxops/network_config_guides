@@ -96,8 +96,6 @@ print(
     sep='\n', # '\n' is the newline character - it starts a new line
 )
 
-
-
 # Functions that operate on other functions are called "higher-order functions." 
 # You probably won't write your own for a little while. But there are higher-order 
 # functions built into Python that you might find useful to call.
@@ -115,3 +113,15 @@ print(
     max(100, 51, 14, key=mod_5),
     sep='\n',
 )
+
+# List comprehensions in Python
+from pprint import pprint
+
+# Print built-in functions that are lowercase and do not start with an underscore
+pprint.pprint([s for s in dir(__builtins__) if s.islower() and not s.startswith('_')], compact=True)
+
+# Print built-in functions that end with 'Error'
+pprint.pprint([s for s in dir(__builtins__) if s.endswith('Error')], compact=True)
+
+# Print built-in functions that end with 'Warning'
+pprint.pprint([s for s in dir(__builtins__) if s.endswith('Warning')], compact=True)
