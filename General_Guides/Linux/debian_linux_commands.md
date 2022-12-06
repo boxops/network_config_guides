@@ -1,10 +1,12 @@
-### Configure permanent IP on Ubuntu
+# Configure permanent IP on Ubuntu
 
-# https://netplan.io/examples
+### Reference: https://netplan.io/examples
 
-nano /etc/netplan/01-network-manager-all.yaml
-# Add the following to the file (modify to needs)
-
+## Add the following to the file (modify to needs)
+```
+sudo nano /etc/netplan/01-network-manager-all.yaml
+```
+```
 network:
   version: 2
   renderer: NetworkManager
@@ -20,16 +22,23 @@ network:
           via: 192.168.1.254
         - to: 192.168.1.99
           via: 192.168.1.254
+```
 
-# Press Ctrl+S and Ctrl+X to save and exit
+## Press Ctrl+S and Ctrl+X to save and exit
 
-# Test and validate the config
+## Test and validate the config
+```
 sudo netplan try
-
-# Apply the config
+```
+## Apply the config
+```
 sudo netplan apply
+```
 
-# Look up the changes
+## Look up the changes
+```
 ip a
+```
+```
 ip r
-
+```
