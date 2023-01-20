@@ -270,11 +270,6 @@ The Kea DHCPv6 server is independent from the Kea DHCPv4 server. Both can be sta
 
 Each DHCPv6 server has a unique DHCP-Unique-ID (DUID). When re-installing a DHCPv6 server, it might be useful to backup and restore the DUID of the system. The Kea DHCPv6 DUID is stored in the file kea-dhcp6-serverid in the /var/lib/kea directory.
 
-## Reference
-
-[ISC KEA configuration](https://kea.readthedocs.io/en/kea-1.6.2/arm/dhcp4-srv.html#interface-configuration)
-
-
 
 # KEA DHCP part 3
 
@@ -292,24 +287,27 @@ The first argument contains the client and the transaction identification inform
 
 The following diagram illustrated the simplified process of Kea lease allocation.
 
-
-( Paste image link here)
-
+<p align="center" width="100%">
+    <img src="kea_lease-allocation.jpg"> 
+</p>
 
 When searching for a new lease, Kea 1.8 iterates over all subnets by subnet-id, previous versions iterated over subnets in config file order. In the example above, lease is not found by client ID, so Kea server gets lease by hardware address.
-Client Classification
+
+## Client Classification
 
 Kea DHCP can assign on or more client classes to client requests. Depending on the client classes, different DHCP information can be send to the client: DHCP-Options, IP-Addresses, BOOTP-Parameter inside DHCP responses Kea can select from multiple subnets / pools with the help of client classes.
-Where do DHCP identifiers come from
+
+### Where do DHCP identifiers come from
 
 Client classes can be build from various DHCP identifier
 
-    information from client host
-    information from DHCP relay
-    information from DHCP packet path towards the DHCP server
+- information from client host
+- information from DHCP relay
+- information from DHCP packet path towards the DHCP server
 
 The DHCP identifiers could come from the client host, including hardware address, client-id, vendor-option and hostname. It also could come from DHCP relay agent to add more options. Finally, it could come from DHCP server itself to add DHCP server interface, and DHCP server destination address, etc.
-Automatic vendor classing
+
+### Automatic vendor classing
 
 Kea DHCP automatically assigns a vendor client class if a vendor option (DHCPv4 option 60 or DHCPv6 option 16) is set in the DHCP request.
 
@@ -317,6 +315,7 @@ The content of that option is prepended with VENDOR_CLASS_ and the result is int
 
 Example subnet selection based on the vendor option
 
+```bash
 "subnet4": [
     {
         "subnet": "192.168.2.0.24",
@@ -328,16 +327,18 @@ Example subnet selection based on the vendor option
 
     },
 ]
+```
 
-The KNOWN and UNKNOWN classes
+## The KNOWN and UNKNOWN classes
 
 Kea automatically assigns classes based on host reservations.
 
-    all clients with a host reservation will be in the KNOWN class
-    all client without reservation will be in the UNKNOWN class
+- all clients with a host reservation will be in the KNOWN class
+- all client without reservation will be in the UNKNOWN class
 
 For example
 
+```bash
 {
     "client-classes": [{
         "name": "dependent-class",
@@ -345,11 +346,13 @@ For example
         "only-if-required": true
     }]
 }
+```
 
-Client classification example
+### Client classification example
 
 Configuration for dynamic client classing based on the vendor option (Option 60) content
 
+```bash
 {
     "client-classes": [
         {
@@ -360,18 +363,23 @@ Configuration for dynamic client classing based on the vendor option (Option 60)
         }
     ]
 }
+```
 
-Classification via hooks
+### Classification via hooks
 
 Client classification via complex expressions can hurt the DCHP server performance. Alternative: writing a custom hook for client classification.
-Debugging client classing
+
+### Debugging client classing
 
 To debug client classing, the quick option is to enable debugging level when start KEA DHCP4.
 
+```bash
 kea-dhcp4 -d -c /etc/kea/kea-dhcp4.conf
+```
 
 Alternatively, we can enable the special kea-dhcp4.eval or kea-dhcp6.eval debug logger in the KEA configuration file
 
+```bash
 "Logging": {
     "loggers": [ {
         "name": "kea-dhcp4.eval",
@@ -382,13 +390,17 @@ Alternatively, we can enable the special kea-dhcp4.eval or kea-dhcp6.eval debug 
         "debuglevel": 55
     }]
 }
+```
 
 The debuglevel ranges from 0 (least verbose) to 99 (most verbose). If severity for the logger is not DEBUG, this value is ignored.
-DHCP options
+
+## DHCP options
 
 DHCP options can be configured in different scopes in the Kea configuration, global, class, subnet, pools, reservations
-Global DHCP options
 
+### Global DHCP options
+
+```bash
 "Dhcp4": {
     "option-data": [{
         "name": "domain-name-servers",
@@ -398,9 +410,11 @@ Global DHCP options
         "data": "192.168.1.1, 192.168.1.2"
     }]
 }
+```
 
-Subnet Specific DHCP option
+### Subnet Specific DHCP option
 
+```bash
     "subnet4": [ {
         "subnet": "192.168.1.0/24",
         "pools": [ { "pool": "192.168.1.100 - 192.168.1.200" }],
@@ -413,9 +427,11 @@ Subnet Specific DHCP option
             "data": "a.example.com" 
         }]
     }],
+```
 
-Client Class Options
+### Client Class Options
 
+```bash
 "client-classes": [{
     "name": "My-Server",
     "test": "option[vendor-class-identifier].text == 'My'",
@@ -424,11 +440,13 @@ Client Class Options
         "data": "192.168.1.30"
     }]
 }]
+```
 
-Defining Custom DHCPv4 options
+### Defining Custom DHCPv4 options
 
 Sometimes it is required to define custom DHCP options that are not part of the DHCP standards.
 
+```bash
 {
     "Dhcp4": {
         "option-def": [{
@@ -447,5 +465,239 @@ Sometimes it is required to define custom DHCP options that are not part of the 
         }]
     }
 }
+```
+
+
+# Using KEA DHCP Part 4
+
+## Database backend support for Kea
+
+Kea DHCP server can store information in a database, including lease info, host address and prefixes, host options, host names and host classification. Only MySQL supports to store configurations.
+
+The supported database are Postgres, MySQL/MariaDB, Cassandra and Redis.
+
+The configuration example to use postgresql as DB.
+
+```bash
+"lease-database": {
+    "type": "postgresql",
+    "name": "kea_lease_db",
+    "user": "kea",
+    "password": "secure-password",
+    "host": "localhost"
+}
+```
+
+### Benefits of using a database backend
+
+- Faster turn-around for configuration changes in large deployments.
+- Easy access to DHCP info from scripts.
+- High-Availability through database redundancy.
+- Easier to integrate into existing backup systems.
+
+### Drawbacks of using a database backend.
+
+When issuing a lease, Kea DHCP must wait for the storage backend to acknowledge the successful storage of lease information. Some databases cannot store lease information that reaches beyond the year 2038
+
+## High Availability
+
+The HA hook offers different operation modes.
+
+- load-balancing: all DHCP server are active and return leases.
+- hot-standby: all DHCP server are in sync but only one is active and returns leases.
+- passive-backup: one DHCP server is active and send lease database updates to a number of backup servers.
+
+### Load-balancing Mode
+
+When operating in load-balancing mode, two KEA DHCP server are active and respond to lease requests. The lease information is synced between the KEA DHCP HA servers by TCP port 649. The pool are split 50/50 between the two DHCP servers. Every DHCP server can take over the full services if needed. Via the HA protocol, a DHCP HA node will detect if one partner node is down and takes over the service.
+
+The configuration looks like
+
+```bash
+{
+"library": "/usr/lib/kea/hooks/libdhcp_ha.so", "parameters": {
+    "high-availability": [{
+        "this-server-name": "server1",
+        "mode": "load-balancing",
+        "heartbeat-delay": 10000, "max-response-delay": 40000, "max-ack-delay": 5000,
+        "max-unacked-clients": 5,
+        "peers": [{
+            "name": "server1",
+            "url": "http://192.0.2.33:8000/",
+            "role": "primary", "auto-failover": true
+        }, {
+            "name": "server2",
+            "url": "http://192.0.2.66:8000/",
+            "role": "secondary", "auto-failover": true
+        }, {
+            "name": "server3",
+            "url": "http://192.0.2.99:8000/",
+            "role": "backup",
+            "basic-auth-user": "foo", "basic-auth-password": "bar",
+            "auto-failover": false
+}] }]
+}
+```
+
+### Hot-standby Mode
+
+A KEA DHCP cluster configured for the hot-standby mode will have the primary node serving DHCP clients and another node only receiving the lease-database updates, but not serving clients.
+
+The configuration looks like
+
+```bash
+{
+"library": "/usr/lib/kea/hooks/libdhcp_ha.so", "parameters": {
+   "high-availability": [      "this-server-name": "server1",
+       "mode": "hot-standby",
+       "heartbeat-delay": 10000, "max-response-delay": 40000,
+       "max-ack-delay": 5000,    "max-unacked-clients": 5,
+       "peers": [{
+           "name": "server1",
+           "url": "http://192.0.2.33:8000/",
+           "role": "primary", "auto-failover": true
+       }, {
+           "name": "server2",
+           "url": "http://192.0.2.66:8000/",
+           "role": "standby", "auto-failover": true
+       }, {
+           "name": "server3",
+           "url": "http://192.0.2.99:8000/",
+           "basic-auth-user": "foo",  "basic-auth-password": "bar",
+           "role": "backup",  "auto-failover": false
+}] }]
+}
+```
+
+### Backup Servers Mode
+
+KEA DHCP supports an number of backup servers. They receive lease database updates but are not an active part of an HA setup. Backup server can be deployed in addition to the other KEA HA modes.
+
+### Passive-backup Mode
+
+Only one KEA server is active and is serving lease to the clients. In case of an failure of the active server, a backup server needs to be manually promoted to be active.
+
+### Load-balancing vs. Hot-standby
+
+The hot-standby mode is simpler. Only one active server, one active log file, and no split pools required.
+
+However, in the load-balancing mode, the load is distributed across both active DHCP servers, with complex client classing rules. The load-balancing mode requires a 50/50 split of the pools across both HA server nodes.
+
+### HA Configurations
+
+The KEA HA configuration parts are symmetric, all HA peers can share an almost identical configuration file. The only difference in the HA configuration is the this-server-name parameter. The HA mode is selected with mode parameter.
+
+Depending on the mode, the server role can be defined as primary, standby or backup.
+
+### Database synchronization
+
+The ha-sync command triggers the server to sync lease database with the selected peer
+
+```bash
+{   "command": "ha-sync",
+    "service": [ "dhcp4 "],
+    "arguments": {
+        "server-name": "server2",
+        "max-period": 60
+    }
+}
+```
+
+### Retrieving the HA status
+
+The command ha-heartbeat can be used to check the current state of a KEA DHCP server HA node. The returned JSON structure describes the current DHCP server state.
+
+
+# Using KEA DHCP Part 5
+
+This blog is a study note of using Kea DHCP Webinar 05. It introduced Stork monitoring tool, logging and performance test tool, very briefly.
+
+## Stork Monitoring
+
+Stork is a graphic dashboard for Kea DHCP server. It monitors Kea and Kea HA state. It alerts failures, fault conditions and other unwanted events. However, it is under active development.
+
+Stork can be installed to various platforms, including Ubuntu, Fedora and RedHat. This post will ignore Stork installation.
+
+In addition, the Stork user management provides the basic management dashboard. Infoblox IPAM DHCP service actually provide more sophisticated management for Kea DHCP server.
+
+## Other Monitoring
+
+### Process Monitoring
+
+systemd exposes the state of managed services via the DBUS API, so a monitoring system can read the DBUS API information. For example, Prometheus exporter for systemd services.
+
+### DHCP Function Monitoring
+
+dhcping is a simple tool to test if a DHCP server responds to DHCP requests and returns a lease. It requests a lease (DHCPREQUEST) or DHCP option information (DHCPINFORM) from a DHCP Server.
+
+## Dealing With Pool Depletion
+
+If we encounter address pool depletion, check the following reasons:
+
+- lease time too high for the number of DHCP clients in the network.
+- machines are not releasing their lease on shutdown.
+- malicious/buggy DHCP client software.
+
+The solution is to consider to switch to DHCPv6.
+
+## Logging
+
+All Kea services provide flexible logging. It can output log to syslog, to a file, or to stdout or stderr. The logging config section may looks like below.
+
+```bash
+"Logging": {
+        "loggers": [
+            {
+                "name": "kea-dhcp4",
+                "output_options": [
+                    {
+                        "output": "syslog:user"
+                    }
+                ],
+                "severity": "INFO",
+                "debuglevel": 0
+            },
+            {
+                "name": "kea-dhcp4.leases",
+                "output_options": [
+                    {
+                        "output": "syslog:user"
+                    }
+                ],
+                "severity": "INFO",
+                "debuglevel": 0
+            },
+            {
+                "name": "kea-dhcp4.alloc-engine",
+                "output_options": [
+                    {
+                        "output": "syslog:user"
+                    }
+                ],
+                "severity": "INFO",
+                "debuglevel": 0
+            },
+            {
+                "name": "kea-dhcp4.ddns",
+                "output_options": [
+                    {
+                        "output": "syslog:user"
+                    }
+                ],
+                "severity": "INFO",
+                "debuglevel": 0
+            }
+        ]
+    }
+```
+
+## Performance Testing
+
+perfdhcp is used to do DHCP performance testing for Kea. The usage examples can be available from here.
+
+## References
+
+[ISC KEA configuration](https://kea.readthedocs.io/en/kea-1.6.2/arm/dhcp4-srv.html#interface-configuration)
+
 
 
