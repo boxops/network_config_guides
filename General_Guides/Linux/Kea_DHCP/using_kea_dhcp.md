@@ -3,14 +3,65 @@ Using the Kea DHCP Server
 
 ## Table of Contents
 
-- [KEA DHCP Part 1](#KEA-DHCP-Part-1)
-- [Introduction](#Introduction)
-- [DHCPv4 Protocol](#DHCPv4-protocol)
-- [DHCPv4 Lease concept](#DHCPv4-lease-concept)
-- [Host Reservation](#Host-reservation)
-- [Shared Subnet](#Shared-subnet)
-- [DHCPv6](#DHCPv6)
-- [Identity Association (IA)](#Identity-Association-IA)
+- [KEA DHCP Part 1](#kea-dhcp-part-1)
+  - [Introduction](#introduction)
+  - [DHCPv4 Protocol](#dhcpv4-protocol)
+  - [DHCPv4 Lease concept](#dhcpv4-lease-concept)
+  - [Host Reservation](#host-reservation)
+  - [Shared Subnet](#shared-subnet)
+  - [DHCPv6](#dhcpv6)
+  - [Identity Association (IA)](#identity-association-ia)
+- [KEA DHCP Part 2](#kea-dhcp-part-2)
+  - [KEA DHCP](#kea-dhcp)
+  - [KEA Platforms](#kea-platforms)
+  - [KEA hooks](#kea-hooks)
+  - [KEA configuration](#kea-configuration)
+    - [Network interface configuration](#network-interface-configuration)
+    - [Lease database definition](#lease-database-definition)
+    - [Subnet and pool definition](#subnet-and-pool-definition)
+    - [Logging definition](#logging-definition)
+    - [Kea configuration check](#kea-configuration-check)
+  - [keactrl](#keactrl)
+  - [Testing DHCPv4 with the ISC dhcpclient](#testing-dhcpv4-with-the-isc-dhcpclient)
+    - [dhclient as a debugging tool](#dhclient-as-a-debugging-tool)
+    - [Performance benchmarking](#performance-benchmarking)
+  - [Kea DHCPv6 configuration](#kea-dhcpv6-configuration)
+    - [Kea DHCPv6 DUID](#kea-dhcpv6-duid)
+- [KEA DHCP part 3](#kea-dhcp-part-3)
+  - [DHCP Lease allocation](#dhcp-lease-allocation)
+  - [Client Classification](#client-classification)
+    - [Where do DHCP identifiers come from](#where-do-dhcp-identifiers-come-from)
+    - [Automatic vendor classing](#automatic-vendor-classing)
+    - [The KNOWN and UNKNOWN classes](#the-known-and-unknown-classes)
+    - [Client classification example](#client-classification-example)
+    - [Classification via hooks](#classification-via-hooks)
+    - [Debugging client classing](#debugging-client-classing)
+  - [DHCP options](#dhcp-options)
+    - [Global DHCP options](#global-dhcp-options)
+    - [Subnet Specific DHCP option](#subnet-specific-dhcp-option)
+    - [Client Class Options](#client-class-options)
+    - [Defining Custom DHCPv4 options](#defining-custom-dhcpv4-options)
+- [KEA DHCP Part 4](#kea-dhcp-part-4)
+  - [Database backend support for Kea](#database-backend-support-for-kea)
+    - [Benefits of using a database backend](#benefits-of-using-a-database-backend)
+    - [Drawbacks of using a database backend](#drawbacks-of-using-a-database-backend)
+  - [High Availability](#high-availability)
+    - [Load-balancing Mode](#load-balancing-mode)
+    - [Hot-standby Mode](#hot-standby-mode)
+    - [Backup Servers Mode](#backup-servers-mode)
+    - [Passive-backup Mode](#passive-backup-mode)
+    - [Load-balancing vs. Hot-standby](#load-balancing-vs-hot-standby)
+    - [HA Configurations](#ha-configurations)
+    - [Database synchronization](#database-synchronization)
+    - [Retrieving the HA status](#retrieving-the-ha-status)
+- [KEA DHCP Part 5](#kea-dhcp-part-5)
+  - [Stork Monitoring](#stork-monitoring)
+  - [Other Monitoring](#other-monitoring)
+    - [Process Monitoring](#process-monitoring)
+    - [DHCP Function Monitoring](#dhcp-function-monitoring)
+  - [Dealing With Pool Depletion](#dealing-with-pool-depletion)
+  - [Logging](#logging)
+  - [Performance Testing](#performance-testing)
 
 # KEA DHCP Part 1
 
@@ -131,7 +182,7 @@ KEA configuration files include kea-dhcp4.conf, kea-dhcp6.conf, kea-dhcp-ddns.co
 
 The following sections are examples of configuration section inside the config file.
 
-## Network interface configuration
+### Network interface configuration
 
 ```bash
   "interfaces-config": {
@@ -150,7 +201,7 @@ The dhcp-socket-type specifies that the IP/UDP sockets will be opened on all int
 
 Interfaces are re-detected at each reconfiguration.
 
-## Lease database definition
+### Lease database definition
 
 ```bash
  "lease-database": {
@@ -163,7 +214,7 @@ Interfaces are re-detected at each reconfiguration.
 
 The lease database is the place where the server stores its lease information. This particular example tells the server to use memfile, which is the simplest (and fastest) database backend. It uses an in-memory database and stores leases on disk in a CSV (comma-separated values) file. This is a very simple configuration; usually the lease database configuration is more extensive and contains additional parameters. Note that lease-database is an object and opens up a new scope, using an opening brace. Its parameters (just one in this example: type) follow. If there were more than one, they would be separated by commas. This scope is closed with a closing brace. As more parameters for the DHCPv4 definition follow, a trailing comma is present.
 
-## Subnet and pool definition
+### Subnet and pool definition
 ```bash
  "subnet4": [
             {
@@ -179,7 +230,7 @@ The lease database is the place where the server stores its lease information. T
 
 We need to define a list of IPv4 subnets. This is the most important DHCPv4 configuration structure, as the server uses that information to process clients’ requests. It defines all subnets from which the server is expected to receive DHCP requests. The subnets are specified with the subnet4 parameter. It is a list, so it starts and ends with square brackets. Each subnet definition in the list has several attributes associated with it, so it is a structure and is opened and closed with braces. At a minimum, a subnet definition has to have at least two parameters: subnet (which defines the whole subnet) and pools (which is a list of dynamically allocated pools that are governed by the DHCP server).
 
-## Logging definition
+### Logging definition
 
 KEA DHCP has comes with a flexible and powerful logging framework. The configuration snippet below configures a log-file for the DHCPv4 service.
 
@@ -208,7 +259,7 @@ KEA DHCP has comes with a flexible and powerful logging framework. The configura
             },
 ```
 
-## Kea configuration check
+### Kea configuration check
 ```bash
 kea-dhcp4 -t /etc/kea/kea-dhcp4.conf
 ```
@@ -235,7 +286,7 @@ keactrl reload -c keactrl.conf
 
 Most Linux distributions provide the ISC DHCP client tool dhclient. This tool can be used as an simple DHCP debugging tool.
 
-## dhclient as a debugging tool
+### dhclient as a debugging tool
 
 Create a new shell script in /usr/local/sbin/dhclient-debug.sh with the lines below
 
@@ -258,7 +309,7 @@ dhclient -sf /usr/local/sbind/dhclient-debug.sh
 
 The script will print out all the information received from the DHCP server (via environment variables). It will not reconfigure the client machines network stack.
 
-## Performance benchmarking
+### Performance benchmarking
 
 Kea comes with a DHCP benchmarking tool: perfdhcp. This tool can be used to benchmark Kea, but also other DHCP server systems. For details, see the perfdhcp document.
 
@@ -266,7 +317,7 @@ Kea comes with a DHCP benchmarking tool: perfdhcp. This tool can be used to benc
 
 The Kea DHCPv6 server is independent from the Kea DHCPv4 server. Both can be started together on the same machine, or separated machines. The configuration file for the Kea DHCPv6 server is kea-dhcp6.conf. The Kea DHCPv6 server can be controlled from the keactrl script or through systemd (on Linux).
 
-## Kea DHCPv6 DUID
+### Kea DHCPv6 DUID
 
 Each DHCPv6 server has a unique DHCP-Unique-ID (DUID). When re-installing a DHCPv6 server, it might be useful to backup and restore the DUID of the system. The Kea DHCPv6 DUID is stored in the file kea-dhcp6-serverid in the /var/lib/kea directory.
 
@@ -329,7 +380,7 @@ Example subnet selection based on the vendor option
 ]
 ```
 
-## The KNOWN and UNKNOWN classes
+### The KNOWN and UNKNOWN classes
 
 Kea automatically assigns classes based on host reservations.
 
@@ -468,7 +519,7 @@ Sometimes it is required to define custom DHCP options that are not part of the 
 ```
 
 
-# Using KEA DHCP Part 4
+# KEA DHCP Part 4
 
 ## Database backend support for Kea
 
@@ -495,7 +546,7 @@ The configuration example to use postgresql as DB.
 - High-Availability through database redundancy.
 - Easier to integrate into existing backup systems.
 
-### Drawbacks of using a database backend.
+### Drawbacks of using a database backend
 
 When issuing a lease, Kea DHCP must wait for the storage backend to acknowledge the successful storage of lease information. Some databases cannot store lease information that reaches beyond the year 2038
 
@@ -608,7 +659,7 @@ The ha-sync command triggers the server to sync lease database with the selected
 The command ha-heartbeat can be used to check the current state of a KEA DHCP server HA node. The returned JSON structure describes the current DHCP server state.
 
 
-# Using KEA DHCP Part 5
+# KEA DHCP Part 5
 
 This blog is a study note of using Kea DHCP Webinar 05. It introduced Stork monitoring tool, logging and performance test tool, very briefly.
 
