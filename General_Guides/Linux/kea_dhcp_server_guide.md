@@ -126,11 +126,103 @@ The main Kea configuration files are:
 
 ### A basic Kea DHCPv4 configuration
 
+#### Network Interface and control socket
 
+The Kea DHCP server needs to know on which network interfaces the DHCP service should listen on
 
+The control socket defines the communication interface between the DHCP server process and the administration tools.
 
+```bash
+[...]
+"Dhcp4": {
+    // Add names of your network interfaces to listen on.
+    "interfaces-config": {
+        // interface name (e.g. "eth0" or specific IPv4 address on that
+        // interface name (e.g. "eth0/192.0.2.1").
+        "interfaces": [ "eth0" ]
+    },
+    "control-socket": {
+        "socket-type": "unix",
+        "socket-name": "/tmp/kea4-ctrl-socket"
+    },
+[...]
+```
 
-### Kea configuration file check
+#### Lease database definition
+
+Kea DHCP needs to know where to store the lease information.
+
+The configuration snippet below defines an in-memory database.
+
+```bash
+[...]
+    "lease-database": {
+        // Memfile is the simplest and easiest backend to use. It's an in-memory
+        // C++ database that stores its state in CSV file.
+        "type": "memfile",
+        "lfc-interval": 3600
+    },
+[...]
+```
+
+#### IPv4-Subnet and Pool definition
+
+The example of a subnet below with DHCP pool definition includes subnet specific options (default router option: routers).
+
+```bash
+[...]
+    "subnet4": [
+        {
+            "subnet": "192.0.2.0/24",
+            "pools": [ { "pool": "192.0.2.1 - 192.0.2.200" } ],
+            "option-data": [
+                {
+                    // For each IPv4 subnet you most likely need to specify at
+                    // least one router.
+                    "name": "routers",
+                    "data": "192.0.2.1"
+                }
+            ],
+[...]
+```
+
+#### Logging
+
+Kea DHCP comes with a flexible and powerful logging framework.
+
+The configuration snippet below configures a log-file for the DHCPv4 service.
+
+```bash
+[...]
+    "loggers": [
+    {
+        "name": "kea-dhcp4",
+        "output_options": [
+            {
+                // Specifies the output file. There are several special values
+                // supported:
+                // - stdout (prints on standard output)
+                // - stderr (prints on standard error)
+                // - syslog (logs to syslog)
+                // - syslog:name (logs to syslog using specified name)
+                // Any other value is considered a name of the file
+                "output": "@localstatedir@/log/kea-dhcp4.log"
+        "severity": "INFO",
+
+        // If DEBUG level is specified, this value is used. 0 is least verbose,
+        // 99 is most verbose. Be cautious, Kea can generate lots and lots
+        // of logs if told to do so.
+        "debuglevel": 0
+[...]
+```
+
+### Checking the configuration for syntax errors
+
+#### Kea configuration file check
+
+After changes to a configuration file, and before reloading the new configuration into the Kea server, the configuration file should be checked for errors.
+
+Syntax checks can be done with the -t (test) parameter.
 
 ```bash
 kea-dhcp4 -t /etc/kea/kea-dhcp4.conf
