@@ -79,6 +79,54 @@ Move the binary to somewhere within the Linux install that is within the PATH, s
 sudo mv kustomize /usr/local/bin
 ```
 
+### Create kustomization.yaml 
+
+Create the kustomization.yaml file for the Kustomize architect to read.
+
+```bash
+touch ~/kustomization.yaml
+```
+
+Add the content to the file:
+
+```bash
+cat <<EOT >> ~/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Find the latest tag here: https://github.com/ansible/awx-operator/releases
+  - github.com/ansible/awx-operator/config/default?ref=0.28.0
+
+# Set the image tags to match the git version from above
+images:
+  - name: quay.io/ansible/awx-operator
+    newTag: 0.28.0
+
+# Specify a custom namespace in which to install AWX
+namespace: awx
+EOT
+```
+
+### Kustomize Build
+
+Kick off the kustomization binary to point to our local directory and then pipe the output to the Kubernetes binary called kubectl.
+
+```bash
+kustomize build . | kubectl apply -f -
+```
+
+Notes: 
+  - The user might need to be changed to root.
+
+### Check Build Progress
+
+```bash
+kubectl get pods -n awx
+```
+
+Notes:
+  - Check the workload and ensure that the STATUS is Running (wait about a minute for the container process to complete).
+
 ### Create awx.yaml
 
 Create a file called awx.yaml
@@ -102,18 +150,12 @@ spec:
 EOT
 ```
 
-### Create kustomization.yaml 
+### Add awx.yaml Reference to the kustomization.yaml File
 
-Create the kustomization.yaml file for the Kustomize architect to read.
-
-```bash
-touch ~/kustomization.yaml
-```
-
-Add the content to the file:
+Add the awx.yaml entry to resources, like so:
 
 ```bash
-cat <<EOT >> ~/kustomization.yaml
+cat <<EOT > ~/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -131,17 +173,11 @@ namespace: awx
 EOT
 ```
 
-### Kustomize Build
-
-Kick off the kustomization binary to point to our local directory and then pipe the output to the Kubernetes binary called kubectl.
+### Run Kustomize Build Again
 
 ```bash
 kustomize build . | kubectl apply -f -
 ```
-
-Notes: 
-  - The user might need to be changed to root.
-  - The process will deploy a Postgres database and an AWX pod.
 
 The deployment can be watched using the kubectl logs command.
 
