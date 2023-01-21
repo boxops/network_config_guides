@@ -69,7 +69,9 @@ The following script detects your OS and downloads the appropriate kustomize bin
 curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
 ```
 
-Notes: This script doesn’t work for ARM architecture.
+Notes: 
+  - The user might need to be changed to root.
+  - This script doesn’t work for ARM architecture.
 
 Move the binary to somewhere within the Linux install that is within the PATH, so that the operating system can find the executable for a command.
 
@@ -134,16 +136,24 @@ EOT
 Kick off the kustomization binary to point to our local directory and then pipe the output to the Kubernetes binary called kubectl.
 
 ```bash
-kustomize build . | kubectl apply -f
+kustomize build . | kubectl apply -f -
 ```
 
-Look at our workload and ensure that the STATUS is Running (wait about 10 minutes for the container process to complete):
+Notes: 
+  - The user might need to be changed to root.
+  - The process will deploy a Postgres database and an AWX pod.
+
+The deployment can be watched using the kubectl logs command.
+
+```bash
+kubectl logs -f deployments/awx-operator-controller-manager -c awx-manager --namespace awx
+```
+
+After the deployment is done, check our workload and ensure that the STATUS is Running (wait about 10 minutes for the container process to complete):
 
 ```bash
 kubectl get pods -n awx
 ```
-
-Note: The process will deploy a Postgres database and an AWX pod.
 
 ### Retrieve the admin Password
 
