@@ -86,7 +86,7 @@ Packages can be downloaded from our public Cloudsmith repository by following th
 Be sure to update and upgrade your package manager before installation:
 
 ```bash
-sudo apt -y update && sudo apt -y upgrade
+sudo apt -y update && sudo apt -y dist-upgrade
 ```
 
 ### Setting Up Repos on Debian
