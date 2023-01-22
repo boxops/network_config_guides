@@ -2,7 +2,7 @@
 # Generate a diagram as code using the diagrams package
 
 # Usage:
-# python3 kea_diagram.py
+# python3 diagram_as_code.py
 
 # Required Packages:
 # python3 -m pip install graphviz
