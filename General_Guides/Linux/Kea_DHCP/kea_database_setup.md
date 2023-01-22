@@ -1,6 +1,8 @@
 Kea Database Setup
 ==================
 
+# Work in Progress...
+
 ### Databases and Schema Versions
 
 Kea may be configured to use a database as storage for leases or as a source of servers' configurations and host reservations (i.e. static assignments of addresses, prefixes, options, etc.). As Kea is updated, new database schemas are introduced to facilitate new features and correct discovered issues with the existing schemas.
