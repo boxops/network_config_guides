@@ -160,6 +160,22 @@ Show the status of the Kea daemon:
 sudo systemctl status isc-kea-dhcp4-server
 ```
 
+### Installation Hierarchy
+
+The following is the directory layout of the complete Kea installation. (All directory paths are relative to the installation directory.)
+
+- etc/kea/ — configuration files.
+- include/ — C++ development header files.
+- lib/ — libraries.
+- lib/kea/hooks — additional hooks libraries.
+- sbin/ — server software and commands used by the system administrator.
+- share/doc/kea/ — this guide, other supplementary documentation, and examples.
+- share/kea/ — API command examples and database schema scripts.
+- share/man/ — manual pages (online documentation).
+- var/lib/kea/ — server identification and lease database files.
+- var/log/ - log files.
+- var/run/kea - PID file and logger lock file.
+
 ## References: 
   - ISC Kea Packages: https://kb.isc.org/docs/isc-kea-packages
   - ISC Kea Official Documentation: https://kea.readthedocs.io/en/latest/index.html
