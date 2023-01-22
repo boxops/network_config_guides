@@ -3,7 +3,7 @@ Kea DHCP Server Installation Guide
 
 ### Installation Notes
 
-This install and setup guide is focused on Debian Linux distributions, specifically the Ubuntu 22.04.1 LTS server distribution.
+This install guide is focused on Debian Linux distributions, specifically the Ubuntu 22.04.1 LTS server distribution.
 
 ISC offers binary packages of Kea DHCP hosted on [Cloudsmith](https://cloudsmith.io/~isc/repos/).
 
@@ -103,10 +103,10 @@ curl -1sLf \
 
 After configuring the repositories on a host machine, the Kea packages can be installed. As there are several packages, we can choose to install only the parts of Kea that are required. The dependencies between packages are set up so any dependent packages will be pulled in as well.
 
-The following example will install the Kea DHCPv4 server which consequently installs all of the dependencies in the Open Source bundle.
+The following examples will install the main Kea metapackage which depends on (and consequently installs) all of the components in the Open Source bundle.
 
 ```bash
-sudo apt install isc-kea-dhcp4-server -y
+sudo apt -y install isc-kea*
 ```
 
 If you would like to install other specific components, or subpackages, that is also possible. Please refer to the list of packages above to discover which specific packages you need.
@@ -162,3 +162,4 @@ sudo systemctl status isc-kea-dhcp4-server
 
 ## References: 
   - ISC Kea Packages: https://kb.isc.org/docs/isc-kea-packages
+  - ISC Kea Official Documentation: https://kea.readthedocs.io/en/latest/index.html
