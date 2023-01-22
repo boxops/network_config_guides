@@ -1,5 +1,5 @@
-Kea DHCP Server Installation and Configuration Guide
-====================================================
+Kea DHCP Server Installation Guide
+==================================
 
 ### Installation Notes
 
@@ -159,23 +159,6 @@ Show the status of the Kea daemon:
 ```bash
 sudo systemctl status isc-kea-dhcp4-server
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## References: 
   - ISC Kea Packages: https://kb.isc.org/docs/isc-kea-packages
