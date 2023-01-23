@@ -339,7 +339,7 @@ The first argument contains the client and the transaction identification inform
 The following diagram illustrated the simplified process of Kea lease allocation.
 
 <p align="center" width="100%">
-    <img src="kea_lease-allocation.jpg"> 
+    <img src="lease-allocation.jpg"> 
 </p>
 
 When searching for a new lease, Kea 1.8 iterates over all subnets by subnet-id, previous versions iterated over subnets in config file order. In the example above, lease is not found by client ID, so Kea server gets lease by hardware address.
