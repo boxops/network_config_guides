@@ -34,6 +34,7 @@ with Diagram("Kea DHCP High Availability Servers with Kea Stork Monitoring", sho
             primary_dhcpv6 = Server("Kea DHCPv6")
 
         with Cluster("dhcp-monitoring"):
+            stork_hooks = Server("Kea Stork Hooks")
             stork_db = PostgreSQL("Stork PostgreSQL")
             stork = Grafana("Stork")
 
@@ -48,9 +49,10 @@ with Diagram("Kea DHCP High Availability Servers with Kea Stork Monitoring", sho
     secondary_dhcpv4 >> secondary_dbv4
     secondary_dhcpv6 >> secondary_dbv6
     # connect primary_db to stork_db and secondary_db to stork_db
-    primary_dbv4 >> stork_db
-    primary_dbv6 >> stork_db
-    secondary_dbv4 >> stork_db
-    secondary_dbv6 >> stork_db
+    primary_dbv4 >> stork_hooks
+    primary_dbv6 >> stork_hooks
+    secondary_dbv4 >> stork_hooks
+    secondary_dbv6 >> stork_hooks
     # connect stor_db to stork
+    stork_hooks >> stork_db
     stork_db >> stork
