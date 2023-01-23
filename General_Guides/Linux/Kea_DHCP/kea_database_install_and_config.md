@@ -1,5 +1,5 @@
-Kea Database Setup
-==================
+Kea Database Installation and Configuration
+===========================================
 
 ### Installation Notes
 
