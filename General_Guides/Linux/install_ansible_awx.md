@@ -73,7 +73,7 @@ Ansible AWX is going to need to have an AWX operator and it's going to handle th
 The following script detects your OS and downloads the appropriate kustomize binary to your current working directory.
 
 ```bash
-curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash 
 ```
 
 Notes: 
