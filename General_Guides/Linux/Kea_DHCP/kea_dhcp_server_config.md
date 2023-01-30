@@ -21,7 +21,7 @@ Kea components use extended JSON with additional features allowed:
 - Shell comments: any text after the hash (#) character is ignored.
 - C comments: any text after the double slashes (//) character is ignored.
 - Multiline comments: any text between /* and */ is ignored. This comment can span multiple lines.
-- File inclusion: JSON files can include other JSON files by using a statement of the form <?include "file.json"?>.
+- File inclusion: JSON files can include other JSON files by using a statement of the form \<?include "file.json"?\>.
 - Extra commas: to remove the inconvenience of errors caused by leftover commas after making changes to configuration. While parsing, a warning is printed with the location of the comma to give the user the ability to correct a potential mistake.
 
 **Warning: These features are meant to be used in a JSON configuration file. Their usage in any other way may result in errors.**
@@ -144,16 +144,82 @@ User context can store configuration for multiple hooks and comments at once.
 
 ### Simplified Notation
 
-It is sometimes convenient to refer to a specific element in the configuration hierarchy. Each hierarchy level is separated by a slash. If there is an array, a specific instance within that array is referenced by a number in square brackets (with numbering starting at zero). For example, in the above configuration the valid-lifetime in the Dhcp4 component can be referred to as Dhcp4/valid-lifetime, and the pool in the first subnet defined in the DHCPv4 configuration as Dhcp4/subnet4[0]/pool.
+It is sometimes convenient to refer to a specific element in the configuration hierarchy. Each hierarchy level is separated by a slash. If there is an array, a specific instance within that array is referenced by a number in square brackets (with numbering starting at zero). For example, in the above configuration the valid-lifetime in the Dhcp4 component can be referred to as Dhcp4/valid-lifetime, and the pool in the first subnet defined in the DHCPv4 configuration as `Dhcp4/subnet4[0]/pool`.
 
 ## Kea Configuration Backend
 
+### Applicability
 
+Kea Configuration Backend (CB or config backend) gives Kea servers the ability to manage and fetch their configuration from one or more databases. In this documentation, the term "Configuration Backend" may also refer to the particular Kea module providing support to manage and fetch the configuration information from the particular database type. For example, the MySQL Configuration Backend is the logic implemented within the mysql_cb hook library, which provides a complete set of functions to manage and fetch the configuration information from the MySQL database. The PostgreSQL Configuration Backend is the logic implemented within the pgsql_cb hook library, which provides a complete set of functions to manage and fetch the configuration information from the PostgreSQL database. From herein, the term "database" is used to refer to either a MySQL or PostgreSQL database.
 
+In small deployments, e.g. those comprising a single DHCP server instance with limited and infrequently changing number of subnets, it may be impractical to use the CB as a configuration repository because it requires additional third-party software to be installed and configured - in particular the database server, client and libraries. Once the number of DHCP servers and/or the number of managed subnets in the network grows, the usefulness of the CB becomes obvious.
 
+One use case for the CB is a pair of Kea DHCP servers that are configured to support High Availability as described in [ha: High Availability Outage Resilience for Kea Servers](https://kea.readthedocs.io/en/latest/arm/hooks.html#hooks-high-availability). The configurations of both servers (including the value of the `server-tag` parameter) are almost exactly the same: they may differ by the server identifier and designation of the server as a primary or standby (or secondary), and/or by their interfaces' configuration. Typically, the subnets, shared networks, option definitions, and global parameters are the same for both servers and can be sourced from a single database instance to both Kea servers.
 
+Using the database as a single source of configuration for subnets and/or other configuration information supported by the CB has the advantage that any modifications to the configuration in the database are automatically applied to both servers.
 
+Another case when the centralized configuration repository is useful is in deployments including a large number of DHCP servers, possibly using a common lease database to provide redundancy. New servers can be added to the pool frequently to fulfill growing scalability requirements. Adding a new server does not require replicating the entire configuration to the new server when a common database is used.
 
+Using the database as a configuration repository for Kea servers also brings other benefits, such as:
+- the ability to use database specific tools to access the configuration information;
+- the ability to create customized statistics based on the information stored in the database; and
+- the ability to backup the configuration information using the database's built-in replication mechanisms.
+
+### Configuration Database Capabilities and Limitations
+
+Currently, the Kea CB has the following limitations:
+- It is only supported for MySQL and PostgreSQL databases.
+- It is only supported for the DHCPv4 and DHCPv6 daemons; the Control Agent, D2 daemon, and the NETCONF daemon cannot be configured from the database,
+- Only certain DHCP configuration parameters can be set in the database: global parameters, option definitions, global options, client classes, shared networks, and subnets. Other configuration parameters must be sourced from a JSON configuration file.
+
+### Configuration Files Inclusion
+
+The parser provides the ability to include files. The syntax was chosen to look similar to how Apache includes PHP scripts in HTML code. This particular syntax was chosen to emphasize that the include directive is an additional feature and not a part of JSON syntax.
+
+The inclusion is implemented as a stack of files. You can use the include directive in nested includes. Up to ten nesting levels are supported. This arbitrarily chosen limit is protection against recursive inclusions.
+
+The include directive has the form:
+
+```bash
+<?include "[PATH]"?>
+```
+
+The `[PATH]` pattern should be replaced with an absolute path or a path relative to the current working directory at the time the Kea process was launched.
+
+To include one file from another, use the following syntax:
+
+```bash
+{
+   "Dhcp6": {
+      "interfaces-config": {
+         "interfaces": [ "*" ]},
+      "preferred-lifetime": 3000,
+      "rebind-timer": 2000,
+      "renew-timer": 1000,
+      <?include "subnets.json"?>
+      "valid-lifetime": 4000
+   }
+}
+```
+
+where the content of "subnets.json" may be:
+
+```bash
+"subnet4": [
+   {
+      "id": 123,
+      "subnet": "192.0.2.0/24"
+   },
+   {
+      "id": 234,
+      "subnet": "192.0.3.0/24"
+   },
+   {
+      "id": 345,
+      "subnet": "10.0.0.0/8"
+   }
+],
+```
 
 
 ## References
