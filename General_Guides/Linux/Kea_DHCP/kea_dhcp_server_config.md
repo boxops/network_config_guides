@@ -15,6 +15,8 @@ Configuration files for the DHCPv4, DHCPv6, DDNS, Control Agent, and NETCONF mod
 
 Even though the JSON standard (ECMA 404) does not require JSON objects (i.e. name/value maps) to have unique entries, Kea implements them using a C++ STL map with unique entries. Therefore, if there are multiple values for the same name in an object/map, the last value overwrites previous values. **Since Kea 1.9.0, configuration file parsers raise a syntax error in such cases.**
 
+### Extended JSON
+
 Kea components use extended JSON with additional features allowed:
 - Shell comments: any text after the hash (#) character is ignored.
 - C comments: any text after the double slashes (//) character is ignored.
