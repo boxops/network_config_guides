@@ -251,7 +251,7 @@ KEA DHCP has comes with a flexible and powerful logging framework. The configura
                 "name": "kea-dhcp4.leases",
                 "output_options": [
                     {
-                        "output": "syslog:user"
+                        "output": "/var/log/kea-dhcp4-leases.log"
                     }
                 ],
                 "severity": "INFO",
