@@ -126,9 +126,39 @@ curl -1sLf \
   'https://dl.cloudsmith.io/public/isc/stork/setup.deb.sh' \
   | sudo -E bash
 
+Edit the `/etc/stork/agent.env` file:
 
+```
+### the IP or hostname to listen on for incoming Stork server connections
+STORK_AGENT_HOST=0.0.0.0
 
+### the TCP port to listen on for incoming Stork server connections
+STORK_AGENT_PORT=8080
+```
 
+Register the agent:
+
+```
+dhcpadmin@lab-dhcp-primary:/etc/stork$ sudo su -
+root@lab-dhcp-primary:~# su stork-agent -s /bin/sh -c 'stork-agent register -u http://192.168.30.35:8080'
+>>>> Server access token (optional):
+>>>> IP address or FQDN of the host with Stork Agent (for the Stork Server connection) [lab-dhcp-primary]:
+>>>> Port number that Stork Agent will listen on [8080]:
+INFO[2023-01-31 16:32:08]         register.go:160   Agent token stored in /var/lib/stork-agent/tokens/agent-token.txt
+INFO[2023-01-31 16:32:08]         register.go:161   Agent key, agent token, and CSR (re)generated
+INFO[2023-01-31 16:32:08]         register.go:449   =============================================================================
+INFO[2023-01-31 16:32:08]         register.go:450   AGENT TOKEN: 27A00ED54612D6C48723076205AA537A5A9E04EEB74A846E10DEF65AA609A3F9
+INFO[2023-01-31 16:32:08]         register.go:451   =============================================================================
+INFO[2023-01-31 16:32:08]         register.go:454   Authorize the machine in the Stork web UI
+INFO[2023-01-31 16:32:08]         register.go:471   Try to register agent in Stork Server
+INFO[2023-01-31 16:32:08]         register.go:311   Machine registered
+INFO[2023-01-31 16:32:08]         register.go:336   Stored agent-signed cert and CA cert
+INFO[2023-01-31 16:32:08]             main.go:132   Registration completed successfully
+root@lab-dhcp-primary:~#
+
+```
+
+Certs stored in `/var/lib/stork-agent/certs/` after successful registration.
 
 
 
