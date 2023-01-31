@@ -221,8 +221,17 @@ where the content of "subnets.json" may be:
 ],
 ```
 
-TODO
-https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html
+## The DHCPv4 Server
+
+### Starting and Stopping the DHCPv4 Server
+
+It is recommended that the Kea DHCPv4 server be started and stopped using keactrl (described in [Managing Kea with keactrl](https://kea.readthedocs.io/en/latest/arm/keactrl.html#keactrl)); however, it is also possible to run the server directly via the kea-dhcp4 command, which accepts the following command-line switches:
+
+
+
+
+
+
 
 
 ## References
