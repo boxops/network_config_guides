@@ -117,7 +117,8 @@ stork-tool db-password-gen
 Expected output: generated new database password password=\<random-string\>
 
 
-
+TODO
+https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
 
 
 
@@ -140,3 +141,4 @@ Expected output: generated new database password password=\<random-string\>
 
 ## References
   - Stork installation guide: https://stork.readthedocs.io/en/v1.8.0/install.html
+  - Stork server and agent installation: https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
