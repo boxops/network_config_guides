@@ -259,8 +259,6 @@ Usually the setting is configured in the postgresql.conf with the varying versio
 timezone = 'UTC'
 ```
 
-
-
 2. Create the database (`database-name` is the name chosen for the database):
 
 ```bash
@@ -362,6 +360,12 @@ or permanently in `/etc/postgresql/[version]/main/postgresql.conf`:
 
 ```bash
 synchronous_commit = off
+```
+
+Apply the changes after editing the `postgresql.conf` file:
+
+```bash
+/etc/init.d/postgresql reload
 ```
 
 Be aware that changing this value can cause problems during data recovery after a crash, so we recommend checking the [PostgreSQL documentation](https://www.postgresql.org/docs/current/wal-async-commit.html). With the default value of ON, PostgreSQL writes changes to disk after every INSERT or UPDATE query (in Kea terms, every time a client gets a new lease or renews an existing lease). When `synchronous_commit` is set to OFF, PostgreSQL writes the changes with some delay. Batching writes gives a substantial performance boost. The trade-off, however, is that in the worst-case scenario, all changes in the last moment before crash could be lost. Given the fact that Kea is stable software and crashes very rarely, most deployments find it a beneficial trade-off.
