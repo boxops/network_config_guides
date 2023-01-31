@@ -120,9 +120,11 @@ Expected output: generated new database password password=\<random-string\>
 TODO
 https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
 
+https://cloudsmith.io/~isc/repos/stork/setup/#formats-deb
 
-
-
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/isc/stork/setup.deb.sh' \
+  | sudo -E bash
 
 
 
@@ -142,3 +144,4 @@ https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
 ## References
   - Stork installation guide: https://stork.readthedocs.io/en/v1.8.0/install.html
   - Stork server and agent installation: https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
+  - Cloudsmith Debian repository setup: https://cloudsmith.io/~isc/repos/stork/setup/#formats-deb
