@@ -169,7 +169,7 @@ The following is the directory layout of the complete Kea installation. (All dir
 - lib/ — libraries.
 - lib/kea/hooks — additional hooks libraries.
 - sbin/ — server software and commands used by the system administrator.
-- share/doc/kea/ — this guide, other supplementary documentation, and examples.
+- usr/share/doc/isc-kea-doc/ — this guide, other supplementary documentation, and examples.
 - share/kea/ — API command examples and database schema scripts.
 - share/man/ — manual pages (online documentation).
 - var/lib/kea/ — server identification and lease database files.
