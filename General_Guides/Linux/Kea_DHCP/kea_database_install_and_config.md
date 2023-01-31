@@ -193,7 +193,39 @@ Be aware that changing this value can cause problems during data recovery after 
 
 PostgreSQL can store leases, host reservations, and options defined on a per-host basis.
 
-#### First-Time Creation of the PostgreSQL Database
+### Install Postgresql
+
+Update the system packages:
+
+```bash
+sudo apt -y update
+```
+
+Install Postgresql and its dependencies:
+
+```bash
+sudo apt install postgresql postgresql-contrib
+```
+
+Ensure that the service is started:
+
+```bash
+sudo systemctl start postgresql.service
+```
+
+Enable the service to start on boot:
+
+```bash
+sudo systemctl enable postgresql.service
+```
+
+Check the state of the service file:
+
+```bash
+sudo systemctl status postgresql.service
+```
+
+### First-Time Creation of the PostgreSQL Database
 
 Before preparing any Kea-specific database and tables, the PostgreSQL database must be configured to use the system timezone. It is recommended to use UTC as the timezone for both the system and the PostgreSQL database.
 
@@ -201,6 +233,14 @@ To check the system timezone:
 
 ```bash
 date +%Z
+```
+
+The first task is to create both the database and the user under which the servers will access it. A number of steps are required:
+
+1. Log into PostgreSQL as "root":
+
+```bash
+sudo -u postgres psql postgres
 ```
 
 To check the PostgreSQL timezone:
@@ -219,13 +259,7 @@ Usually the setting is configured in the postgresql.conf with the varying versio
 timezone = 'UTC'
 ```
 
-The first task is to create both the database and the user under which the servers will access it. A number of steps are required:
 
-1. Log into PostgreSQL as "root":
-
-```bash
-sudo -u postgres psql postgres
-```
 
 2. Create the database (`database-name` is the name chosen for the database):
 
@@ -251,7 +285,9 @@ Exit PostgreSQL:
 
 5. At this point, create the database tables either using the kea-admin tool, as explained in the next section (recommended), or manually. 
 
-**Option: Initialize the PostgreSQL Database Manually** To create the tables manually, enter the following command. PostgreSQL will prompt the administrator to enter the new user's password that was specified in Step 3. When the command completes, Kea will return to the shell prompt. The output should be similar to the following:
+#### Option 1: Initialize the PostgreSQL Database Manually
+
+To create the tables manually, enter the following command. PostgreSQL will prompt the administrator to enter the new user's password that was specified in Step 3. When the command completes, Kea will return to the shell prompt. The output should be similar to the following:
 
 ```bash
 psql -d database-name -U user-name -f path-to-kea/share/kea/scripts/pgsql/dhcpdb_create.pgsql
@@ -296,7 +332,7 @@ host    database-name    user-name          ::1/128                password
 
 These edits are primarily intended as a starting point, and are not a definitive reference on PostgreSQL administration or database security. Please consult the PostgreSQL user manual before making these changes, as they may expose other databases that are running. It may be necessary to restart PostgreSQL for the changes to take effect.
 
-**Option: Initialize the PostgreSQL Database Using `kea-admin`**
+#### Option 2: Initialize the PostgreSQL Database Using `kea-admin`
 
 If the tables were not created manually, do so now by running the `kea-admin` tool:
 
