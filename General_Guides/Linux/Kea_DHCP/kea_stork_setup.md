@@ -116,15 +116,21 @@ stork-tool db-password-gen
 
 Expected output: generated new database password password=\<random-string\>
 
-
-TODO
-https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
+## Stork Agent Setup
 
 https://cloudsmith.io/~isc/repos/stork/setup/#formats-deb
+
+### Stork Agent installation from the Cloudsmith package:
 
 curl -1sLf \
   'https://dl.cloudsmith.io/public/isc/stork/setup.deb.sh' \
   | sudo -E bash
+
+#### Install the Stork Agent:
+
+```bash
+sudo apt install isc-stork-agent
+```
 
 Edit the `/etc/stork/agent.env` file:
 
@@ -136,7 +142,37 @@ STORK_AGENT_HOST=0.0.0.0
 STORK_AGENT_PORT=8080
 ```
 
-Register the agent:
+### Enable and start the Stork Agent:
+
+```bash
+sudo systemctl enable isc-stork-agent
+```
+
+```bash
+sudo systemctl start isc-stork-agent
+```
+
+To check the status:
+
+```bash
+sudo systemctl status isc-stork-agent
+```
+
+### Registration With an Agent Token
+
+Register the agent (from the agent terminal) by entering the following (need to be in sudo mode: `sudo su -`):
+
+```bash
+su stork-agent -s /bin/sh -c 'stork-agent register -u http://192.168.30.35:8080'
+```
+
+Enter the answers to the prompts:
+
+- Token from the Stork Server
+- Stork Agent IP or FDQN
+- Stork Agent Port (default: 8080)
+
+Output:
 
 ```
 dhcpadmin@lab-dhcp-primary:/etc/stork$ sudo su -
@@ -160,6 +196,8 @@ root@lab-dhcp-primary:~#
 
 Certs stored in `/var/lib/stork-agent/certs/` after successful registration.
 
+TODO
+https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
 
 
 
