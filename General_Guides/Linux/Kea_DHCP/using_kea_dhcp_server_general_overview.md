@@ -748,7 +748,12 @@ perfdhcp is used to do DHCP performance testing for Kea. The usage examples can 
 
 ## References
 
-[ISC KEA configuration](https://kea.readthedocs.io/en/kea-1.6.2/arm/dhcp4-srv.html#interface-configuration)
-
-
+- [ISC KEA configuration](https://kea.readthedocs.io/en/kea-1.6.2/arm/dhcp4-srv.html#interface-configuration)
+- [Getting Started with Kea](https://www.youtube.com/watch?v=446Ew0POkTw&list=PLUwyH0o3uuIBv1-CJQaM9_L4_wrI0Jatb)
+- [Using the Kea DHCP Server - Session 1 of 6. DHCP Fundamentals](https://www.youtube.com/watch?v=zr8kGTcJ5WY&list=PLUwyH0o3uuIBv1-CJQaM9_L4_wrI0Jatb&index=2)
+- [Using the Kea DHCP Server - Session 2 of 6. Installation and Configuration](https://www.youtube.com/watch?v=vq1D1czPXSI&list=PLUwyH0o3uuIBv1-CJQaM9_L4_wrI0Jatb&index=3)
+- [Using the Kea DHCP Server - Session 3 of 6. Options, Classification, Reservation](https://www.youtube.com/watch?v=iyZDPhEGuR4&list=PLUwyH0o3uuIBv1-CJQaM9_L4_wrI0Jatb&index=4)
+- [Using the Kea DHCP Server - Session 4 of 6. DB Backends and High Availability](https://www.youtube.com/watch?v=GogtjOLAC5k&list=PLUwyH0o3uuIBv1-CJQaM9_L4_wrI0Jatb&index=5)
+- [Using the Kea DHCP Server - Session 5 of 6. Monitoring and Logging](https://www.youtube.com/watch?v=tsC67hMSlN0&list=PLUwyH0o3uuIBv1-CJQaM9_L4_wrI0Jatb&index=6)
+- [Using the Kea DHCP Server - Session 6 of 6. Migrating to Kea from ISC DHCP](https://www.youtube.com/watch?v=kEZ4P3NAibI&list=PLUwyH0o3uuIBv1-CJQaM9_L4_wrI0Jatb&index=7)
 
