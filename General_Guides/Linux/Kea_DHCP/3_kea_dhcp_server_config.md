@@ -707,6 +707,396 @@ Should the server be required to listen on multiple IPv4 addresses assigned to t
 
 Alternatively, if the server should listen on all addresses for the particular interface, an interface name without any address should be specified.
 
+Kea supports responding to directly connected clients which do not have an address configured. This requires the server to inject the hardware address of the destination into the data-link layer of the packet being sent to the client. The DHCPv4 server uses raw sockets to achieve this, and builds the entire IP/UDP stack for the outgoing packets. The downside of raw socket use, however, is that incoming and outgoing packets bypass the firewalls (e.g. iptables).
+
+Handling traffic on multiple IPv4 addresses assigned to the same interface can be a challenge, as raw sockets are bound to the interface. When the DHCP server is configured to use the raw socket on an interface to receive DHCP traffic, advanced packet filtering techniques (e.g. the BPF) must be used to receive unicast traffic on the desired addresses assigned to the interface. Whether clients use the raw socket or the UDP socket depends on whether they are directly connected (raw socket) or relayed (either raw or UDP socket).
+
+Therefore, in deployments where the server does not need to provision the directly connected clients and only receives the unicast packets from the relay agents, the Kea server should be configured to use UDP sockets instead of raw sockets. The following configuration demonstrates how this can be achieved:
+
+```json
+"Dhcp4": {
+    "interfaces-config": {
+        "interfaces": [ "eth1", "eth3" ],
+        "dhcp-socket-type": "udp"
+    },
+    ...
+}
+```
+
+The `dhcp-socket-type` parameter specifies that the IP/UDP sockets will be opened on all interfaces on which the server listens, i.e. "eth1" and "eth3" in this example. If `dhcp-socket-type` is set to `raw`, it configures the server to use raw sockets instead. If the `dhcp-socket-type` value is not specified, the default value `raw` is used.
+
+Using UDP sockets automatically disables the reception of broadcast packets from directly connected clients. This effectively means that UDP sockets can be used for relayed traffic only. When using raw sockets, both the traffic from the directly connected clients and the relayed traffic are handled.
+
+Caution should be taken when configuring the server to open multiple raw sockets on the interface with several IPv4 addresses assigned. If the directly connected client sends the message to the broadcast address, all sockets on this link will receive this message and multiple responses will be sent to the client. Therefore, the configuration with multiple IPv4 addresses assigned to the interface should not be used when the directly connected clients are operating on that link. To use a single address on such an interface, the "interface-name/address" notation should be used.
+
+Note:
+
+Specifying the value raw as the socket type does not guarantee that raw sockets will be used! The use of raw sockets to handle traffic from the directly connected clients is currently supported on Linux and BSD systems only. If raw sockets are not supported on the particular OS in use, the server issues a warning and fall back to using IP/UDP sockets.
+
+In a typical environment, the DHCP server is expected to send back a response on the same network interface on which the query was received. This is the default behavior. However, in some deployments it is desired that the outbound (response) packets be sent as regular traffic and the outbound interface be determined by the routing tables. This kind of asymmetric traffic is uncommon, but valid. Kea supports a parameter called outbound-interface that controls this behavior. It supports two values: the first one, same-as-inbound, tells Kea to send back the response on the same interface where the query packet was received. This is the default behavior. The second parameter, use-routing, tells Kea to send regular UDP packets and let the kernel's routing table determine the most appropriate interface. This only works when dhcp-socket-type is set to udp. An example configuration looks as follows:
+
+```json
+"Dhcp4": {
+    "interfaces-config": {
+        "interfaces": [ "eth1", "eth3" ],
+        "dhcp-socket-type": "udp",
+        "outbound-interface": "use-routing"
+    },
+    ...
+}
+```
+
+Interfaces are re-detected at each reconfiguration. This behavior can be disabled by setting the `re-detect` value to `false`, for instance:
+
+```json
+"Dhcp4": {
+    "interfaces-config": {
+        "interfaces": [ "eth1", "eth3" ],
+        "re-detect": false
+    },
+    ...
+}
+```
+
+Note that interfaces are not re-detected during `config-test`.
+
+Usually loopback interfaces (e.g. the `lo` or `lo0` interface) are not configured, but if a loopback interface is explicitly configured and IP/UDP sockets are specified, the loopback interface is accepted.
+
+For example, this setup can be used to run Kea in a FreeBSD jail having only a loopback interface, to service a relayed DHCP request:
+
+```json
+"Dhcp4": {
+    "interfaces-config": {
+        "interfaces": [ "lo0" ],
+        "dhcp-socket-type": "udp"
+    },
+    ...
+}
+```
+
+Kea binds the service sockets for each interface on startup. If another process is already using a port, then Kea logs the message and suppresses an error. DHCP service runs, but it is unavailable on some interfaces.
+
+The `service-sockets-require-all` option makes Kea require all sockets to be successfully bound. If any opening fails, Kea interrupts the initialization and exits with a non-zero status. (Default is false).
+
+```json
+"Dhcp4": {
+    "interfaces-config": {
+        "interfaces": [ "eth1", "eth3" ],
+        "service-sockets-require-all": true
+    },
+    ...
+}
+```
+
+Sometimes, immediate interruption isn't a good choice. The port can be unavailable only temporary. In this case, retrying the opening may resolve the problem. Kea provides two options to specify the retrying: service-sockets-max-retries and service-sockets-retry-wait-time.
+
+The first defines a maximal number of retries that Kea makes to open a socket. The zero value (default) means that the Kea doesn't retry the process.
+
+The second defines a wait time (in milliseconds) between attempts. The default value is 5000 (5 seconds).
+
+```json
+"Dhcp4": {
+    "interfaces-config": {
+        "interfaces": [ "eth1", "eth3" ],
+        "service-sockets-max-retries": 5,
+        "service-sockets-retry-wait-time": 5000
+    },
+    ...
+}
+```
+
+If "service-sockets-max-retries" is non-zero and "service-sockets-require-all" is false, then Kea retries the opening (if needed) but does not fail if any socket is still not opened.
+
+### [Issues With Unicast Responses to DHCPINFORM](https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#issues-with-unicast-responses-to-dhcpinform)
+
+Server administrators willing to support DHCPINFORM messages via relays should not block ARP traffic in their networks, or should use raw sockets instead of UDP sockets.
+
+### IPv4 Subnet Identifier
+
+The subnet identifier (subnet ID) is a unique number associated with a particular subnet. In principle, it is used to associate clients' leases with their respective subnets. When a subnet identifier is not specified for a subnet being configured, it is automatically assigned by the configuration mechanism. The identifiers are assigned starting at 1 and are monotonically increased for each subsequent subnet: 1, 2, 3, ....
+
+If there are multiple subnets configured with auto-generated identifiers and one of them is removed, the subnet identifiers may be renumbered. For example: if there are four subnets and the third is removed, the last subnet will be assigned the identifier that the third subnet had before removal. As a result, the leases stored in the lease database for subnet 3 are now associated with subnet 4, something that may have unexpected consequences. The only remedy for this issue at present is to manually specify a unique identifier for each subnet.
+
+Note:
+
+Subnet IDs must be greater than zero and less than 4294967295.
+
+The following configuration assigns the specified subnet identifier to a newly configured subnet:
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+            "subnet": "192.0.2.0/24",
+            "id": 1024,
+            ...
+        }
+    ]
+}
+```
+
+This identifier will not change for this subnet unless the `id` parameter is removed or set to 0. The value of 0 forces auto-generation of the subnet identifier.
+
+### IPv4 Subnet Prefix
+
+The subnet prefix is the second way to identify a subnet. Kea can accept non-canonical subnet addresses; for instance, this configuration is accepted:
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+           "subnet": "192.0.2.1/24",
+            ...
+        }
+    ]
+}
+```
+
+This works even if there is another subnet with the "192.0.2.0/24" prefix; only the textual form of subnets are compared to avoid duplicates.
+
+Note:
+
+Abuse of this feature can lead to incorrect subnet selection (see [How the DHCPv4 Server Selects a Subnet for the Client](https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#dhcp4-subnet-selection)).
+
+### Configuration of IPv4 Address Pools
+
+The main role of a DHCPv4 server is address assignment. For this, the server must be configured with at least one subnet and one pool of dynamic addresses to be managed. For example, assume that the server is connected to a network segment that uses the 192.0.2.0/24 prefix. The administrator of that network decides that addresses from the range 192.0.2.10 to 192.0.2.20 are going to be managed by the DHCPv4 server. Such a configuration can be achieved in the following way:
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+            "subnet": "192.0.2.0/24",
+            "pools": [
+                { "pool": "192.0.2.10 - 192.0.2.20" }
+            ],
+            ...
+        }
+    ]
+}
+```
+
+Note that `subnet` is defined as a simple string, but the `pools` parameter is actually a list of pools; for this reason, the pool definition is enclosed in square brackets, even though only one range of addresses is specified.
+
+Each `pool` is a structure that contains the parameters that describe a single pool. Currently there is only one parameter, `pool`, which gives the range of addresses in the pool.
+
+It is possible to define more than one pool in a subnet; continuing the previous example, further assume that 192.0.2.64/26 should also be managed by the server. It could be written as 192.0.2.64 to 192.0.2.127, or it can be expressed more simply as 192.0.2.64/26. Both formats are supported by Dhcp4 and can be mixed in the pool list. For example, the following pools could be defined:
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+            "subnet": "192.0.2.0/24",
+            "pools": [
+                { "pool": "192.0.2.10-192.0.2.20" },
+                { "pool": "192.0.2.64/26" }
+            ],
+            ...
+        }
+    ],
+    ...
+}
+```
+
+White space in pool definitions is ignored, so spaces before and after the comma are optional. They can be used to improve readability.
+
+The number of pools is not limited, but for performance reasons it is recommended to use as few as possible.
+
+The server may be configured to serve more than one subnet. To add a second subnet, use a command similar to the following:
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+            "subnet": "192.0.2.0/24",
+            "pools": [ { "pool": "192.0.2.1 - 192.0.2.200" } ],
+            ...
+        },
+        {
+            "subnet": "192.0.3.0/24",
+            "pools": [ { "pool": "192.0.3.100 - 192.0.3.200" } ],
+            ...
+        },
+        {
+            "subnet": "192.0.4.0/24",
+            "pools": [ { "pool": "192.0.4.1 - 192.0.4.254" } ],
+            ...
+        }
+    ]
+}
+```
+
+When configuring a DHCPv4 server using prefix/length notation, please pay attention to the boundary values. When specifying that the server can use a given pool, it is also able to allocate the first (typically a network address) and the last (typically a broadcast address) address from that pool. In the aforementioned example of pool 192.0.3.0/24, both the 192.0.3.0 and 192.0.3.255 addresses may be assigned as well. This may be invalid in some network configurations. To avoid this, use the min-max notation.
+
+Note:
+
+Here are some liberties and limits to the values that subnets and pools can take in Kea configurations that are out of the ordinary:
+
+| Kea configuration case | Allowed | Comment |
+|------------------------|---------|---------|
+| Overlapping subnets | Yes | Administrator should consider how clients are matched to these subnets. |
+| Overlapping pools in one subnet | No | Startup error: DHCP4_PARSER_FAIL |
+| Overlapping address pools in different subnets | Yes | Specifying the same address pool in different subnets can be used as an equivalent of the global address pool. In that case, the server can assign addresses from the same range regardless of the client's subnet. If an address from such a pool is assigned to a client in one subnet, the same address will be renewed for this client if it moves to another subnet. Another client in a different subnet will not be assigned an address already assigned to the client in any of the subnets. |
+| Pools not matching the subnet prefix | No | Startup error: DHCP4_PARSER_FAIL |
+
+### Sending T1 (Option 58) and T2 (Option 59)
+
+According to [RFC 2131](https://tools.ietf.org/html/rfc2131), servers should send values for T1 and T2 that are 50% and 87.5% of the lease lifetime, respectively. By default, `kea-dhcp4` does not send either value; it can be configured to send values that are either specified explicitly or that are calculated as percentages of the lease time. The server's behavior is governed by a combination of configuration parameters, two of which have already been mentioned. To send specific, fixed values use the following two parameters:
+
+- `renew-timer` - specifies the value of T1 in seconds.
+- `rebind-timer` - specifies the value of T2 in seconds.
+
+The server only sends T2 if it is less than the valid lease time. T1 is only sent if T2 is being sent and T1 is less than T2; or T2 is not being sent and T1 is less than the valid lease time.
+
+Calculating the values is controlled by the following three parameters.
+
+- `calculate-tee-times` - when true, T1 and T2 are calculated as percentages of the valid lease time. It defaults to false.
+
+- `t1-percent` - the percentage of the valid lease time to use for T1. It is expressed as a real number between 0.0 and 1.0 and must be less than `t2-percent`. The default value is 0.50, per RFC 2131.
+
+- `t2-percent` - the percentage of the valid lease time to use for T2. It is expressed as a real number between 0.0 and 1.0 and must be greater than `t1-percent`. The default value is .875, per RFC 2131.
+
+Note:
+
+In the event that both explicit values are specified and calculate-tee-times is true, the server will use the explicit values. Administrators with a setup where some subnets or shared-networks use explicit values and some use calculated values must not define the explicit values at any level higher than where they will be used. Inheriting them from too high a scope, such as global, will cause them to have explicit values at every level underneath (shared-networks and subnets), effectively disabling calculated values.
+
+### Standard DHCPv4 Options
+
+One of the major features of the DHCPv4 server is the ability to provide configuration options to clients. Most of the options are sent by the server only if the client explicitly requests them using the Parameter Request List option. Those that do not require inclusion in the Parameter Request List option are commonly used options, e.g. "Domain Server", and options which require special behavior, e.g. "Client FQDN", which is returned to the client if the client has included this option in its message to the server.
+
+[List of standard DHCPv4 options configurable by an administrator](https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#dhcp4-std-options-list) comprises the list of the standard DHCPv4 options whose values can be configured using the configuration structures described in this section. This table excludes the options which require special processing and thus cannot be configured with fixed values. The last column of the table indicates which options can be sent by the server even when they are not requested in the Parameter Request List option, and those which are sent only when explicitly requested.
+
+The following example shows how to configure the addresses of DNS servers, which is one of the most frequently used options. Options specified in this way are considered global and apply to all configured subnets.
+
+```json
+"Dhcp4": {
+    "option-data": [
+        {
+           "name": "domain-name-servers",
+           "code": 6,
+           "space": "dhcp4",
+           "csv-format": true,
+           "data": "192.0.2.1, 192.0.2.2"
+        },
+        ...
+    ]
+}
+```
+
+Note that either `name` or `code` is required; there is no need to specify both. `space` has a default value of `dhcp4`, so this can be skipped as well if a regular (not encapsulated) DHCPv4 option is defined. Finally, `csv-format` defaults to `true`, so it too can be skipped, unless the option value is specified as a hexadecimal string. Therefore, the above example can be simplified to:
+
+```json
+"Dhcp4": {
+    "option-data": [
+        {
+           "name": "domain-name-servers",
+           "data": "192.0.2.1, 192.0.2.2"
+        },
+        ...
+    ]
+}
+```
+
+Defined options are added to the response when the client requests them, with a few exceptions which are always added. To enforce the addition of a particular option, set the `always-send` flag to `true` as in:
+
+```json
+"Dhcp4": {
+    "option-data": [
+        {
+           "name": "domain-name-servers",
+           "data": "192.0.2.1, 192.0.2.2",
+           "always-send": true
+        },
+        ...
+    ]
+}
+```
+
+The effect is the same as if the client added the option code in the Parameter Request List option (or its equivalent for vendor options):
+
+```json
+"Dhcp4": {
+    "option-data": [
+        {
+           "name": "domain-name-servers",
+           "data": "192.0.2.1, 192.0.2.2",
+           "always-send": true
+        },
+        ...
+    ],
+    "subnet4": [
+        {
+           "subnet": "192.0.3.0/24",
+           "option-data": [
+               {
+                   "name": "domain-name-servers",
+                   "data": "192.0.3.1, 192.0.3.2"
+               },
+               ...
+           ],
+           ...
+        },
+        ...
+    ],
+    ...
+}
+```
+
+The `domain-name-servers` option is always added to responses (the always-send is "sticky"), but the value is the subnet one when the client is localized in the subnet.
+
+The `name` parameter specifies the option name. For a list of currently supported names, see [List of standard DHCPv4 options configurable by an administrator](https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#dhcp4-std-options-list) below. The `code` parameter specifies the option code, which must match one of the values from that list. The next line specifies the option space, which must always be set to `dhcp4` as these are standard DHCPv4 options. For other option spaces, including custom option spaces, see [Nested DHCPv4 Options (Custom Option Spaces)](https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#dhcp4-option-spaces). The next line specifies the format in which the data will be entered; use of CSV (comma-separated values) is recommended. The sixth line gives the actual value to be sent to clients. The data parameter is specified as normal text, with values separated by commas if more than one value is allowed.
+
+Options can also be configured as hexadecimal values. If `csv-format` is set to `false`, option data must be specified as a hexadecimal string. The following commands configure the `domain-name-servers` option for all subnets with the following addresses: 192.0.3.1 and 192.0.3.2. Note that `csv-format` is set to `false`.
+
+```json
+"Dhcp4": {
+    "option-data": [
+        {
+            "name": "domain-name-servers",
+            "code": 6,
+            "space": "dhcp4",
+            "csv-format": false,
+            "data": "C0 00 03 01 C0 00 03 02"
+        },
+        ...
+    ],
+    ...
+}
+```
+
+Kea supports the following formats when specifying hexadecimal data:
+
+- `Delimited octets` - one or more octets separated by either colons or spaces (":" or " "). While each octet may contain one or two digits, we strongly recommend always using two digits. Valid examples are "ab:cd:ef" and "ab cd ef".
+
+- `String of digits` - a continuous string of hexadecimal digits with or without a "0x" prefix. Valid examples are "0xabcdef" and "abcdef".
+
+Care should be taken to use proper encoding when using hexadecimal format; Kea's ability to validate data correctness in hexadecimal is limited.
+
+It is also possible to specify data for binary options as a single-quoted text string within double quotes as shown (note that `csv-format` must be set to `false`):
+
+```json
+"Dhcp4": {
+    "option-data": [
+        {
+            "name": "user-class",
+            "code": 77,
+            "space": "dhcp4",
+            "csv-format": false,
+            "data": "'convert this text to binary'"
+        },
+        ...
+    ],
+    ...
+}
+```
+
+
+
+
+
+
+
+
 
 
 
