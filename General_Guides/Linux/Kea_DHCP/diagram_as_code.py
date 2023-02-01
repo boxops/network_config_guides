@@ -1,12 +1,11 @@
 # Purpose:
-# Generate a diagram as code using the diagrams package
+# Generate a diagram from code using the diagrams package
+
+# Required Packages:
+# python3 -m pip install diagrams
 
 # Usage:
 # python3 diagram_as_code.py
-
-# Required Packages:
-# python3 -m pip install graphviz
-# python3 -m pip install diagrams
 
 from diagrams import Cluster, Diagram
 from diagrams.custom import Custom
@@ -16,7 +15,7 @@ from diagrams.onprem.monitoring import Grafana
 from diagrams.onprem.network import Nginx
 
 with Diagram("Kea DHCP High Availability Servers with Kea Stork Monitoring", show=False):
-    # stork = Custom("Stork", "./stork-square-200px.png")
+    # stork = Custom("Stork", "stork-square-200px.png")
 
     with Cluster("VMware vSphere"):
         ingress = Nginx("Ingress")
@@ -48,11 +47,12 @@ with Diagram("Kea DHCP High Availability Servers with Kea Stork Monitoring", sho
     primary_dhcpv6 >> primary_dbv6
     secondary_dhcpv4 >> secondary_dbv4
     secondary_dhcpv6 >> secondary_dbv6
-    # connect primary_db to stork_db and secondary_db to stork_db
+    # connect primary_db to stork_hooks and secondary_db to stork_hooks
     primary_dbv4 >> stork_hooks
     primary_dbv6 >> stork_hooks
     secondary_dbv4 >> stork_hooks
     secondary_dbv6 >> stork_hooks
-    # connect stor_db to stork
+    # connect stork_hooks to stork_db
     stork_hooks >> stork_db
+    # connect stork_db to stork
     stork_db >> stork
