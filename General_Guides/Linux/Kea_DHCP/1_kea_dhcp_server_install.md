@@ -126,13 +126,15 @@ Notes:
 | RPM Service Name | Description |
 |------------------|-------------|
 | isc-kea-dhcp4-server | DHCPv4 Server
-| isc-kea-dhcp4-server | DHCPv6 Server
-| isc-kea-dhcp4-server | DHCP DDNS Server
+| isc-kea-dhcp6-server | DHCPv6 Server
+| isc-kea-dhcp-ddns-server | DHCP DDNS Server
 | isc-kea-ctrl-agent | Kea Control Agent - REST API
 
 ### Service Management
 
 To start, stop, or restart Kea daemons, systemctl should be used on Debian/Ubuntu and RPM based systems, and OpenRC should be used on Alpine.
+
+#### Kea DHCPv4 Server Service Management
 
 In the following examples, the kea-dhcp4 service is being enabled, started, and stopped. Please replace kea-dhcp4 with the service you wish to manage.
 
@@ -148,16 +150,43 @@ Start the Kea daemon:
 sudo systemctl start isc-kea-dhcp4-server
 ```
 
-Stop the Kea daemon:
-
-```bash
-sudo systemctl stop isc-kea-dhcp4-server
-```
-
 Show the status of the Kea daemon:
 
 ```bash
 sudo systemctl status isc-kea-dhcp4-server
+```
+
+#### Kea Control Agent - REST API Service Management
+
+The `/etc/kea/kea-ctrl-agent.conf` needs to be changed before enabling and starting the REST API.
+
+In the following configuration example, the `http-host` of the `Control-agent` is set to an IP where the Kea DHCP server is listening on. The default `http-port` is 8000.
+
+```json
+"Control-agent": {
+    "http-host": "192.168.30.29",
+    "http-port": 8000,
+```
+
+Notes:
+
+If enabling HA and multi-threading, the 8000 port is used by the HA hook library http listener. When using HA hook library with multi-threading to function, make sure the port used by dedicated
+listener is different (e.g. 8001) than the one used by CA. Note the commands should still be sent via CA. The dedicated listener is specifically for HA updates only.
+
+Enable and start the Kea control agent:
+
+```bash
+sudo systemctl enable isc-kea-ctrl-agent
+```
+
+```bash
+sudo systemctl start isc-kea-ctrl-agent
+```
+
+Show the status of the Kea control agent:
+
+```bash
+sudo systemctl status isc-kea-ctrl-agent
 ```
 
 ### Installation Hierarchy
