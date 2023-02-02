@@ -1090,12 +1090,745 @@ It is also possible to specify data for binary options as a single-quoted text s
 }
 ```
 
+Most of the parameters in the option-data structure are optional and can be omitted in some circumstances.
+
+It is possible to specify or override options on a per-subnet basis. If clients connected to most subnets are expected to get the same values of a given option, administrators should use global options. On the other hand, if different values are used in each subnet, it does not make sense to specify global option values; rather, only subnet-specific ones should be set.
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+            "option-data": [
+                {
+                    "name": "domain-name-servers",
+                    "code": 6,
+                    "space": "dhcp4",
+                    "csv-format": true,
+                    "data": "192.0.2.3"
+                },
+                ...
+            ],
+            ...
+        },
+        ...
+    ],
+    ...
+}
+```
+
+In some cases it is useful to associate some options with an address pool from which a client is assigned a lease. Pool-specific option values override subnet-specific and global option values; it is not possible to prioritize assignment of pool-specific options via the order of pool declarations in the server configuration.
+
+The following configuration snippet demonstrates how to specify the DNS servers option, which is assigned to a client only if the client obtains an address from the given pool:
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+            "pools": [
+                {
+                    "pool": "192.0.2.1 - 192.0.2.200",
+                    "option-data": [
+                        {
+                            "name": "domain-name-servers",
+                            "data": "192.0.2.3"
+                         },
+                         ...
+                    ],
+                    ...
+                },
+                ...
+            ],
+            ...
+        },
+        ...
+    ],
+    ...
+}
+```
+
+Options can also be specified in class or host-reservation scope. The current Kea options precedence order is (from most important to least): host reservation, pool, subnet, shared network, class, global.
+
+When a data field is a string and that string contains the comma (`,`; U+002C) character, the comma must be escaped with two backslashes (`\\,`; U+005C). This double escape is required because both the routine splitting of CSV data into fields and JSON use the same escape character; a single escape (`\,`) would make the JSON invalid. For example, the string "foo,bar" must be represented as:
+
+```json
+"Dhcp4": {
+    "subnet4": [
+        {
+            "pools": [
+                {
+                    "option-data": [
+                        {
+                            "name": "boot-file-name",
+                            "data": "foo\\,bar"
+                        }
+                    ]
+                },
+                ...
+            ],
+            ...
+        },
+        ...
+    ],
+    ...
+}
+```
+
+Some options are designated as arrays, which means that more than one value is allowed. For example, the option `time-servers` allows the specification of more than one IPv4 address, enabling clients to obtain the addresses of multiple NTP servers.
+
+[Custom DHCPv4 Options](https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#dhcp4-custom-options) describes the configuration syntax to create custom option definitions (formats). Creation of custom definitions for standard options is generally not permitted, even if the definition being created matches the actual option format defined in the RFCs. There is an exception to this rule for standard options for which Kea currently does not provide a definition. To use such options, a server administrator must create a definition as described in Custom DHCPv4 Options in the `dhcp4` option space. This definition should match the option format described in the relevant RFC, but the configuration mechanism will allow any option format as it currently has no means to validate it.
+
+The currently supported standard DHCPv4 options are listed in the table below. "Name" and "Code" are the values that should be used as a name/code in the option-data structures. "Type" designates the format of the data; the meanings of the various types are given in List of standard DHCP option types.
 
 
+List of standard DHCPv4 options configurable by an administrator
 
+| Name | Code | Type | Array? | Returned if not requested? |
+|------|------|------|--------|----------------------------|
+| time-offset | 2 | int32 | false | false |
+| routers | 3 | ipv4-address | true | true |
+| time-servers | 4 | ipv4-address | true | false |
+| name-servers | 5 | ipv4-address | true | false |
+| domain-name-servers | 6 | ipv4-address | true | true |
+| log-servers | 7 | ipv4-address | true | false |
+| cookie-servers | 8 | ipv4-address | true | false |
+| lpr-servers | 9 | ipv4-address | true | false |
+| impress-servers | 10 | ipv4-address | true | false |
+| resource-location-servers | 11 | ipv4-address | true | false |
+| boot-size | 13 | uint16 | false | false |
+| merit-dump | 14 | string | false | false |
+| domain-name | 15 | fqdn | false | true |
+| swap-server | 16 | ipv4-address | false | false |
+| root-path | 17 | string | false | false |
+| extensions-path | 18 | string | false | false |
+| ip-forwarding | 19 | boolean | false | false |
+| non-local-source-routing | 20 | boolean | false | false |
+| policy-filter | 21 | ipv4-address | true | false |
+| max-dgram-reassembly | 22 | uint16 | false | false |
+| default-ip-ttl | 23 | uint8 | false | false |
+| path-mtu-aging-timeout | 24 | uint32 | false | false |
+| path-mtu-plateau-table | 25 | uint16 | true | false |
+| interface-mtu | 26 | uint16 | false | false |
+| all-subnets-local | 27 | boolean | false | false |
+| broadcast-address | 28 | ipv4-address | false | false |
+| perform-mask-discovery | 29 | boolean | false | false |
+| mask-supplier | 30 | boolean | false | false |
+| router-discovery | 31 | boolean | false | false |
+| router-solicitation-address | 32 | ipv4-address | false | false |
+| static-routes | 33 | ipv4-address | true | false |
+| trailer-encapsulation | 34 | boolean | false | false |
+| arp-cache-timeout | 35 | uint32 | false | false |
+| ieee802-3-encapsulation | 36 | boolean | false | false |
+| default-tcp-ttl | 37 | uint8 | false | false |
+| tcp-keepalive-interval | 38 | uint32 | false | false |
+| tcp-keepalive-garbage | 39 | boolean | false | false |
+| nis-domain | 40 | string | false | false |
+| nis-servers | 41 | ipv4-address | true | false |
+| ntp-servers | 42 | ipv4-address | true | false |
+| vendor-encapsulated-options | 43 | empty | false | false |
+| netbios-name-servers | 44 | ipv4-address | true | false |
+| netbios-dd-server | 45 | ipv4-address | true | false |
+| netbios-node-type | 46 | uint8 | false | false |
+| netbios-scope | 47 | string | false | false |
+| font-servers | 48 | ipv4-address | true | false | 
+| x-display-manager | 49 | ipv4-address | true | false |
+| dhcp-option-overload | 52 | uint8 | false | false |
+| dhcp-server-identifier | 54 | ipv4-address | false | true |
+| dhcp-message | 56 | string | false | false |
+| dhcp-max-message-size | 57 | uint16 | false | false |
+| vendor-class-identifier | 60 | string | false | false |
+| nwip-domain-name | 62 | string | false | false |
+| nwip-suboptions | 63 | binary | false | false |
+| nisplus-domain-name | 64 | string | false | false |
+| nisplus-servers | 65 | ipv4-address | true | false |
+| tftp-server-name | 66 | string | false | false |
 
+boot-file-name
+	
 
+67
+	
 
+string
+	
+
+false
+	
+
+false
+
+mobile-ip-home-agent
+	
+
+68
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+smtp-server
+	
+
+69
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+pop-server
+	
+
+70
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+nntp-server
+	
+
+71
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+www-server
+	
+
+72
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+finger-server
+	
+
+73
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+irc-server
+	
+
+74
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+streettalk-server
+	
+
+75
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+streettalk-directory-assistance-server
+	
+
+76
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+user-class
+	
+
+77
+	
+
+binary
+	
+
+false
+	
+
+false
+
+slp-directory-agent
+	
+
+78
+	
+
+record (boolean, ipv4-address)
+	
+
+true
+	
+
+false
+
+slp-service-scope
+	
+
+79
+	
+
+record (boolean, string)
+	
+
+false
+	
+
+false
+
+nds-server
+	
+
+85
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+nds-tree-name
+	
+
+86
+	
+
+string
+	
+
+false
+	
+
+false
+
+nds-context
+	
+
+87
+	
+
+string
+	
+
+false
+	
+
+false
+
+bcms-controller-names
+	
+
+88
+	
+
+fqdn
+	
+
+true
+	
+
+false
+
+bcms-controller-address
+	
+
+89
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+client-system
+	
+
+93
+	
+
+uint16
+	
+
+true
+	
+
+false
+
+client-ndi
+	
+
+94
+	
+
+record (uint8, uint8, uint8)
+	
+
+false
+	
+
+false
+
+uuid-guid
+	
+
+97
+	
+
+record (uint8, binary)
+	
+
+false
+	
+
+false
+
+uap-servers
+	
+
+98
+	
+
+string
+	
+
+false
+	
+
+false
+
+geoconf-civic
+	
+
+99
+	
+
+binary
+	
+
+false
+	
+
+false
+
+pcode
+	
+
+100
+	
+
+string
+	
+
+false
+	
+
+false
+
+tcode
+	
+
+101
+	
+
+string
+	
+
+false
+	
+
+false
+
+v6-only-preferred
+	
+
+108
+	
+
+uint32
+	
+
+false
+	
+
+false
+
+netinfo-server-address
+	
+
+112
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+netinfo-server-tag
+	
+
+113
+	
+
+string
+	
+
+false
+	
+
+false
+
+v4-captive-portal
+	
+
+114
+	
+
+string
+	
+
+false
+	
+
+false
+
+auto-config
+	
+
+116
+	
+
+uint8
+	
+
+false
+	
+
+false
+
+name-service-search
+	
+
+117
+	
+
+uint16
+	
+
+true
+	
+
+false
+
+domain-search
+	
+
+119
+	
+
+fqdn
+	
+
+true
+	
+
+false
+
+vivco-suboptions
+	
+
+124
+	
+
+record (uint32, binary)
+	
+
+false
+	
+
+false
+
+vivso-suboptions
+	
+
+125
+	
+
+uint32
+	
+
+false
+	
+
+false
+
+pana-agent
+	
+
+136
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+v4-lost
+	
+
+137
+	
+
+fqdn
+	
+
+false
+	
+
+false
+
+capwap-ac-v4
+	
+
+138
+	
+
+ipv4-address
+	
+
+true
+	
+
+false
+
+sip-ua-cs-domains
+	
+
+141
+	
+
+fqdn
+	
+
+true
+	
+
+false
+
+rdnss-selection
+	
+
+146
+	
+
+record (uint8, ipv4-address, ipv4-address, fqdn)
+	
+
+true
+	
+
+false
+
+v4-portparams
+	
+
+159
+	
+
+record (uint8, psid)
+	
+
+false
+	
+
+false
+
+option-6rd
+	
+
+212
+	
+
+record (uint8, uint8, ipv6-address, ipv4-address)
+	
+
+true
+	
+
+false
+
+v4-access-domain
+	
+
+213
+	
+
+fqdn
+	
+
+false
+	
+
+false
 
 
 
