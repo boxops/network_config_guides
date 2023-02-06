@@ -116,6 +116,119 @@ stork-tool db-password-gen
 
 Expected output: generated new database password password=\<random-string\>
 
+The newly created database is not ready for use until necessary database migrations are executed. The migrations create tables, indexes, triggers, and functions required by the `Stork Server`. As mentioned above, the server can automatically run the migrations at startup, bringing up the database schema to the latest version. However, if a user wants to run the migrations before starting the server, they can use the `stork-tool`:
+
+```bash
+stork-tool db-init
+```
+
+```bash
+stork-tool db-up
+```
+
+The server requires the latest database version to run, always runs the migration on its own, and refuses to start if the migration fails for any reason. The migration tool is mostly useful for debugging problems with migration, or for migrating the database without actually running the service. For the complete manual page, please see [stork-tool - A Tool for Managing Stork Server](https://stork.readthedocs.io/en/v1.8.0/man/stork-tool.8.html#man-stork-tool).
+
+## Installing From Packages
+
+Stork packages are stored in repositories located on the [Cloudsmith](https://cloudsmith.io/~isc/repos/stork/packages/) service. Both Debian/Ubuntu and RPM packages may be found there.
+
+Detailed instructions for setting up the operating system to use this repository are available under the `Set Me Up` button on the Cloudsmith repository page.
+
+It is possible to install both `stork-agent` and `stork-server` on the same machine. It is useful in small deployments with a single monitored machine, to avoid setting up a dedicated system for the Stork server. In those cases, however, an operator must consider the potential impact of the stork-server on other services running on the same machine.
+
+### Installing the Stork Server on Debian/Ubuntu
+
+The first step for both Debian and Ubuntu is:
+
+```bash
+curl -1sLf 'https://dl.cloudsmith.io/public/isc/stork/cfg/setup/bash.deb.sh' | sudo bash
+```
+
+Next, install the Stork server package:
+
+```bash
+sudo apt -y install isc-stork-server
+```
+
+### Stork Server Setup
+
+Configure the Stork server settings in `/etc/stork/server.env`.
+
+| Note |
+|:-----|
+| The environment file IS NOT read by default if you run the Stork server manually (without using `systemd`). To load the environment variables from this file you should call the `. /etc/stork/server.env` command before executing the binary (in the same shell instance) or run Stork with the `--use-env-file` switch. |
+
+The following settings are required for the database connection (they have a common `STORK_DATABASE_` prefix):
+
+- `STORK_DATABASE_HOST` - the address of a PostgreSQL database; the default is localhost
+- `STORK_DATABASE_PORT` - the port of a PostgreSQL database; the default is 5432
+- `STORK_DATABASE_NAME` - the name of a database; the default is stork
+- `STORK_DATABASE_USER_NAME` - the username for connecting to the database; the default is stork
+- `STORK_DATABASE_PASSWORD` - the password for the username connecting to the database
+
+| Note |
+|:-----|
+| All of the database connection settings have default values, but we strongly recommend protecting the database with a non-default and hard-to-guess password in the production environment. The `STORK_DATABASE_PASSWORD` setting must be adjusted accordingly. |
+
+The remaining settings pertain to the server’s RESTful API configuration (the `STORK_REST_` prefix):
+
+- `STORK_REST_HOST` - the IP address on which the server listens
+- `STORK_REST_PORT` - the port number on which the server listens; the default is 8080
+- `STORK_REST_TLS_CERTIFICATE` - a file with a certificate to use for secure connections
+- `STORK_REST_TLS_PRIVATE_KEY` - a file with a private key to use for secure connections
+- `STORK_REST_TLS_CA_CERTIFICATE` - a certificate authority file used for mutual TLS authentication
+- `STORK_REST_STATIC_FILES_DIR` - a directory with static files served in the user interface
+
+
+| Note |
+|:-----|
+| The `STORK_REST_STATIC_FILES_DIR` should be set to `/usr/share/stork/www` for the Stork Server installed from the binary packages. It’s the default location for the static content. |
+| The Stork agent must trust the REST TLS certificate presented by Stork server. Otherwise, the registration process fails due to invalid Stork Server certificate verification. We strongly recommend using proper, trusted certificates for security reasons. |
+
+The remaining settings pertain to the server’s Prometheus `/metrics` endpoint configuration (the `STORK_SERVER_` prefix is for general purposes):
+
+- `STORK_SERVER_ENABLE_METRICS` - enable the Prometheus metrics collector and /metrics HTTP endpoint
+
+| Warning |
+|:-----|
+| The Prometheus `/metrics` endpoint does not require authentication. Therefore, securing this endpoint from external access is highly recommended to prevent unauthorized parties from gathering the server’s metrics. One way to restrict endpoint access is by using an appropriate HTTP proxy configuration to allow only local access or access from the Prometheus host. Please consult the NGINX example configuration file shipped with Stork. |
+
+With the settings in place, the Stork server service can now be enabled and started:
+
+```bash
+sudo systemctl enable isc-stork-server
+```
+
+```bash
+sudo systemctl start isc-stork-server
+```
+
+To check the status:
+
+```bash
+sudo systemctl status isc-stork-server
+```
+
+| Note |
+|:-----|
+| By default, the Stork server web service is exposed on port 8080 and can be tested using a web browser at [http://localhost:8080](http://localhost:8080). To use a different IP address or port, set the `STORK_REST_HOST` and `STORK_REST_PORT` variables in the `/etc/stork/stork.env` file. |
+
+The Stork server can be configured to run behind an HTTP reverse proxy using `Nginx` or `Apache`. The Stork server package contains an example configuration file for `Nginx`, in `/usr/share/stork/examples/nginx-stork.conf`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Stork Agent Setup
 
 https://cloudsmith.io/~isc/repos/stork/setup/#formats-deb
