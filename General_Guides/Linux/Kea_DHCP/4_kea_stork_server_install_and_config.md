@@ -215,35 +215,78 @@ sudo systemctl status isc-stork-server
 
 The Stork server can be configured to run behind an HTTP reverse proxy using `Nginx` or `Apache`. The Stork server package contains an example configuration file for `Nginx`, in `/usr/share/stork/examples/nginx-stork.conf`.
 
+#### Securing the Database Connection
 
+The PostgreSQL server can be configured to encrypt communications between the clients and the server. Detailed information on how to enable encryption on the database server, and how to create the suitable certificate and key files, is available in the [PostgreSQL documentation](https://www.postgresql.org/docs/14/ssl-tcp.html).
 
+The Stork server supports secure communications with the database. The following configuration settings in the `server.env` file enable and configure communication encryption with the database server. They correspond with the SSL settings provided by `libpq` - the native PostgreSQL client library written in C:
 
+- `STORK_DATABASE_SSLMODE` - the SSL mode for connecting to the database (i.e., `disable`, `require`, `verify-ca`, or `verify-full`); the default is `disable`
+- `STORK_DATABASE_SSLCERT` - the location of the SSL certificate used by the server to connect to the database
+- `STORK_DATABASE_SSLKEY` - the location of the SSL key used by the server to connect to the database
+- `STORK_DATABASE_SSLROOTCERT` - the location of the root certificate file used to verify the database server’s certificate
 
+The default SSL mode setting, `disable`, configures the server to use unencrypted communication with the database. Other settings have the following meanings:
 
+- `require` - use secure communication but do not verify the server’s identity unless the root certificate location is specified and that certificate exists. If the root certificate exists, the behavior is the same as in the case of `verify-ca`.
+- `verify-ca` - use secure communication and verify the server’s identity by checking it against the root certificate stored on the Stork server machine.
+- `verify-full` - use secure communication and verify the server’s identity against the root certificate. In addition, check that the server hostname matches the name stored in the certificate.
 
+Specifying the SSL certificate and key location is optional. If they are not specified, the Stork server uses the ones from the current user’s home directory: `~/.postgresql/postgresql.crt` and `~/.postgresql/postgresql.key`. If they are not present, Stork tries to find suitable keys in common system locations.
 
+### Installing the Stork Agent
 
+There are two ways to install the packaged Stork agent on a monitored machine. The first method is to use the [Cloudsmith](https://cloudsmith.io/~isc/repos/stork/setup/#formats-deb) repository, as with the Stork server installation. The second method, supported since Stork 0.15.0, is to use an installation script provided by the Stork server, which downloads the agent packages embedded in the server package. The preferred installation method depends on the selected agent registration type. Supported registration methods are described in [Securing Connections Between the Stork Server and a Stork Agent](https://stork.readthedocs.io/en/v1.8.0/install.html#secure-server-agent).
 
+#### Stork Agent installation from the Cloudsmith package:
 
-
-
-
-
-## Stork Agent Setup
-
-https://cloudsmith.io/~isc/repos/stork/setup/#formats-deb
-
-### Stork Agent installation from the Cloudsmith package:
-
+```bash
 curl -1sLf \
   'https://dl.cloudsmith.io/public/isc/stork/setup.deb.sh' \
   | sudo -E bash
+```
 
 #### Install the Stork Agent:
 
 ```bash
 sudo apt install isc-stork-agent
 ```
+
+#### Agent Configuration Settings
+
+The following are the Stork agent configuration settings available in the `/etc/stork/agent.env` file after installing the package. All these settings use the `STORK_AGENT_` prefix to indicate that they configure the Stork agent. Configuring Stork using the environment variables is recommended for deployments using `systemd`.
+
+| Note |
+|:-----|
+| The environment file IS NOT read by default if you run the Stork agent manually (without using `systemd`). To load the environment variables from this file you should call the `. /etc/stork/agent.env` command before executing the binary (in the same shell instance) or run Stork with the `--use-env-file` switch. |
+
+The general settings:
+
+- `STORK_AGENT_HOST` - the IP address of the network interface or DNS name which `stork-agent` should use to receive connections from the server; the default is `0.0.0.0` (i.e. listen on all interfaces)
+- `STORK_AGENT_PORT` - the port number the agent should use to receive connections from the server; the default is `8080`
+- `STORK_AGENT_LISTEN_STORK_ONLY` - this enables Stork functionality only, i.e. disables Prometheus exporters; the default is `false`
+- `STORK_AGENT_LISTEN_PROMETHEUS_ONLY` - this enables the Prometheus exporters only, i.e. disables Stork functionality; the default is `false`
+- `STORK_AGENT_SKIP_TLS_CERT_VERIFICATION` - this skips TLS certificate verification when `stork-agent` connects to Kea over TLS and Kea uses self-signed certificates; the default is `false`
+
+The following settings are specific to the Prometheus exporters:
+
+- `STORK_AGENT_PROMETHEUS_KEA_EXPORTER_ADDRESS` - the IP address or hostname the agent should use to receive the connections from Prometheus fetching Kea statistics; default is `0.0.0.0`
+- `STORK_AGENT_PROMETHEUS_KEA_EXPORTER_PORT` - the port the agent should use to receive connections from Prometheus when fetching Kea statistics; the default is `9547`
+- `STORK_AGENT_PROMETHEUS_KEA_EXPORTER_INTERVAL` - specifies how often the agent collects stats from Kea, in seconds; default is `10`
+- `STORK_AGENT_PROMETHEUS_KEA_EXPORTER_PER_SUBNET_STATS` - enable or disable collecting per subnet stats from Kea; default is `true` (collecting enabled). You can use this option to limit the data passed to Prometheus/Grafana in large networks.
+- `STORK_AGENT_PROMETHEUS_BIND9_EXPORTER_ADDRESS` - the IP address or hostname the agent should use to receive the connections from Prometheus fetching BIND9 statistics; default is `0.0.0.0` to listen on for incoming Prometheus connection; default is `0.0.0.0`
+- `STORK_AGENT_PROMETHEUS_BIND9_EXPORTER_PORT` - the port the agent should use to receive the connections from Prometheus fetching BIND9 statistics; default is `9119`
+- `STORK_AGENT_PROMETHEUS_BIND9_EXPORTER_INTERVAL` - specifies how often the agent collects stats from BIND9, in seconds; default is `10`
+
+The last setting is used only when Stork agents register in the Stork server using an agent token:
+
+- `STORK_AGENT_SERVER_URL` - the `stork-server` URL used by the agent to send REST commands to the server during agent registration
+
+| Warning |
+|:--------|
+| `stork-server` does not currently support communication with `stork-agent` via an IPv6 link-local address with zone ID (e.g., `fe80::%eth0`). This means that the `STORK_AGENT_HOST` variable must be set to a DNS name, an IPv4 address, or a non-link-local IPv6 address. |
+
+#### Minimal Agent Configuration
 
 Edit the `/etc/stork/agent.env` file:
 
@@ -255,7 +298,7 @@ STORK_AGENT_HOST=0.0.0.0
 STORK_AGENT_PORT=8080
 ```
 
-### Enable and start the Stork Agent:
+Enable and start the Stork Agent:
 
 ```bash
 sudo systemctl enable isc-stork-agent
@@ -270,6 +313,76 @@ To check the status:
 ```bash
 sudo systemctl status isc-stork-agent
 ```
+
+### Securing Connections Between the Stork Server and a Stork Agent
+
+Connections between the server and the agents are secured using standard cryptography solutions, i.e. PKI and TLS.
+
+The server generates the required keys and certificates during its first startup. They are used to establish safe, encrypted connections between the server and the agents with authentication at both ends of these connections. The agents use the keys and certificates generated by the server to create agent-side keys and certificates, during the agents’ registration procedure described in the next sections. The private key and CSR certificate generated by an agent and signed by the server are used for authentication and connection encryption.
+
+An agent can be registered in the server using one of the two supported methods:
+
+1. using an agent token
+2. using a server token
+
+In the first case, an agent generates a token and passes it to the server requesting registration. The server associates the token with the particular agent. A Stork super administrator must approve the registration request in the web UI, ensuring that the token displayed in the UI matches the agent’s token in the logs. The Stork agent is typically installed from the Cloudsmith repository when this registration method is used.
+
+In the second registration method, a server generates a common token for all new registrations. The super admin must copy the token from the UI and paste it into the agent’s terminal during the interactive agent registration procedure. This registration method does not require any additional approval of the agent’s registration request in the web UI. If the pasted server token is correct, the agent should be authorized in the UI when the interactive registration completes. When this registration method is used, the Stork agent is typically installed using a script that downloads the agent packages embedded in the server.
+
+The applicability of the two methods is described in [Registration Methods Summary](https://stork.readthedocs.io/en/v1.8.0/install.html#registration-methods-summary).
+
+The installation and registration processes using each method are described in the subsequent sections.
+
+#### Securing Connections Between `stork-agent` and the Kea Control Agent
+
+The Kea Control Agent (CA) may be configured to accept connections only over TLS. It requires specifying `trust-anchor`, `cert-file` and `key-file` values in the `kea-ctrl-agent.conf` file. For details, see the [Kea Administrator Reference Manual](https://kea.readthedocs.io/en/latest/index.html).
+
+The Stork agent can communicate with Kea over TLS, via the same certificates that it uses in communication with the Stork server.
+
+The Stork agent by default requires that the Kea Control Agent provide a trusted TLS certificate. If Kea uses a self-signed certificate, the Stork agent can be launched with the `--skip-tls-cert-verification` flag or `STORK_AGENT_SKIP_TLS_CERT_VERIFICATION` environment variable set to 1, to disable Kea certificate verification.
+
+The Kea CA accepts only requests signed with a trusted certificate, when the `cert-required` parameter is set to `true` in the Kea CA configuration file. In this case, the Stork agent must use valid certificates; it cannot use self-signed certificates created during Stork agent registration.
+
+Kea 1.9.0 added support for basic HTTP authentication to control access for incoming REST commands over HTTP. If the Kea CA is configured to use Basic Auth, valid credentials must be provided in the Stork agent credentials file: `/etc/stork/agent-credentials.json`.
+
+By default, this file does not exist, but the `/etc/stork/agent-credentials.json.template` file provides example data. The template file can be renamed by removing the `.template` suffix; then the file can be edited and valid credentials can be provided. The `chown` and `chmod` commands should be used to set the proper permissions; this file contains the secrets, and should be readable/writable only by the user running the Stork agent and any administrators.
+
+| Warning |
+|:--------|
+| Basic HTTP authentication is weak on its own as there are known dictionary attacks, but those attacks require a “man in the middle” to get access to the HTTP traffic. That can be eliminated by using basic HTTP authentication exclusively over TLS. In fact, if possible, using client certificates for TLS is better than using basic HTTP authentication. |
+
+For example:
+
+```json
+{
+   "basic_auth": [
+      {
+         "ip": "127.0.0.1",
+         "port": 8000,
+         "user": "foo",
+         "password": "bar"
+      }
+   ]
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Registration With an Agent Token
 
