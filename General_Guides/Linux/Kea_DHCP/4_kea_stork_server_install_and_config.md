@@ -366,25 +366,183 @@ For example:
 }
 ```
 
+It contains a single object with a single “basic” key. The “basic” value is a list of the Basic Auth credentials. All credentials must contain the values for four keys:
+
+- `ip` - the IPv4 or IPv6 address of the Kea CA. It supports IPv6 abbreviations (e.g. “FF:0000::” is the same as “ff::”).
+- `port` - the Kea Control Agent port number.
+- `user` - the Basic Auth user ID to use in connection with a specific Kea CA.
+- `password` - the Basic Auth password to use in connection with a specific Kea CA.
+
+To apply changes in the credentials file, the `stork-agent` daemon must be restarted.
+
+If the credentials file is invalid, the Stork agent will run but without Basic Auth support. The notice will be indicated with a specific message in the log.
+
+### Option 1: Installation From Cloudsmith and Registration With an Agent Token
+
+The Stork agent installation steps are similar to the Stork server installation steps described in [Installing on Debian/Ubuntu](https://stork.readthedocs.io/en/latest/install.html#install-server-deb). Use one of the following commands depending on the local Linux distribution:
+
+```bash
+sudo apt install isc-stork-agent
+```
+
+Next, specify the required settings in the `/etc/stork/agent.env` file. The `STORK_AGENT_SERVER_URL` should be the URL on which the server receives the REST connections, e.g. `http://stork-server.example.org:8080`. The `STORK_AGENT_HOST` should point to the agent’s address (or name), e.g. `stork-agent.example.org`. Finally, a non-default agent port can be specified with the `STORK_AGENT_PORT`.
 
 
+| Note |
+|:-----|
+| Even though the examples provided in this documentation use the `http` scheme, we highly recommend using secure protocols in production environments. We use `http` in the examples because it usually makes it easier to start testing the software and eliminate all issues unrelated to the use of `https` before it is enabled. |
+
+Enable the agent service:
+
+```bash
+sudo systemctl enable isc-stork-agent
+```
+
+Start the agent service:
+
+```bash
+sudo systemctl start isc-stork-agent
+```
+
+To check the status:
+
+```bash
+sudo systemctl status isc-stork-agent
+```
+
+The following log messages should be returned when the agent successfully sends the registration request to the server:
+
+```
+machine registered
+stored agent signed cert and CA cert
+registration completed successfully
+```
+
+A server administrator must approve the registration request via the web UI before a machine can be monitored. Visit the `Services -> Machines` page in the Stork UI, and click the `Unauthorized` button located above the list of machines on the right side. This list contains all machines pending registration approval. Before authorizing a machine, ensure that the agent token displayed on this list is the same as the agent token in the agent’s logs or the `/var/lib/stork-agent/tokens/agent-token.txt` file. If they match, click on the `Action` button and select `Authorize`. The machine should now be visible on the list of authorized machines.
+
+### Option 2: Installation With a Script and Registration With a Server Token
+
+This section describes how to install an agent using a script and packages downloaded from the Stork server and register the agent using a server token.
+
+Open Stork in the web browser and log in as a user from the “super admin” group. Select `Services` and then `Machines` from the menu. Click on the `How to Install Agent on New Machine` button to display the agent installation instructions. Copy and paste the commands from the displayed window into the terminal on the machine where the agent is installed. These commands are also provided here for convenience:
+
+```bash
+wget http://stork.example.org:8080/stork-install-agent.sh
+```
+
+```bash
+chmod a+x stork-install-agent.sh
+```
+
+```bash
+sudo ./stork-install-agent.sh
+```
+
+`stork.example.org` is an example URL for the Stork server; it must be replaced with the real server URL used in the deployment.
+
+The script downloads an OS-specific agent package from the Stork server (deb or RPM), installs the package, and starts the agent’s registration procedure.
+
+In the agent machine’s terminal, a prompt for a server token is presented:
+
+```bash
+>>>> Server access token (optional):
+```
+
+The server token is available for a super admin user after clicking on the `How to Install Agent on New Machine` button in the `Services -> Machines` page. Copy the server token from the dialog box and paste it in at the prompt displayed on the agent machine.
+
+The following prompt appears next:
+
+```bash
+>>>> IP address or FQDN of the host with Stork Agent (the Stork Server will use it to connect to the Stork Agent):
+```
+
+Specify an IP address or fully qualified domain name (FQDN) that the server should use to reach out to an agent via the secure gRPC channel.
+
+When asked for the port:
+
+```bash
+>>>> Port number that Stork Agent will use to listen on [8080]:
+```
+
+specify the port number for the gRPC connections, or hit Enter if the default port 8080 matches the local settings.
+
+If the registration is successful, the following messages are displayed:
+
+```bash
+machine ping over TLS: OK
+registration completed successfully
+```
+
+Unlike with [Installation From Cloudsmith and Registration With an Agent Token](https://stork.readthedocs.io/en/latest/install.html#register-agent-token-cloudsmith), this registration method does not require approval via the web UI. The machine should already be listed among the authorized machines.
 
 
+### Option 3: Installation With a Script and Registration With an Agent Token
 
+This section describes how to install an agent using a script and packages downloaded from the Stork server and perform the agent’s registration using an agent token. It is an interactive alternative to the procedure described in [Installation From Cloudsmith and Registration With an Agent Token](https://stork.readthedocs.io/en/latest/install.html#register-agent-token-cloudsmith).
 
+Start the interactive registration procedure following the steps in the [Installation With a Script and Registration With a Server Token](https://stork.readthedocs.io/en/latest/install.html#register-server-token-script) section.
 
+In the agent machine’s terminal, a prompt for a server token is presented:
 
+```bash
+>>>> Server access token (optional):
+```
 
+Because this registration method does not use the server token, do not type anything in this prompt. Hit Enter to move on.
 
+The following prompt appears next:
 
+```bash
+>>>> IP address or FQDN of the host with Stork Agent (the Stork Server will use it to connect to the Stork Agent):
+```
 
+Specify an IP address or FQDN that the server should use to reach out to an agent via the secure gRPC channel.
 
+When asked for the port:
 
+```bash
+>>>> Port number that Stork Agent will use to listen on [8080]:
+```
 
+specify the port number for the gRPC connections, or hit Enter if the default port 8080 matches the local settings.
 
+The following log messages should be returned when the agent successfully sends the registration request to the server:
 
+```bash
+machine registered
+stored agent signed cert and CA cert
+registration completed successfully
+```
 
-### Registration With an Agent Token
+As with [Installation From Cloudsmith and Registration With an Agent Token](https://stork.readthedocs.io/en/latest/install.html#register-agent-token-cloudsmith), the agent’s registration request must be approved in the UI to start monitoring the newly registered machine.
+
+### Option 4: Installation From Cloudsmith and Registration With a Server Token
+
+This section describes how to install an agent from the Cloudsmith repository and perform the agent’s registration using a server token. It is an alternative to the procedure described in [Installation With a Script and Registration With a Server Token](https://stork.readthedocs.io/en/latest/install.html#register-server-token-script).
+
+The Stork agent installation steps are similar to the Stork server installation steps described in [Installing on Debian/Ubuntu](https://stork.readthedocs.io/en/latest/install.html#install-server-deb).
+
+```bash
+sudo apt install isc-stork-agent
+```
+
+Enable the agent service:
+
+```bash
+sudo systemctl enable isc-stork-agent
+```
+
+Start the agent service:
+
+```bash
+sudo systemctl start isc-stork-agent
+```
+
+To check the status:
+
+```bash
+sudo systemctl status isc-stork-agent
+```
 
 Register the agent (from the agent terminal) by entering the following (need to be in sudo mode: `sudo su -`):
 
@@ -398,29 +556,33 @@ Enter the answers to the prompts:
 - Stork Agent IP or FDQN
 - Stork Agent Port (default: 8080)
 
-Output:
-
-```
-dhcpadmin@lab-dhcp-primary:/etc/stork$ sudo su -
-root@lab-dhcp-primary:~# su stork-agent -s /bin/sh -c 'stork-agent register -u http://192.168.30.35:8080'
->>>> Server access token (optional):
->>>> IP address or FQDN of the host with Stork Agent (for the Stork Server connection) [lab-dhcp-primary]:
->>>> Port number that Stork Agent will listen on [8080]:
-INFO[2023-01-31 16:32:08]         register.go:160   Agent token stored in /var/lib/stork-agent/tokens/agent-token.txt
-INFO[2023-01-31 16:32:08]         register.go:161   Agent key, agent token, and CSR (re)generated
-INFO[2023-01-31 16:32:08]         register.go:449   =============================================================================
-INFO[2023-01-31 16:32:08]         register.go:450   AGENT TOKEN: 27A00ED54612D6C48723076205AA537A5A9E04EEB74A846E10DEF65AA609A3F9
-INFO[2023-01-31 16:32:08]         register.go:451   =============================================================================
-INFO[2023-01-31 16:32:08]         register.go:454   Authorize the machine in the Stork web UI
-INFO[2023-01-31 16:32:08]         register.go:471   Try to register agent in Stork Server
-INFO[2023-01-31 16:32:08]         register.go:311   Machine registered
-INFO[2023-01-31 16:32:08]         register.go:336   Stored agent-signed cert and CA cert
-INFO[2023-01-31 16:32:08]             main.go:132   Registration completed successfully
-root@lab-dhcp-primary:~#
-
-```
-
 Certs stored in `/var/lib/stork-agent/certs/` after successful registration.
+
+### Registration Methods Summary
+
+Stork supports two different agent-registration methods, described above. Both methods can be used interchangeably, and it is often a matter of preference which one the administrator selects. However, the agent token registration may be more suitable in some situations. This method requires a server URL, agent address (or name), and agent port as registration settings. If they are known upfront, it is possible to prepare a system (or container) image with the agent offline. After starting the image, the agent sends the registration request to the server and awaits authorization in the web UI.
+
+The agent registration with the server token is always manual. It requires copying the token from the web UI, logging into the agent, and pasting the token. Therefore, the registration using the server token is not appropriate when it is impossible or awkward to access the machine’s terminal, e.g. in Docker. On the other hand, the registration using the server token is more straightforward because it does not require unauthorized agents’ approval via the web UI.
+
+If the server token leaks, it poses a risk that rogue agents might register. In that case, the administrator should regenerate the token to prevent the uncontrolled registration of new agents. Regeneration of the token does not affect already-registered agents. The new token must be used for any new registrations.
+
+The server token can be regenerated in the `How to Install Agent on New Machine` dialog box available after navigating to the `Services -> Machines` page.
+
+### Agent Setup Summary
+
+After successful agent setup, the agent periodically tries to detect installed Kea DHCP or BIND9 services on the system. If it finds them, they are reported to the Stork server when it connects to the agent.
+
+Further configuration and usage of the Stork server and the Stork agent are described in the Using Stork chapter.
+
+### Inspecting Keys and Certificates
+
+
+
+
+
+
+
+
 
 TODO
 https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
