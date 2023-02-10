@@ -1,7 +1,5 @@
-Stork Setup for Monitoring the Kea DHCP Server
-==============================================
-
-## Work in Progress...
+Stork Setup for Monitoring Kea DHCP Servers
+===========================================
 
 ### Installation Notes
 
@@ -576,25 +574,51 @@ Further configuration and usage of the Stork server and the Stork agent are desc
 
 ### Inspecting Keys and Certificates
 
+The Stork server maintains TLS keys and certificates internally to secure the communication between `stork-server` and any agents. They can be inspected and exported using `stork-tool`, with a command such as:
 
+```bash
+stork-tool cert-export --db-url postgresql://user:pass@localhost/dbname -f srvcert -o srv-cert.pem
+```
 
+The above command may fail if the database password contains any characters requiring URL encoding. In this case, a command line with multiple switches can be used instead:
 
+```bash
+stork-tool cert-export --db-user user --db-password pass --db-host localhost --db-name dbname -f srvcert -o srv-cert.pem
+```
 
+The certificates and secret keys can be inspected using OpenSSL, using commands such as `openssl x509 -noout -text -in srv-cert.pem` (for the certificates) and `openssl ec -noout -text -in cakey` (for the keys).
 
+There are five secrets that can be exported or imported: the Certificate Authority secret key (`cakey`), the Certificate Authority certificate (`cacert`), the Stork server private key (`srvkey`), the Stork server certificate (`srvcert`), and a server token (`srvtkn`).
 
+For more details, please see stork-tool - [A Tool for Managing Stork Server](https://stork.readthedocs.io/en/latest/man/stork-tool.8.html#man-stork-tool).
 
+### Using External Keys and Certificates
 
-TODO
-https://stork.readthedocs.io/en/v1.8.0/install.html#installing-from-packages
+It is possible to use external TLS keys and certificates. They can be imported to the Stork server using `stork-tool`:
 
+```bash
+stork-tool cert-import --db-url postgresql://user:pass@localhost/dbname -f srvcert -i srv-cert.pem
+```
 
+The above command may fail if the database password contains any characters requiring URL encoding. In this case, a command line with multiple switches can be used instead:
 
+```bash
+stork-tool cert-import --db-user user --db-password pass --db-host localhost --db-name dbname -f srvcert -i srv-cert.pem
+```
 
+Both the Certificate Authority key and the Certificate Authority certificate must be changed at the same time, as the certificate depends on the key. If they are changed, then the server key and certificate must also be changed.
 
+The ability to use external certificates and keys is considered experimental.
 
+For more details, please see stork-tool - [A Tool for Managing Stork Server](https://stork.readthedocs.io/en/latest/man/stork-tool.8.html#man-stork-tool).
 
+### Upgrading
 
+Due to the new security model introduced with TLS in Stork 0.15.0, upgrades from versions 0.14.0 and earlier require the agents to be re-registered.
 
+The server upgrade procedure is the same as the initial installation procedure.
+
+Install the new packages on the server. Installation scripts in the deb/RPM package will perform the required database and other migrations.
 
 
 ## References
