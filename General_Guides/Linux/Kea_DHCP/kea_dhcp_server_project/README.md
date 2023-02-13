@@ -28,36 +28,33 @@ The setup is not expected to scale automatically. This example uses 4 threads fo
 
 The assumption is that there are two hosts that are running the Kea setup:
 
-    192.168.1.2 - primary HA server (active, handles all the traffic)
-
-    192.168.1.3 - secondary HA server (passive, ready to take over if the primary fails)
+- 192.168.1.2 - primary HA server (active, handles all the traffic)
+- 192.168.1.3 - secondary HA server (passive, ready to take over if the primary fails)
 
 The network is 192.168.1.0/24. It is assumed that 192.168.1.1 is the default router.
 
 The whole subnet is split into dynamic pools:
 
-    192.168.1.100 - 192.168.1.199 - this is the dynamic pool. When new devices appear in the network, they are assigned dynamic addresses from this pool.
+- 192.168.1.100 - 192.168.1.199 - this is the dynamic pool. When new devices appear in the network, they are assigned dynamic addresses from this pool.
 
 To deploy this setup, follow the steps provided in the power user home setup with the following distinctions:
 
-    Install CA only if the administrator is planning to manage Kea using RESTful API. Otherwise, the High Availability Kea server with multi-threading does not require CA to run.
+1. Install CA only if the administrator is planning to manage Kea using RESTful API. Otherwise, the High Availability Kea server with multi-threading does not require CA to run.
+2. Alter the following to match the local setup:
 
-    Alter the following to match the local setup:
+- the paths to `trust-anchor`, `cert-file`, `key-file` must be set to the respective values corresponding to the deployment machine.
+- the addressing, if using something other than 192.168.1.0/24. Make sure the CA port configuration (`http-host` and `http-port` in `kea-ca.conf`) is different than the DHCPv4 server configuration (`url` in `hook-libraries/parameters/high-availability/peers` in `kea-dhcp4.conf`). The CA is used to handle only management commands, as the HA module sends lease updates using the dedicated HTTP listener to the peer.
 
-        the paths to trust-anchor, cert-file, key-file must be set to the respective values corresponding to the deployment machine.
+3. Verify the communication between the HA peers by checking the Kea logs.
 
-        the addressing, if using something other than 192.168.1.0/24. Make sure the CA port configuration (http-host and http-port in kea-ca.conf) is different than the DHCPv4 server configuration (url in hook-libraries/parameters/high-availability/peers in kea-dhcp4.conf). The CA is used to handle only management commands, as the HA module sends lease updates using the dedicated HTTP listener to the peer.
+4. Verify that communication between the hosts works in the opposite direction as well (host-2 can connect to host-1), by repeating step 3 from host-2 using host-1's IP address and port.
 
-    Verify the communication between the HA peers by checking the Kea logs.
-
-    Verify that communication between the hosts works in the opposite direction as well (host-2 can connect to host-1), by repeating step 3 from host-2 using host-1's IP address and port.
-
-    Install the CA and DHCPv4 on host-2, as in steps 1 and 2. The config file for the standby server is very similar to the one on the primary server, other than the definition of the this-server-name field (and possibly the interface names).
+5. Install the CA and DHCPv4 on host-2, as in steps 1 and 2. The config file for the standby server is very similar to the one on the primary server, other than the definition of the `this-server-name` field (and possibly the interface names).
 
 ## Possible Extensions
 
 The proposed configuration is somewhat basic, but functional. Once it is set up and running, administrators may wish to consider the following changes:
 
-    if using a database, configuring TLS for the database backend (either for lease, host, configuration backend or forensic logging) is also possible. See [Database Connectivity](https://kea.readthedocs.io/en/latest/arm/database-connectivity.html#database-connectivity) for more information.
+- if using a database, configuring TLS for the database backend (either for lease, host, configuration backend or forensic logging) is also possible. See [Database Connectivity](https://kea.readthedocs.io/en/latest/arm/database-connectivity.html#database-connectivity) for more information.
 
 Some tweaking of these templates may be required to match specific system needs: at a minimum, the lines highlighted in yellow must be adjusted to match the actual deployment.
