@@ -1,9 +1,9 @@
 # List of Kea Tools with Examples
 
 
-`kea-dhcp4` - [DHCPv4 server in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-dhcp4.8.html)
+## `kea-dhcp4` - [DHCPv4 server in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-dhcp4.8.html)
 
-## Command options:
+### Command options:
 
 ```
 Kea DHCPv4 server, version 2.2.0 (stable)
@@ -19,7 +19,7 @@ Usage: kea-dhcp4 -[v|V|W] [-d] [-{c|t} cfgfile] [-p number] [-P number]
   -P number: specify non-standard client port number 1-65535 (useful for testing only)
 ```
 
-## Examples
+### Examples
 
 ### Check the config file syntax:
 
@@ -27,9 +27,9 @@ Usage: kea-dhcp4 -[v|V|W] [-d] [-{c|t} cfgfile] [-p number] [-P number]
 kea-dhcp4 -t /etc/kea/kea-dhcp4.conf
 ```
 
-`kea-dhcp6` - [DHCPv6 server in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-dhcp6.8.html)
+## `kea-dhcp6` - [DHCPv6 server in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-dhcp6.8.html)
 
-## Command options:
+### Command options:
 
 ```
 Kea DHCPv6 server, version 2.2.0 (stable)
@@ -45,7 +45,7 @@ Usage: kea-dhcp6 -[v|V|W] [-d] [-{c|t} cfgfile] [-p number] [-P number]
   -P number: specify non-standard client port number 1-65535 (useful for testing only)
 ```
 
-## Examples
+### Examples
 
 ### Check the config file syntax:
 
@@ -54,9 +54,9 @@ kea-dhcp6 -t /etc/kea/kea-dhcp6.conf
 ```
 
 
-`kea-ctrl-agent` - [Control Agent process in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-ctrl-agent.8.html)
+## `kea-ctrl-agent` - [Control Agent process in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-ctrl-agent.8.html)
 
-## Command options:
+### Command options:
 
 ```
 Usage: kea-ctrl-agent
@@ -68,7 +68,7 @@ Usage: kea-ctrl-agent
   -t <config file name> : check the configuration file and exit
 ```
 
-## Examples
+### Examples
 
 ### Check the config file syntax:
 
@@ -76,15 +76,15 @@ Usage: kea-ctrl-agent
 kea-ctrl-agent -t /etc/kea/kea-ctrl-agent.conf
 ```
 
-`keactrl` - [Shell script for managing Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/keactrl.8.html)
+## `keactrl` - [Shell script for managing Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/keactrl.8.html)
 
-## Command options:
+### Command options:
 
-## Examples
+### Examples
 
-`kea-admin` - [Shell script for managing Kea databases](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-admin.8.html)
+## `kea-admin` - [Shell script for managing Kea databases](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-admin.8.html)
 
-## Command options:
+### Command options:
 
 ```
 kea-admin 2.2.0
@@ -127,7 +127,7 @@ PARAMETERS: Parameters are optional in general, but may be required
      -y or --yes - assume yes on overwriting temporary files
 ```
 
-## Examples
+### Examples
 
 ### Dump the leases into a text file from a database
 
@@ -135,9 +135,9 @@ PARAMETERS: Parameters are optional in general, but may be required
 sudo kea-admin lease-dump pgsql -h localhost -P 5432 -u admin -p supersecretdatabasepassword -n dhcp -4 -o /var/lib/kea/kea-leases4-dump.txt
 ```
 
-`kea-dhcp-ddns` - [DHCP-DDNS process in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-dhcp-ddns.8.html)
+## `kea-dhcp-ddns` - [DHCP-DDNS process in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-dhcp-ddns.8.html)
 
-## Command options:
+### Command options:
 
 ```
 Usage: kea-dhcp-ddns
@@ -149,11 +149,11 @@ Usage: kea-dhcp-ddns
   -t <config file name> : check the configuration file and exit
 ```
 
-## Examples
+### Examples
 
-`kea-lfc` - [Lease File Cleanup process in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-lfc.8.html)
+## `kea-lfc` - [Lease File Cleanup process in Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-lfc.8.html)
 
-## Command options:
+### Command options:
 
 ```
 Usage: kea-lfc
@@ -171,11 +171,11 @@ Usage: kea-lfc
    -h: print this message 
 ```
 
-## Examples
+### Examples
 
-`kea-shell` - [Text client for Control Agent process](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-shell.8.html)
+## `kea-shell` - [Text client for Control Agent process](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-shell.8.html)
 
-## Command options:
+### Command options:
 
 ```
 usage: kea-shell [-h] [--host HOST] [--port PORT] [--path PATH] [--ca CA] [--cert CERT] [--key KEY] [--timeout TIMEOUT] [--service [SERVICE]] [--auth-user AUTH_USER]
@@ -204,11 +204,23 @@ options:
   -v                    Prints version
 ```
 
-## Examples
+### Examples
 
-`kea-netconf` - [NETCONF agent for configuring Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-netconf.8.html)
+### Return the JSON data from the Kea-Modules REST API:
 
-## Command options:
+```
+sudo kea-shell --service dhcp4 --host 192.168.30.32 --port 8000 version-get | jq
+```
+
+### Reading configuration data
+
+```
+curl -X POST -H "Content-Type: application/json" -d '{ "command": "config-get", "service": [ "dhcp4" ] }' http://192.168.30.32:8000 | jq
+```
+
+## `kea-netconf` - [NETCONF agent for configuring Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-netconf.8.html)
+
+### Command options:
 
 ```
 Usage: kea-netconf
@@ -220,11 +232,11 @@ Usage: kea-netconf
   -t <config file name> : check the configuration file and exit
 ```
 
-## Examples
+### Examples
 
-`perfdhcp` - [DHCP benchmarking tool](https://kea.readthedocs.io/en/kea-2.2.0/man/perfdhcp.8.html)
+## `perfdhcp` - [DHCP benchmarking tool](https://kea.readthedocs.io/en/kea-2.2.0/man/perfdhcp.8.html)
 
-## Command options:
+### Command options:
 
 ```
 perfdhcp [-1] [-4 | -6] [-A encapsulation-level] [-b base] [-B] [-c]
@@ -239,13 +251,13 @@ perfdhcp [-1] [-4 | -6] [-A encapsulation-level] [-b base] [-B] [-c]
          [-w script_name] [-x diagnostic-selector] [-X xid-offset] [server]
 ```
 
-## Examples
+### Examples
 
-### 
+### Test a DHCP server by sending 100 requests
 
 ```
 sudo perfdhcp -xi -t 2 -r 10 -R 100 192.168.30.29
 ```
 
-References:
+## References:
 - [Manual Pages](https://kea.readthedocs.io/en/kea-2.2.0/manpages.html)
