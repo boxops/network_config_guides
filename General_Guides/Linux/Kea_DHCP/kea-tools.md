@@ -212,7 +212,7 @@ options:
 sudo kea-shell --service dhcp4 --host 192.168.30.32 --port 8000 version-get | jq
 ```
 
-### Reading configuration data
+### API calls can be sent to the Kea control agent from the command line via the `curl` tool.
 
 ```
 curl -X POST -H "Content-Type: application/json" -d '{ "command": "config-get", "service": [ "dhcp4" ] }' http://192.168.30.32:8000 | jq
