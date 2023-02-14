@@ -212,11 +212,63 @@ options:
 sudo kea-shell --service dhcp4 --host 192.168.30.32 --port 8000 version-get | jq
 ```
 
-### API calls can be sent to the Kea control agent from the command line via the `curl` tool.
+### API calls can be sent to the Kea control agent from the command line via the `curl` tool:
 
 ```
 curl -X POST -H "Content-Type: application/json" -d '{ "command": "config-get", "service": [ "dhcp4" ] }' http://192.168.30.32:8000 | jq
 ```
+
+### `jq` can be used to filter specific parts of the configuration:
+
+```
+curl -X POST -H "Content-Type: application/json" -d '{ "command": "config-get", "service": [ "dhcp4" ] }' http://192.168.30.32:8000 | jq ".[0].arguments.Dhcp4.loggers"
+```
+
+### The `list-commands` command returns the API commands available for a specific Kea module:
+
+```
+curl -X POST -H "Content-Type: application/json" -d '{ "command": "list-commands", "service": [ "dhcp4" ] }' http://192.168.30.32:8000 | jq
+```
+
+### Apply dynamic changes to the configuration file
+
+#### 1. Dump the current configuration into a file:
+
+```
+curl -X POST -H "Content-Type: application/json" -d '{ "command": "config-get", "service": [ "dhcp4" ] }' http://192.168.30.32:8000 | jq ".[0]" > /tmp/kea-dhcp4.tmp
+```
+
+#### 2. Edit the config file:
+
+- Add the `command` and `service` information
+- Make changes to the configuration
+- Remove the `result` from the JSON file
+
+```
+{
+    "command": "config-set",
+    "service": [ "dhcp4" ],
+    "arguments": {
+      "Logging": {
+        "loggers": [
+          {
+            "severity": "INFO",
+            "output_options": [
+[...]
+```
+
+#### 3. Send the new configuration to the server
+
+```
+curl -s -X POST -H "Content-Type: application/json" -d @kea-dhcp4.tmp http://192.168.30.32:8000 | jq
+```
+
+#### 4. To make the changes persistent, write the in-memory configuration back to a file with the `config-write` command (any comments in the file will be gone):
+
+```
+curl -X POST -H "Content-Type: application/json" -d '{ "command": "config-write", "arguments": "/etc/kea/kea-dhcp4-new.json" }' http://192.168.30.32:8000 | jq
+```
+
 
 ## `kea-netconf` - [NETCONF agent for configuring Kea](https://kea.readthedocs.io/en/kea-2.2.0/man/kea-netconf.8.html)
 
