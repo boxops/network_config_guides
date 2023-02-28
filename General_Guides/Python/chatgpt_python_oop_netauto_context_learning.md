@@ -210,9 +210,10 @@ class DeviceConfigurator:
             print(output)
 
 class NetworkAutomation:
-    def __init__(self, devices, config_commands):
+    def __init__(self, devices, config_commands, max_threads):
         self.devices = devices
         self.config_commands = config_commands
+        self.max_threads = max_threads
     
     def configure_devices(self):
         threads = []
@@ -221,6 +222,10 @@ class NetworkAutomation:
             thread = threading.Thread(target=device_configurator.configure_device)
             threads.append(thread)
             thread.start()
+            if len(threads) == self.max_threads:
+                for t in threads:
+                    t.join()
+                threads = []
         for thread in threads:
             thread.join()
 
@@ -250,11 +255,15 @@ if __name__ == '__main__':
         'ip address 10.0.1.1 255.255.255.0',
         'no shutdown',
     ]
-    network_automation = NetworkAutomation(devices, config_commands)
+    max_threads = 2
+    network_automation = NetworkAutomation(devices, config_commands, max_threads)
     network_automation.configure_devices()
+
 ```
 
 In this program, we define two classes: DeviceConfigurator and NetworkAutomation. The DeviceConfigurator class takes a dictionary of device information and a list of configuration commands and uses the netmiko library to connect to the device and send the configuration commands. The NetworkAutomation class takes a list of device information dictionaries and a list of configuration commands, and creates a DeviceConfigurator object for each device, which is then run in a separate thread using the threading library. The NetworkAutomation class waits for all threads to complete before returning.
+
+By using this maximum threading option, we can control the number of threads used by the program and avoid overloading the devices or network with too many simultaneous connections.
 
 In the if __name__ == '__main__': block, we define a list of device information dictionaries and a list of configuration commands, and then create a NetworkAutomation object with these arguments. We then call the configure_devices method to configure all devices in parallel.
 
