@@ -166,3 +166,25 @@ In this tutorial, you learned the basics of OOP in Python and how it can be used
 OOP is a powerful tool that can help you write more modular, reusable, and scalable code. By using OOP in your network automation projects, you can create more robust and flexible solutions that can adapt to changing network environments and requirements.
 
 
+## Question: Show me the most common mistakes made by programmers using Python OOP.
+
+## Answer:
+
+Here are some common mistakes made by programmers when using OOP in Python:
+
+**1. Overusing inheritance:** Inheritance can be a powerful tool for code reuse, but it can also lead to complex and hard-to-maintain code if used excessively. In general, it's best to favor composition over inheritance and only use inheritance when it makes sense.
+
+**2. Violating the Single Responsibility Principle (SRP):** Each class should have a single responsibility or concern. When a class has too many responsibilities, it becomes harder to understand and maintain.
+
+**3. Not using encapsulation:** Encapsulation is the practice of hiding internal details of a class and exposing only the necessary information through well-defined interfaces. This helps prevent unintended changes to the internal state of a class and improves the overall maintainability of the code.
+
+**4. Creating too many global variables:** Global variables can lead to code that is hard to reason about and test. It's best to limit the use of global variables and instead encapsulate state within classes.
+
+**5. Not using proper naming conventions:** Following a consistent naming convention can make code easier to read and understand. In Python, it's common to use snake_case for variable and function names and PascalCase for class names.
+
+**6. Not testing code:** Unit tests are a critical part of software development and can help catch bugs early in the development process. It's important to write tests for your code, including your object-oriented code.
+
+**7. Not thinking about the end user:** It's important to design classes and methods with the end user in mind. This means considering the user's needs and expectations, as well as designing APIs that are easy to use and understand.
+
+By avoiding these common mistakes, you can write more effective and maintainable object-oriented code in Python.
+
