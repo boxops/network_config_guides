@@ -188,3 +188,75 @@ Here are some common mistakes made by programmers when using OOP in Python:
 
 By avoiding these common mistakes, you can write more effective and maintainable object-oriented code in Python.
 
+
+## Question: Provide an example of an OOP Python program that uses netmiko library and multithreading to configure multiple devices.
+
+## Answer:
+
+Sure! Here's an example of an object-oriented Python program that uses the netmiko library and multithreading to configure multiple devices:
+
+```python
+import threading
+from netmiko import ConnectHandler
+
+class DeviceConfigurator:
+    def __init__(self, device_info, config_commands):
+        self.device_info = device_info
+        self.config_commands = config_commands
+    
+    def configure_device(self):
+        with ConnectHandler(**self.device_info) as net_connect:
+            output = net_connect.send_config_set(self.config_commands)
+            print(output)
+
+class NetworkAutomation:
+    def __init__(self, devices, config_commands):
+        self.devices = devices
+        self.config_commands = config_commands
+    
+    def configure_devices(self):
+        threads = []
+        for device_info in self.devices:
+            device_configurator = DeviceConfigurator(device_info, self.config_commands)
+            thread = threading.Thread(target=device_configurator.configure_device)
+            threads.append(thread)
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+if __name__ == '__main__':
+    devices = [
+        {
+            'device_type': 'cisco_ios',
+            'ip': '10.0.0.1',
+            'username': 'user1',
+            'password': 'password1',
+        },
+        {
+            'device_type': 'cisco_ios',
+            'ip': '10.0.0.2',
+            'username': 'user2',
+            'password': 'password2',
+        },
+        {
+            'device_type': 'cisco_ios',
+            'ip': '10.0.0.3',
+            'username': 'user3',
+            'password': 'password3',
+        },
+    ]
+    config_commands = [
+        'interface FastEthernet0/1',
+        'ip address 10.0.1.1 255.255.255.0',
+        'no shutdown',
+    ]
+    network_automation = NetworkAutomation(devices, config_commands)
+    network_automation.configure_devices()
+```
+
+In this program, we define two classes: DeviceConfigurator and NetworkAutomation. The DeviceConfigurator class takes a dictionary of device information and a list of configuration commands and uses the netmiko library to connect to the device and send the configuration commands. The NetworkAutomation class takes a list of device information dictionaries and a list of configuration commands, and creates a DeviceConfigurator object for each device, which is then run in a separate thread using the threading library. The NetworkAutomation class waits for all threads to complete before returning.
+
+In the if __name__ == '__main__': block, we define a list of device information dictionaries and a list of configuration commands, and then create a NetworkAutomation object with these arguments. We then call the configure_devices method to configure all devices in parallel.
+
+This program demonstrates how object-oriented programming can be used to encapsulate network automation functionality and make it easier to manage and scale. Using multithreading allows us to configure multiple devices in parallel, which can improve the overall speed and efficiency of the automation process.
+
