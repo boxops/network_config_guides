@@ -269,3 +269,152 @@ In the if __name__ == '__main__': block, we define a list of device information 
 
 This program demonstrates how object-oriented programming can be used to encapsulate network automation functionality and make it easier to manage and scale. Using multithreading allows us to configure multiple devices in parallel, which can improve the overall speed and efficiency of the automation process.
 
+
+## Question: Write an OOP Python program that uses an intent-based networking concept to configure multiple devices. Make the program idempotent by querying the device first, then evaluating its state and configuring the device if the intended state is not the same.
+
+## Answer:
+
+Sure, here's a program that makes it idempotent by querying the device first, then evaluating its state and configuring the device if the intended state is not the same:
+
+```python
+from netmiko import ConnectHandler
+import json
+import threading
+
+class Device:
+    def __init__(self, device_info):
+        self.device_info = device_info
+    
+    def configure(self, commands):
+        with ConnectHandler(**self.device_info) as net_connect:
+            output = net_connect.send_config_set(commands)
+            print(output)
+
+    def get_running_config(self):
+        with ConnectHandler(**self.device_info) as net_connect:
+            output = net_connect.send_command('show running-config')
+            return output
+
+class Network:
+    def __init__(self, devices):
+        self.devices = []
+        for device_info in devices:
+            device = Device(device_info)
+            self.devices.append(device)
+    
+    def configure_network(self, intent_file, max_threads=10):
+        with open(intent_file) as file:
+            intent = json.load(file)
+            self.run_in_parallel(max_threads, self.configure_device, intent['devices'])
+
+    def configure_device(self, device_intent):
+        for device in self.devices:
+            if device.device_info['hostname'] == device_intent['hostname']:
+                intended_config = device_intent['config']
+                current_config = device.get_running_config().split('\n')
+                if set(intended_config) != set(current_config):
+                    device.configure(intended_config)
+                else:
+                    print(f"No changes needed for {device_intent['hostname']}")
+                break
+
+    def run_in_parallel(self, max_threads, target, args_list):
+        threads = []
+        for args in args_list:
+            thread = threading.Thread(target=target, args=(args,))
+            threads.append(thread)
+            thread.start()
+            if len(threads) == max_threads:
+                for thread in threads:
+                    thread.join()
+                threads = []
+        for thread in threads:
+            thread.join()
+
+if __name__ == '__main__':
+    devices = [
+        {
+            'device_type': 'cisco_ios',
+            'ip': '10.0.0.1',
+            'username': 'user1',
+            'password': 'password1',
+            'hostname': 'device1',
+        },
+        {
+            'device_type': 'cisco_ios',
+            'ip': '10.0.0.2',
+            'username': 'user2',
+            'password': 'password2',
+            'hostname': 'device2',
+        },
+        {
+            'device_type': 'cisco_ios',
+            'ip': '10.0.0.3',
+            'username': 'user3',
+            'password': 'password3',
+            'hostname': 'device3',
+        },
+    ]
+    network = Network(devices)
+    network.configure_network('intent.json')
+```
+
+In this example, we have defined two classes: Device and Network.
+
+The Device class represents a network device, and has an __init__ method that initializes the device's connection information, such as IP address, username, and password.
+
+The configure method of the Device class takes a list of configuration commands and uses the netmiko library to connect to the device and send the commands.
+
+The Network class represents a network of devices, and has an __init__ method that creates a list of Device objects based on the information provided in the devices parameter.
+
+The configure_network method of the Network class takes an intent file that contains a JSON representation of the network intent. The method reads the intent file, extracts the configuration commands for each device, and calls the configure method of the corresponding Device object to apply the configuration.
+
+In the __main__ block, we define a list of devices and create a Network object with this list. We then call the configure_network method of the Network object and pass the intent file name as a parameter.
+
+We have added a get_running_config method to the Device class, which connects to the device and retrieves its running configuration using the show running-config command. The output is then returned as a list of lines.
+
+In the configure_network method of the Network class, we retrieve the current configuration of each device by calling the get_running_config method of the corresponding Device object. We then compare the set of intended configuration commands with the set of current configuration commands, and if they are not the same, we call the configure method of the Device object to apply the intended configuration.
+
+This idempotent approach ensures that the program only makes changes to the device configuration when necessary, by checking the current state of the device before applying any changes. If the current state already matches the intended state, the program simply prints a message indicating that no changes are needed.
+
+The intent.json file might look like this:
+
+```python
+{
+  "devices": [
+    {
+      "hostname": "device1",
+      "config": [
+        "interface FastEthernet0/1",
+        "ip address 10.0.1.1 255.255.255.0",
+        "no shutdown"
+      ]
+    },
+    {
+      "hostname": "device2",
+      "config": [
+        "interface FastEthernet0/1",
+        "ip address 10.0.1.2 255.255.255.0",
+        "no shutdown"
+      ]
+    },
+    {
+      "hostname": "device3",
+      "config": [
+        "interface FastEthernet0/1",
+        "ip address 10.0.1.3 255.255.255.0",
+        "no shutdown"
+      ]
+    },
+```
+
+## Follow up Question: Why are the intended_config and the current_config are converted into a set?
+
+## Answer:
+
+In the updated version of the program, we convert the intended_config and current_config lists into sets before comparing them. We do this to check if the sets are equal, meaning that the two lists contain the same elements (configuration commands), regardless of their order.
+
+In Python, sets are unordered collections of unique elements. By converting the configuration lists to sets, we remove any duplicate commands, and we ensure that the order of the commands does not matter when comparing them. This is useful because the get_running_config method may return the configuration commands in a different order than the intended configuration commands specified in the intent file, due to differences in how the configuration is stored and retrieved by the network devices.
+
+By using sets, we can simplify the comparison logic, and ensure that the program correctly detects whether the device configuration needs to be changed or not, without being sensitive to the order of the configuration commands.
+
