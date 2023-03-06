@@ -1,0 +1,1 @@
+DHCP_CLOUDSMITH_PACKAGE='https://dl.cloudsmith.io/public/isc/kea-2-2/setup.deb.sh'
