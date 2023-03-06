@@ -1,1 +1,8 @@
 DHCP_CLOUDSMITH_PACKAGE='https://dl.cloudsmith.io/public/isc/kea-2-2/setup.deb.sh'
+STORK_AGENT_CLOUDSMITH_PACKAGE='https://dl.cloudsmith.io/public/isc/stork/setup.deb.sh'
+NETPLAN_CONFIG_FILE='netplan-config.yaml'
+DHCP_CONFIG_DIRECTORY='/etc/kea'
+STORK_CONFIG_DIRECTORY='/etc/stork'
+DATABASE_NAME='dhcp'
+DATABASE_USER='kea'
+DATABASE_USER_PASSWORD='keapass'
