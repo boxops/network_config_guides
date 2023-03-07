@@ -288,11 +288,13 @@ function disableNeedrestart() {
     echo "Disable needrestart which causes the interruption of scripts on Ubuntu 22.04."
     # Disable "Pending kernel upgrade" from 'autoremove' on Ubuntu
     # https://askubuntu.com/questions/1349884/how-to-disable-pending-kernel-upgrade-message
+    # edit the /etc/needrestart/needrestart.conf file, changing the line: #\$nrconf{kernelhints} = -1; to $nrconf{kernelhints} = -1;
     sed -i "s/#\$nrconf{kernelhints} = -1;/\$nrconf{kernelhints} = -1;/g" /etc/needrestart/needrestart.conf
     
     # https://stackoverflow.com/questions/73397110/how-to-stop-ubuntu-pop-up-daemons-using-outdated-libraries-when-using-apt-to-i
     # edit the /etc/needrestart/needrestart.conf file, changing the line: #$nrconf{restart} = 'i'; to $nrconf{restart} = 'a';
-    sed -i "s/#\$nrconf{restart} = 'i';/s/.*/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
+    sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
+    # sed -i "s/#\$nrconf{restart} = 'i';/s/.*/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
 }
 
 # Prompt: Proceed with the deployment? (y/N)
@@ -342,3 +344,6 @@ if ! isRoot; then
 fi
 
 deploy
+
+echo "Deployment successful. Exiting."
+exit
