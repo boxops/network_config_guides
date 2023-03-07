@@ -9,7 +9,9 @@
 
 # Set variables for the build
 VARS_DIRECTORY=""
-VARS_BUILD_FILE="kea-build-vars.txt"
+VARS_BUILD_FILE="kea-build.env"
+# agent.env or server.env
+VARS_ENV_FILE="[agent|server].env"
 
 # Check if user is root
 function isRoot() {
@@ -24,9 +26,13 @@ function variables() {
     VARS_DIRECTORY=${VARS_DIRECTORY:-dhcp-primary}
     echo "Imported the following variables for the build from (${VARS_DIRECTORY}/${VARS_BUILD_FILE}):"
     echo
-    SOURCE="${VARS_DIRECTORY}/${VARS_BUILD_FILE}"
-    source $SOURCE
-    cat $SOURCE
+    # Import build variables
+    BUILD_SOURCE="${VARS_DIRECTORY}/${VARS_BUILD_FILE}"
+    source $BUILD_SOURCE
+    cat $BUILD_SOURCE
+    # Import environment variables
+    ENV_SOURCE="${VARS_DIRECTORY}/${VARS_ENV_FILE}"
+    source $ENV_SOURCE
     echo
 }
 
@@ -76,14 +82,13 @@ function validateKeaDHCPConfiguration() {
     else
         echo "Kea DHCP configuration files exist."
     fi
-    # # if not 'Press ENTER' in 'netplan try' output
-    # if [[ $(netplan try) != *"Press ENTER"* ]]; then
-    #     echo "Netplan configuration file is invalid. Exiting."
-    #     exit
-    # else
-    #     echo "Netplan configuration file is valid."
-    #     netplan apply
-    # fi
+    # Check the netplan configuration file
+    if [[ $(netplan apply) ]]; then
+        echo "Netplan configuration file is invalid. Exiting."
+        exit
+    else
+        echo "Netplan configuration file is valid."
+    fi
 }
 
 function validateKeaDHCPStorkAgent() {
@@ -94,6 +99,12 @@ function validateKeaDHCPStorkAgent() {
         exit
     else
         echo "Kea Stork Agent is running."
+    fi
+    if [ ! -f "${STORK_CONFIG_DIRECTORY}/agent-credentials.json" ]; then
+        echo "Kea Stork Agent credentials file does not exist. Exiting."
+        exit
+    else
+        echo "Kea Stork Agent credentials file exists."
     fi
 }
 
@@ -128,19 +139,14 @@ function deployKeaDHCPDatabase() {
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
     systemctl enable postgresql.service && systemctl start postgresql.service
-    # TODO: Change Postgres to work from the bash prompt: https://psql-tips.org/psql_tips_all.html#tip001
-    # Log into PostgreSQL as root
-    sudo -u postgres psql postgres
-    # Create a database for Kea
-    CREATE DATABASE $DATABASE_NAME;
-    # Create the user under which Kea will access the database
-    CREATE USER $DATABASE_USER WITH PASSWORD \'$DATABASE_USER_PASSWORD\';
-    # Grant the user access to the database
-    GRANT ALL PRIVILEGES ON DATABASE $DATABASE_NAME TO $DATABASE_USER;
-    # Improve PostgreSQL Performance
-    ALTER SYSTEM SET synchronous_commit=OFF;
-    # Exit PostgreSQL
-    \q
+    # Create the database and user for Kea
+    sudo su postgres <<EOF
+    createdb $DATABASE_NAME;
+    psql -c "CREATE USER $DATABASE_USER WITH PASSWORD '$DATABASE_USER_PASSWORD';"
+    psql -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_NAME TO $DATABASE_USER;"
+    psql -c "ALTER SYSTEM SET synchronous_commit=OFF;"
+    echo "Created Postgres User '$DATABASE_USER' and database '$DATABASE_NAME'."
+EOF
     # Initialize the PostgreSQL Database Using kea-admin
     kea-admin db-init pgsql -u $DATABASE_USER -p $DATABASE_USER_PASSWORD -n $DATABASE_NAME
 
@@ -179,10 +185,12 @@ function deployKeaDHCPStorkAgent() {
     \cp -f "${VARS_DIRECTORY}/agent.env" "${STORK_CONFIG_DIRECTORY}/agent.env"
     # Add permissions and ownership to the Kea Stork agent configuration file
     chmod 644 "${STORK_CONFIG_DIRECTORY}/agent.env"
+    # Replace agent-credentials.json file in /etc/stork (overwrite without confirmation)
+    \cp -f "${VARS_DIRECTORY}/agent-credentials.json" "${STORK_CONFIG_DIRECTORY}/agent-credentials.json"
     # Enable and start the Kea Stork agent
     systemctl enable isc-stork-agent && systemctl start isc-stork-agent
     # Register the Kea Stork agent - TODO
-    # su stork-agent -s /bin/sh -c 'stork-agent register -u http://192.168.30.35:8080'
+    # su stork-agent -s /bin/sh -c 'stork-agent register -u ${STORK_AGENT_SERVER_URL}'
     # Enter the answers to the prompts:
     # - Token from the Stork Server
     # - Stork Agent IP or FDQN
@@ -217,14 +225,12 @@ function validateKeaStorkDatabaseService() {
 function validateKeaStorkConfiguration() {
     echo "Validating Stork configuration"
     # Check the netplan configuration file
-    # if not 'Press ENTER' in 'netplan try' output
-    # elif [[ $(netplan try) != *"Press ENTER"* ]]; then
-    #     echo "Netplan configuration file is invalid. Exiting."
-    #     exit
-    # else
-    #     echo "Netplan configuration file is valid."
-    #     netplan apply
-    # fi
+    if [[ $(netplan apply) ]]; then
+        echo "Netplan configuration file is invalid. Exiting."
+        exit
+    else
+        echo "Netplan configuration file is valid."
+    fi
 }
 
 function deployKeaStorkServer() {
@@ -253,10 +259,17 @@ function deployKeaStorkDatabase() {
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
     systemctl enable postgresql.service && systemctl start postgresql.service
-    # Create a database, user and install pgcrypto extension
-    stork-tool db-create --db-name $DATABASE_NAME --db-user $DATABASE_USER --db-password \'$DATABASE_USER_PASSWORD\'
-    # Executing: /lib/systemd/systemd-sysv-install enable postgresql
-    # admin password:
+
+    # Create the database and user for Stork
+    sudo su postgres <<EOF
+    createdb $DATABASE_NAME;
+    psql -c "CREATE USER $DATABASE_USER WITH PASSWORD '$DATABASE_USER_PASSWORD';"
+    psql -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_NAME TO $DATABASE_USER;"
+    psql -c "ALTER SYSTEM SET synchronous_commit=OFF;"
+    psql -c "\c $DATABASE_NAME"
+    psql -c "CREATE EXTENSION pgcrypto;"
+    echo "Created Postgres User '$DATABASE_USER' and database '$DATABASE_NAME'."
+EOF
 
     # Validate Stork database
     validateKeaStorkDatabaseService
@@ -272,14 +285,13 @@ function deployKeaStorkConfiguration() {
 }
 
 function disableNeedrestart() {
-    echo "Disabling needrestart which causes the interruption of scripts on Ubuntu 22.04."
+    echo "Disable needrestart which causes the interruption of scripts on Ubuntu 22.04."
     # Disable "Pending kernel upgrade" from 'autoremove' on Ubuntu
     # https://askubuntu.com/questions/1349884/how-to-disable-pending-kernel-upgrade-message
     sed -i "s/#\$nrconf{kernelhints} = -1;/\$nrconf{kernelhints} = -1;/g" /etc/needrestart/needrestart.conf
     
     # https://stackoverflow.com/questions/73397110/how-to-stop-ubuntu-pop-up-daemons-using-outdated-libraries-when-using-apt-to-i
     # edit the /etc/needrestart/needrestart.conf file, changing the line: #$nrconf{restart} = 'i'; to $nrconf{restart} = 'a';
-    # sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
     sed -i "s/#\$nrconf{restart} = 'i';/s/.*/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
 }
 
