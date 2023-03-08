@@ -9,9 +9,7 @@
 
 # Set variables for the build
 VARS_DIRECTORY=""
-VARS_BUILD_FILE="kea-build.env"
-# agent.env or server.env
-VARS_ENV_FILE="[agent|server].env"
+VARS_BUILD_FILE="*.env"
 
 # Check if user is root
 function isRoot() {
@@ -26,13 +24,13 @@ function variables() {
     VARS_DIRECTORY=${VARS_DIRECTORY:-dhcp-primary}
     echo "Imported the following variables for the build from (${VARS_DIRECTORY}/${VARS_BUILD_FILE}):"
     echo
-    # Import build variables
-    BUILD_SOURCE="${VARS_DIRECTORY}/${VARS_BUILD_FILE}"
-    source $BUILD_SOURCE
-    cat $BUILD_SOURCE
-    # Import environment variables
-    ENV_SOURCE="${VARS_DIRECTORY}/${VARS_ENV_FILE}"
-    source $ENV_SOURCE
+    # for the number of *.env files in the VARS_DIRECTORY
+    for env in $(ls ${VARS_DIRECTORY}/*.env); do
+        # Import build variables
+        BUILD_SOURCE=$env
+        source $BUILD_SOURCE
+        cat $BUILD_SOURCE
+    done
     echo
 }
 
@@ -189,6 +187,7 @@ function deployKeaDHCPStorkAgent() {
     \cp -f "${VARS_DIRECTORY}/agent-credentials.json" "${STORK_CONFIG_DIRECTORY}/agent-credentials.json"
     # Enable and start the Kea Stork agent
     systemctl enable isc-stork-agent && systemctl start isc-stork-agent
+
     # Register the Kea Stork agent - TODO
     # su stork-agent -s /bin/sh -c 'stork-agent register -u ${STORK_AGENT_SERVER_URL}'
     # Enter the answers to the prompts:
@@ -318,7 +317,7 @@ function deploy() {
     if [[ $DEPLOYMENT =~ ^[dD]$ ]]; then
         variables
         if proceed; then
-            disableNeedrestart
+            # disableNeedrestart
             deployKeaDHCPServer
             deployKeaDHCPDatabase
             deployKeaDHCPConfiguration
@@ -327,7 +326,7 @@ function deploy() {
     elif [[ $DEPLOYMENT =~ ^[sS]$ ]]; then
         variables
         if proceed; then
-            disableNeedrestart
+            # disableNeedrestart
             deployKeaStorkServer
             deployKeaStorkDatabase
             deployKeaStorkConfiguration
