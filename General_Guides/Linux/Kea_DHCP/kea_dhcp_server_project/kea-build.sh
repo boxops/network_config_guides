@@ -4,6 +4,8 @@
 
 # Usage (run as sudo):
 # sudo su -
+# git clone https://github.com/boxops/network_developer_toolkit.git /tmp/network_developer_toolkit
+# cd /tmp/network_developer_toolkit/General_Guides/Linux/Kea_DHCP/kea_dhcp_server_project
 # chmod +x kea-build.sh
 # ./kea-build.sh
 
@@ -18,7 +20,6 @@ function isRoot() {
     fi
 }
 
-# Action: Show variables for selected
 function variables() {
     read -p "Enter the path to the folder containing the variables for the build (dhcp-primary): " VARS_DIRECTORY
     VARS_DIRECTORY=${VARS_DIRECTORY:-dhcp-primary}
@@ -106,7 +107,6 @@ function validateKeaDHCPStorkAgent() {
     fi
 }
 
-# Action: Deploy Kea DHCP server
 function deployKeaDHCPServer() {
     echo "Deploying Kea DHCP server"
     ## Install Kea DHCP server
@@ -130,9 +130,10 @@ function deployKeaDHCPServer() {
     validateKeaDHCPServices
 }
 
-# Action: Deploy Kea DHCP database
 function deployKeaDHCPDatabase() {
     ## Install Kea DHCP database
+    # Update and upgrade packages
+    apt -y update && apt -y dist-upgrade
     # Install PostgreSQL
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
@@ -152,7 +153,6 @@ EOF
     validateKeaDHCPDatabase
 }
 
-# Action: Deploy Kea DHCP configuration
 function deployKeaDHCPConfiguration() {
     ## Configure Kea DHCP server
     # Replace the Kea DHCP4 server configuration file (overwrite without confirmation)
@@ -188,7 +188,7 @@ function deployKeaDHCPStorkAgent() {
     # Enable and start the Kea Stork agent
     systemctl enable isc-stork-agent && systemctl start isc-stork-agent
 
-    # Register the Kea Stork agent - TODO
+    # Manually register the Kea Stork agent if isc-stork-agent.service does not register
     # su stork-agent -s /bin/sh -c 'stork-agent register -u ${STORK_AGENT_SERVER_URL}'
     # Enter the answers to the prompts:
     # - Token from the Stork Server
@@ -254,6 +254,8 @@ function deployKeaStorkServer() {
 
 function deployKeaStorkDatabase() {
     ## Install Stork database
+    # Update and upgrade packages
+    apt -y update && apt -y dist-upgrade
     # Install PostgreSQL
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
@@ -284,19 +286,16 @@ function deployKeaStorkConfiguration() {
 }
 
 function disableNeedrestart() {
-    echo "Disable needrestart which causes the interruption of scripts on Ubuntu 22.04."
-    # Disable "Pending kernel upgrade" from 'autoremove' on Ubuntu
-    # https://askubuntu.com/questions/1349884/how-to-disable-pending-kernel-upgrade-message
+    echo "Disable needrestart which causes the interruption of scripts on Ubuntu."
+    # Disable "Pending kernel upgrade" messages
     # edit the /etc/needrestart/needrestart.conf file, changing the line: #\$nrconf{kernelhints} = -1; to $nrconf{kernelhints} = -1;
     sed -i "s/#\$nrconf{kernelhints} = -1;/\$nrconf{kernelhints} = -1;/g" /etc/needrestart/needrestart.conf
-    
-    # https://stackoverflow.com/questions/73397110/how-to-stop-ubuntu-pop-up-daemons-using-outdated-libraries-when-using-apt-to-i
+
+    # Set needrestart services to: a (automatically restart)
     # edit the /etc/needrestart/needrestart.conf file, changing the line: #$nrconf{restart} = 'i'; to $nrconf{restart} = 'a';
     sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
-    # sed -i "s/#\$nrconf{restart} = 'i';/s/.*/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
 }
 
-# Prompt: Proceed with the deployment? (y/N)
 function proceed() {
     echo
     read -p "Proceed with the deployment? (y/N): " PROCEED
@@ -310,27 +309,32 @@ function proceed() {
     fi
 }
 
-# Prompt: Deploy Kea DHCP server or Stork server? (D/s)
 function deploy() {
-    read -p "Deploy Kea DHCP server or Stork server? (D/s): " DEPLOYMENT
+    read -p "Deploy Kea [DHCP|Stork] server or Troubleshoot? (D/s/t): " DEPLOYMENT
     DEPLOYMENT=${DEPLOYMENT:-D}
     if [[ $DEPLOYMENT =~ ^[dD]$ ]]; then
         variables
         if proceed; then
-            # disableNeedrestart
+            disableNeedrestart
             deployKeaDHCPServer
             deployKeaDHCPDatabase
             deployKeaDHCPConfiguration
             deployKeaDHCPStorkAgent
+            echo "Deployment successful. Please consider rebooting your system."
         fi
     elif [[ $DEPLOYMENT =~ ^[sS]$ ]]; then
         variables
         if proceed; then
-            # disableNeedrestart
+            disableNeedrestart
             deployKeaStorkServer
             deployKeaStorkDatabase
             deployKeaStorkConfiguration
+            echo "Deployment successful. Please consider rebooting your system."
         fi
+    elif [[ $DEPLOYMENT =~ ^[tT]$ ]]; then
+        echo "Troubleshooting features are not implemented yet. Work in progress..."
+        echo "Exiting."
+        exit
     else
         echo "Invalid selection"
         exit
@@ -344,5 +348,5 @@ fi
 
 deploy
 
-echo "Deployment successful. Exiting."
+echo "Script done. Exiting."
 exit
