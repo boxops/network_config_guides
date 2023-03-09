@@ -14,24 +14,23 @@ def creds():
 
 # Before connecting, the 'api-ssl' service must be enabled on routeros
 # The code below allows connecting to the REST API without a ceritficate
-def connect(host, encrypted=True, unencrypted=False):
+def connect(host, encrypted=True):
 
     username, password = creds()
 
-    if encrypted:
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.set_ciphers("ADH:@SECLEVEL=0")
-        return librouteros.connect(
-            username=username,
-            password=password,
-            host=host,
-            ssl_wrapper=ctx.wrap_socket,
-            port=8729,
-        )
-
-    elif unencrypted:
+    if not encrypted:
         return librouteros.connect(username=username, password=password, host=host)
+
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.set_ciphers("ADH:@SECLEVEL=0")
+    return librouteros.connect(
+        username=username,
+        password=password,
+        host=host,
+        ssl_wrapper=ctx.wrap_socket,
+        port=8729,
+    )
 
 
 # Get information about all interfaces
@@ -76,8 +75,8 @@ def advanced_query():
 if __name__ == "__main__":
     host = "172.16.1.1"
 
-    api = connect(host=host, encrypted=True)
+    api = connect(host=host, encrypted=False)
 
     get_all_interfaces()
-    simple_query()
-    advanced_query()
+    # simple_query()
+    # advanced_query()
