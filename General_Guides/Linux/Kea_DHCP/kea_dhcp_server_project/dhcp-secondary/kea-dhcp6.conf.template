@@ -2,7 +2,7 @@
     "Dhcp6": {
         "interfaces-config": {
             "interfaces": [
-                "ens160"
+                "${PUBLIC_INTERFACE_NAME}"
             ]
         },
         "control-socket": {
@@ -20,12 +20,12 @@
         //     "lfc-interval": 3600
         // },
         "lease-database": {
-            "type": "postgresql",
-            "name": "dhcp",
-            "host": "localhost",
-            "port": 5432,
-            "user": "admin",
-            "password": "securepassword",
+            "type": "${DATABASE_TYPE}",
+            "name": "${DATABASE_NAME}",
+            "host": "${DATABASE_HOST}",
+            "port": ${DATABASE_PORT},
+            "user": "${DATABASE_USER}",
+            "password": "${DATABASE_USER_PASSWORD}",
             "reconnect-wait-time": 3000,
             "max-reconnect-tries": 3,
             "on-fail": "stop-retry-exit",
@@ -84,7 +84,7 @@
                 "parameters": {
                     "high-availability": [
                         {
-                            "this-server-name": "lab-dhcp-secondary",
+                            "this-server-name": "${LOCAL_DHCP_SERVER_HOSTNAME}",
                             "mode": "load-balancing",
                             "heartbeat-delay": 10000,
                             "max-response-delay": 60000,
@@ -99,8 +99,8 @@
                             // },
                             "peers": [
                                 {
-                                    "name": "lab-dhcp-primary",
-                                    "url": "http://192.168.30.29:8000/",
+                                    "name": "${LOCAL_DHCP_SERVER_HOSTNAME}",
+                                    "url": "${LOCAL_DHCP_SERVER_REST_API_URL}",
                                     // "trust-anchor": "/usr/lib/kea/CA.pem",
                                     // "cert-file": "/usr/lib/kea/server1_cert.pem",
                                     // "key-file": "/usr/lib/kea/server1_key.pem",
@@ -109,8 +109,8 @@
                                     "auto-failover": true
                                 },
                                 {
-                                    "name": "lab-dhcp-secondary",
-                                    "url": "http://192.168.30.32:8000/",
+                                    "name": "${REMOTE_DHCP_SERVER_HOSTNAME}",
+                                    "url": "${REMOTE_DHCP_SERVER_REST_API_URL}",
                                     // "trust-anchor": "/usr/lib/kea/CA.pem",
                                     // "cert-file": "/usr/lib/kea/server1_cert.pem",
                                     // "key-file": "/usr/lib/kea/server1_key.pem",
