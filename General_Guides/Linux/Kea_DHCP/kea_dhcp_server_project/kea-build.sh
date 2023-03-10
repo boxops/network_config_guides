@@ -400,8 +400,8 @@ function run() {
             if proceed; then
                 deployKeaDHCPServer
                 deployKeaDHCPDatabase
-                deployKeaDHCPConfiguration
                 deployKeaDHCPStorkAgent
+                deployKeaDHCPConfiguration
                 echo "Deployment successful. Please consider rebooting your system."
             fi
         elif [[ $MANAGE =~ ^[cC]$ ]]; then
@@ -415,8 +415,8 @@ function run() {
             if proceed; then
                 validateKeaDHCPServices
                 validateKeaDHCPDatabase
-                validateKeaDHCPConfiguration
                 validateKeaDHCPStorkAgent
+                validateKeaDHCPConfiguration
                 echo "All services are running."
             fi
         else
