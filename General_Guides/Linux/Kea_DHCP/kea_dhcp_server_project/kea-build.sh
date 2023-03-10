@@ -345,13 +345,13 @@ function deployKeaStorkDatabase() {
 
     # Create the database and user for Stork
     sudo su postgres <<EOF
-    createdb $DATABASE_NAME;
-    psql -c "CREATE USER $DATABASE_USER WITH PASSWORD '$DATABASE_USER_PASSWORD';"
-    psql -c "GRANT ALL PRIVILEGES ON DATABASE $DATABASE_NAME TO $DATABASE_USER;"
+    createdb $STORK_DATABASE_NAME;
+    psql -c "CREATE USER $STORK_DATABASE_USER_NAME WITH PASSWORD '$STORK_DATABASE_PASSWORD';"
+    psql -c "GRANT ALL PRIVILEGES ON DATABASE $STORK_DATABASE_NAME TO $STORK_DATABASE_USER_NAME;"
     psql -c "ALTER SYSTEM SET synchronous_commit=OFF;"
-    psql -c "\c $DATABASE_NAME"
+    psql -c "\c $STORK_DATABASE_NAME"
     psql -c "CREATE EXTENSION pgcrypto;"
-    echo "Created Postgres User '$DATABASE_USER' and database '$DATABASE_NAME'."
+    echo "Created Postgres User '$STORK_DATABASE_USER_NAME' and database '$STORK_DATABASE_NAME'."
 EOF
 
     validateKeaStorkDatabaseService
