@@ -88,6 +88,16 @@ function disableService() {
     fi
 }
 
+function updatePackages() {
+    echo "Updating packages"
+    apt -y update
+}
+
+function upgradePackages() {
+    echo "Upgrading packages"
+    apt -y dist-upgrade
+}
+
 function validateKeaDHCPServices() {
     echo "Validating Kea DHCP services"
     if ! systemctl is-active --quiet isc-kea-dhcp4-server; then
@@ -193,8 +203,6 @@ function validateKeaDHCPStorkAgent() {
 function deployKeaDHCPServer() {
     echo "Deploying Kea DHCP server"
     ## Install Kea DHCP server
-    # Update and upgrade packages
-    apt -y update && apt -y dist-upgrade
     # Setup repository
     curl -1sLf $DHCP_CLOUDSMITH_PACKAGE | sudo -E bash
     # Install Kea packages
@@ -217,8 +225,6 @@ function deployKeaDHCPServer() {
 
 function deployKeaDHCPDatabase() {
     ## Install Kea DHCP database
-    # Update and upgrade packages
-    apt -y update && apt -y dist-upgrade
     # Install PostgreSQL
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
@@ -257,8 +263,6 @@ function deployKeaDHCPConfiguration() {
 function deployKeaDHCPStorkAgent() {
     echo "Deploying Kea DHCP Stork agent"
     ## Install Kea DHCP Stork agent
-    # Update and upgrade packages
-    apt -y update && apt -y dist-upgrade
     # Setup repository
     curl -1sLf $STORK_AGENT_CLOUDSMITH_PACKAGE | sudo -E bash
     # Install Kea packages
@@ -316,8 +320,6 @@ function validateKeaStorkConfiguration() {
 function deployKeaStorkServer() {
     echo "Deploying Stork server"
     ## Install Stork server
-    # Update and upgrade packages
-    apt -y update && apt -y dist-upgrade
     # Setup repository
     curl -1sLf $STORK_SERVER_CLOUDSMITH_PACKAGE | sudo -E bash
     # Install Stork packages
@@ -335,8 +337,6 @@ function deployKeaStorkServer() {
 
 function deployKeaStorkDatabase() {
     ## Install Stork database
-    # Update and upgrade packages
-    apt -y update && apt -y dist-upgrade
     # Install PostgreSQL
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
@@ -389,7 +389,7 @@ function proceed() {
 }
 
 function run() {
-	disableNeedrestart
+    disableNeedrestart
     read -p "Manage Kea [DHCP|Stork] server? (D/s): " OPTION
     OPTION=${OPTION:-D}
     if [[ $OPTION =~ ^[dD]$ ]]; then
@@ -398,6 +398,8 @@ function run() {
         if [[ $MANAGE =~ ^[dD]$ ]]; then
             variables
             if proceed; then
+                updatePackages
+                # upgradePackages
                 deployKeaDHCPServer
                 deployKeaDHCPDatabase
                 deployKeaDHCPStorkAgent
@@ -430,6 +432,8 @@ function run() {
         if [[ $MANAGE =~ ^[dD]$ ]]; then
             variables
             if proceed; then
+                updatePackages
+                # upgradePackages
                 deployKeaStorkServer
                 deployKeaStorkDatabase
                 deployKeaStorkConfiguration
