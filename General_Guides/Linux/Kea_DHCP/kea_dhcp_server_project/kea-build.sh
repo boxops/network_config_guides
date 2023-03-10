@@ -27,26 +27,78 @@ function variables() {
     echo
     # for the number of *.env files in the VARS_DIRECTORY
     for env in $(ls ${VARS_DIRECTORY}/*.env); do
-        # Import build variables
-        BUILD_SOURCE=$env
-        source $BUILD_SOURCE
-        cat $BUILD_SOURCE
+        export $(cat $env | xargs)
+        cat $env
     done
     echo
 }
 
+function startService() {
+    echo "Starting ${1} service"
+    systemctl start $1
+     if ! systemctl is-active --quiet $1; then
+        echo "${1} is not running. Exiting."
+        exit
+    else
+        echo "${1} is running."
+    fi
+}
+
+function enableService() {
+    echo "Enabling ${1} service"
+    systemctl enable $1
+    if ! systemctl is-enabled --quiet $1; then
+        echo "${1} is not enabled. Exiting."
+        exit
+    else
+        echo "${1} is enabled."
+    fi
+}
+
+function restartService() {
+    echo "Restarting ${1} service"
+    systemctl restart $1
+    if ! systemctl is-active --quiet $1; then
+        echo "${1} is not running. Exiting."
+        exit
+    else
+        echo "${1} is running."
+    fi
+}
+
+function stopService() {
+    echo "Stopping ${1} service"
+    systemctl stop $1
+    if systemctl is-active --quiet $1; then
+        echo "${1} is running. Exiting."
+        exit
+    else
+        echo "${1} is not running."
+    fi
+}
+
+function disableService() {
+    echo "Disabling ${1} service"
+    systemctl disable $1
+     if systemctl is-enabled --quiet $1; then
+        echo "${1} is enabled. Exiting."
+        exit
+    else
+        echo "${1} is not enabled."
+    fi
+}
+
 function validateKeaDHCPServices() {
     echo "Validating Kea DHCP services"
-    # Chek if any of the services are running, exit if one is not running
     if ! systemctl is-active --quiet isc-kea-dhcp4-server; then
-        echo "Kea DHCP4 server is not running. Exiting."
-        exit
+        echo "Kea DHCP4 server is not running."
+        restartService isc-kea-dhcp4-server
     elif ! systemctl is-active --quiet isc-kea-dhcp6-server; then
-        echo "Kea DHCP6 server is not running. Exiting."
-        exit
+        echo "Kea DHCP6 server is not running."
+        restartService isc-kea-dhcp6-server
     elif ! systemctl is-active --quiet isc-kea-ctrl-agent; then
-        echo "Kea Control Agent is not running. Exiting."
-        exit
+        echo "Kea Control Agent is not running."
+        restartService isc-kea-ctrl-agent
     else
         echo "Kea DHCP services are running."
     fi
@@ -54,10 +106,9 @@ function validateKeaDHCPServices() {
 
 function validateKeaDHCPDatabase() {
     echo "Validating Kea DHCP database"
-    # Check if the database is running, exit if it is not running
     if ! systemctl is-active --quiet postgresql.service; then
-        echo "PostgreSQL is not running. Exiting."
-        exit
+        echo "PostgreSQL is not running."
+        restartService postgresql.service
     else
         echo "PostgreSQL is running."
     fi
@@ -69,20 +120,53 @@ function validateKeaDHCPConfiguration() {
     if [ ! -f "${DHCP_CONFIG_DIRECTORY}/kea-ctrl-agent.conf" ]; then
         echo "Kea Control Agent configuration file does not exist. Exiting."
         exit
-    elif [ ! -f "${DHCP_CONFIG_DIRECTORY}/kea-dhcp4.conf" ]; then
+    else
+        echo "Kea Control Agent configuration file exists in ${DHCP_CONFIG_DIRECTORY}."
+    fi
+
+    if ! kea-ctrl-agent -t "${DHCP_CONFIG_DIRECTORY}/kea-ctrl-agent.conf"; then
+        echo "Kea Control Agent configuration file is invalid. Exiting."
+        exit
+    else
+        echo "Kea Control Agent configuration file is valid."
+    fi
+
+    if [ ! -f "${DHCP_CONFIG_DIRECTORY}/kea-dhcp4.conf" ]; then
         echo "Kea DHCP4 server configuration file does not exist. Exiting."
         exit
-    elif [ ! -f "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf" ]; then
+    else
+        echo "Kea DHCP4 server configuration file exists in ${DHCP_CONFIG_DIRECTORY}."
+    fi
+
+    if ! kea-dhcp4 -t "${DHCP_CONFIG_DIRECTORY}/kea-dhcp4.conf"; then
+        echo "Kea DHCP4 server configuration file is invalid. Exiting."
+        exit
+    else
+        echo "Kea DHCP4 server configuration file is valid."
+    fi
+
+    if [ ! -f "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf" ]; then
         echo "Kea DHCP6 server configuration file does not exist. Exiting."
         exit
-    elif [ ! -f "/etc/netplan/${NETPLAN_CONFIG_FILE}" ]; then
+    else
+        echo "Kea DHCP6 server configuration file exists in ${DHCP_CONFIG_DIRECTORY}."
+    fi
+
+    if ! kea-dhcp6 -t "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"; then
+        echo "Kea DHCP6 server configuration file is invalid. Exiting."
+        exit
+    else
+        echo "Kea DHCP6 server configuration file is valid."
+    fi
+
+    if [ ! -f "/etc/netplan/${NETPLAN_CONFIG_FILE}" ]; then
         echo "Netplan configuration file does not exist. Exiting."
         exit
     else
-        echo "Kea DHCP configuration files exist."
+        echo "Netplan configuration files exists in /etc/netplan."
     fi
-    # Check the netplan configuration file
-    if [[ $(netplan apply) ]]; then
+
+    if ! netplan apply; then
         echo "Netplan configuration file is invalid. Exiting."
         exit
     else
@@ -92,10 +176,9 @@ function validateKeaDHCPConfiguration() {
 
 function validateKeaDHCPStorkAgent() {
     echo "Validating Kea DHCP Stork Agent"
-    # Check if the Stork Agent is running, exit if it is not running
     if ! systemctl is-active --quiet isc-stork-agent; then
-        echo "Kea Stork Agent is not running. Exiting."
-        exit
+        echo "Kea Stork Agent is not running."
+        restartService isc-stork-agent
     else
         echo "Kea Stork Agent is running."
     fi
@@ -103,7 +186,7 @@ function validateKeaDHCPStorkAgent() {
         echo "Kea Stork Agent credentials file does not exist. Exiting."
         exit
     else
-        echo "Kea Stork Agent credentials file exists."
+        echo "Kea Stork Agent credentials file exists in ${STORK_CONFIG_DIRECTORY}."
     fi
 }
 
@@ -117,16 +200,18 @@ function deployKeaDHCPServer() {
     # Install Kea packages
     apt -y install isc-kea*
     # Enable and start Kea services
-    systemctl enable isc-kea-dhcp4-server && systemctl start isc-kea-dhcp4-server
-    systemctl enable isc-kea-dhcp6-server && systemctl start isc-kea-dhcp6-server
-    # Replace the Kea Control Agent configuration file (overwrite without confirmation)
-    \cp -f "${VARS_DIRECTORY}/kea-ctrl-agent.conf" "${DHCP_CONFIG_DIRECTORY}/kea-ctrl-agent.conf"
+    enableService isc-kea-dhcp4-server
+    startService isc-kea-dhcp4-server
+    enableService isc-kea-dhcp6-server
+    startService isc-kea-dhcp6-server
+    # Replace the Kea Control Agent configuration file
+    envsubst < "${VARS_DIRECTORY}/kea-ctrl-agent.conf.template" > "${DHCP_CONFIG_DIRECTORY}/kea-ctrl-agent.conf"
     # Add permissions and ownership to the Kea Control Agent configuration file
     chmod 644 "${DHCP_CONFIG_DIRECTORY}/kea-ctrl-agent.conf"
     # Enable and start the Kea control agent
-    systemctl enable isc-kea-ctrl-agent && systemctl start isc-kea-ctrl-agent
+    enableService isc-kea-ctrl-agent
+    startService isc-kea-ctrl-agent
 
-    # Validate Kea DHCP services
     validateKeaDHCPServices
 }
 
@@ -137,7 +222,8 @@ function deployKeaDHCPDatabase() {
     # Install PostgreSQL
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
-    systemctl enable postgresql.service && systemctl start postgresql.service
+    enableService postgresql.service
+    startService postgresql.service
     # Create the database and user for Kea
     sudo su postgres <<EOF
     createdb $DATABASE_NAME;
@@ -149,24 +235,22 @@ EOF
     # Initialize the PostgreSQL Database Using kea-admin
     kea-admin db-init pgsql -u $DATABASE_USER -p $DATABASE_USER_PASSWORD -n $DATABASE_NAME
 
-    # Validate Kea DHCP database
     validateKeaDHCPDatabase
 }
 
 function deployKeaDHCPConfiguration() {
     ## Configure Kea DHCP server
-    # Replace the Kea DHCP4 server configuration file (overwrite without confirmation)
-    \cp -f "${VARS_DIRECTORY}/kea-dhcp4.conf" "${DHCP_CONFIG_DIRECTORY}/kea-dhcp4.conf"
+    # Replace the Kea DHCP4 server configuration file
+    envsubst < "${VARS_DIRECTORY}/kea-dhcp4.conf.template" > "${DHCP_CONFIG_DIRECTORY}/kea-dhcp4.conf"
     # Add permissions and ownership to the Kea DHCP4 server configuration file
     chmod 644 "${DHCP_CONFIG_DIRECTORY}/kea-dhcp4.conf"
-    # Replace the Kea DHCP6 server configuration file (overwrite without confirmation)
-    \cp -f "${VARS_DIRECTORY}/kea-dhcp6.conf" "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"
+    # Replace the Kea DHCP6 server configuration file
+    envsubst < "${VARS_DIRECTORY}/kea-dhcp6.conf.template" > "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"
     # Add permissions and ownership to the Kea DHCP6 server configuration file
     chmod 644 "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"
     # Replace/create the netplan config
-    \cp -f "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}" "/etc/netplan/${NETPLAN_CONFIG_FILE}"
+    envsubst < "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}.template" > "/etc/netplan/${NETPLAN_CONFIG_FILE}"
 
-    # Validate Kea DHCP configuration
     validateKeaDHCPConfiguration
 }
 
@@ -183,10 +267,11 @@ function deployKeaDHCPStorkAgent() {
     \cp -f "${VARS_DIRECTORY}/agent.env" "${STORK_CONFIG_DIRECTORY}/agent.env"
     # Add permissions and ownership to the Kea Stork agent configuration file
     chmod 644 "${STORK_CONFIG_DIRECTORY}/agent.env"
-    # Replace agent-credentials.json file in /etc/stork (overwrite without confirmation)
-    \cp -f "${VARS_DIRECTORY}/agent-credentials.json" "${STORK_CONFIG_DIRECTORY}/agent-credentials.json"
+    # Replace agent-credentials.json file in /etc/stork
+    envsubst < "${VARS_DIRECTORY}/agent-credentials.json.template" > "${STORK_CONFIG_DIRECTORY}/agent-credentials.json"
     # Enable and start the Kea Stork agent
-    systemctl enable isc-stork-agent && systemctl start isc-stork-agent
+    enableService isc-stork-agent
+    startService isc-stork-agent
 
     # Manually register the Kea Stork agent if isc-stork-agent.service does not register
     # su stork-agent -s /bin/sh -c 'stork-agent register -u ${STORK_AGENT_SERVER_URL}'
@@ -195,27 +280,24 @@ function deployKeaDHCPStorkAgent() {
     # - Stork Agent IP or FDQN
     # - Stork Agent Port (default: 8080)
 
-    # Validate Kea DHCP Stork agent
     validateKeaDHCPStorkAgent
 }
 
 function validateKeaStorkServerService() {
     echo "Validating Stork server"
-    # Check if the service is running, exit if it is not running
     if ! systemctl is-active --quiet isc-stork-server; then
-        echo "Stork server is not running. Exiting."
-        exit
+        echo "Stork server is not running."
+        restartService isc-stork-server
     else
         echo "Stork server is running."
     fi
 }
 
 function validateKeaStorkDatabaseService() {
-    echo "Validating Stork database"
-    # Check if the database is running, exit if it is not running
+    echo "Validating Stork database service"
     if ! systemctl is-active --quiet postgresql.service; then
-        echo "PostgreSQL is not running. Exiting."
-        exit
+        echo "PostgreSQL is not running."
+        restartService postgresql.service
     else
         echo "PostgreSQL is running."
     fi
@@ -223,8 +305,7 @@ function validateKeaStorkDatabaseService() {
 
 function validateKeaStorkConfiguration() {
     echo "Validating Stork configuration"
-    # Check the netplan configuration file
-    if [[ $(netplan apply) ]]; then
+    if ! netplan apply; then
         echo "Netplan configuration file is invalid. Exiting."
         exit
     else
@@ -241,14 +322,14 @@ function deployKeaStorkServer() {
     curl -1sLf $STORK_SERVER_CLOUDSMITH_PACKAGE | sudo -E bash
     # Install Stork packages
     apt -y install isc-stork-server
-    # Replace Stork server environment variables (overwrite without confirmation)
+    # Replace Stork server environment variables
     \cp -f "${VARS_DIRECTORY}/server.env" "${STORK_CONFIG_DIRECTORY}/server.env"
     # Add permissions and ownership to the Stork server environment variables
     chmod 644 "${STORK_CONFIG_DIRECTORY}/server.env"
     # Enable and start Stork server
-    systemctl enable isc-stork-server && systemctl start isc-stork-server
+    enableService isc-stork-server
+    startService isc-stork-server
 
-    # Validate Stork server
     validateKeaStorkServerService
 }
 
@@ -259,7 +340,8 @@ function deployKeaStorkDatabase() {
     # Install PostgreSQL
     apt -y install postgresql postgresql-contrib
     # Enable and start PostgreSQL
-    systemctl enable postgresql.service && systemctl start postgresql.service
+    enableService postgresql.service
+    startService postgresql.service
 
     # Create the database and user for Stork
     sudo su postgres <<EOF
@@ -272,21 +354,19 @@ function deployKeaStorkDatabase() {
     echo "Created Postgres User '$DATABASE_USER' and database '$DATABASE_NAME'."
 EOF
 
-    # Validate Stork database
     validateKeaStorkDatabaseService
 }
 
 function deployKeaStorkConfiguration() {
     ## Configure Stork server
     # Replace/create the netplan config
-    \cp -f "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}" "/etc/netplan/${NETPLAN_CONFIG_FILE}"
+    envsubst < "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}.template" > "/etc/netplan/${NETPLAN_CONFIG_FILE}"
 
-    # Validate Stork configuration
     validateKeaStorkConfiguration
 }
 
 function disableNeedrestart() {
-    echo "Disable needrestart which causes the interruption of scripts on Ubuntu."
+    echo "Disable needrestart which causes the interruption of scripts in Ubuntu."
     # Disable "Pending kernel upgrade" messages
     # edit the /etc/needrestart/needrestart.conf file, changing the line: #\$nrconf{kernelhints} = -1; to $nrconf{kernelhints} = -1;
     sed -i "s/#\$nrconf{kernelhints} = -1;/\$nrconf{kernelhints} = -1;/g" /etc/needrestart/needrestart.conf
@@ -298,10 +378,9 @@ function disableNeedrestart() {
 
 function proceed() {
     echo
-    read -p "Proceed with the deployment? (y/N): " PROCEED
+    read -p "Proceed? (y/N): " PROCEED
     PROCEED=${PROCEED:-N}
     if [[ $PROCEED =~ ^[yY]$ && deploy ]]; then
-        # echo "Proceeding with the deployment"
         return 0
     else
         echo "Aborted deployment. Exiting."
@@ -309,32 +388,72 @@ function proceed() {
     fi
 }
 
-function deploy() {
-    read -p "Deploy Kea [DHCP|Stork] server or Troubleshoot? (D/s/t): " DEPLOYMENT
-    DEPLOYMENT=${DEPLOYMENT:-D}
-    if [[ $DEPLOYMENT =~ ^[dD]$ ]]; then
-        variables
-        if proceed; then
-            disableNeedrestart
-            deployKeaDHCPServer
-            deployKeaDHCPDatabase
-            deployKeaDHCPConfiguration
-            deployKeaDHCPStorkAgent
-            echo "Deployment successful. Please consider rebooting your system."
+function run() {
+	disableNeedrestart
+    read -p "Manage Kea [DHCP|Stork] server? (D/s): " OPTION
+    OPTION=${OPTION:-D}
+    if [[ $OPTION =~ ^[dD]$ ]]; then
+        read -p "[Deploy|Configure|Troubleshoot] Kea DHCP server? (D/c/t): " MANAGE
+        MANAGE=${MANAGE:-D}
+        if [[ $MANAGE =~ ^[dD]$ ]]; then
+            variables
+            if proceed; then
+                deployKeaDHCPServer
+                deployKeaDHCPDatabase
+                deployKeaDHCPConfiguration
+                deployKeaDHCPStorkAgent
+                echo "Deployment successful. Please consider rebooting your system."
+            fi
+        elif [[ $MANAGE =~ ^[cC]$ ]]; then
+            variables
+            if proceed; then
+                deployKeaDHCPConfiguration
+            fi
+        elif [[ $MANAGE =~ ^[tT]$ ]]; then
+            echo "Troubleshooting Kea DHCP server"
+            variables
+            if proceed; then
+                validateKeaDHCPServices
+                validateKeaDHCPDatabase
+                validateKeaDHCPConfiguration
+                validateKeaDHCPStorkAgent
+                echo "All services are running."
+            fi
+        else
+            echo "Invalid option. Exiting."
+            exit
         fi
-    elif [[ $DEPLOYMENT =~ ^[sS]$ ]]; then
-        variables
-        if proceed; then
-            disableNeedrestart
-            deployKeaStorkServer
-            deployKeaStorkDatabase
-            deployKeaStorkConfiguration
-            echo "Deployment successful. Please consider rebooting your system."
+
+    elif [[ $OPTION =~ ^[sS]$ ]]; then
+        read -p "[Deploy|Configure|Troubleshoot] Kea Stork server? (D/c/t): " MANAGE
+        MANAGE=${MANAGE:-D}
+        if [[ $MANAGE =~ ^[dD]$ ]]; then
+            variables
+            if proceed; then
+                deployKeaStorkServer
+                deployKeaStorkDatabase
+                deployKeaStorkConfiguration
+                echo "Deployment successful. Please consider rebooting your system."
+            fi
+        elif [[ $MANAGE =~ ^[cC]$ ]]; then
+            variables
+            if proceed; then
+                deployKeaStorkConfiguration
+                echo "Configuration successful."
+            fi
+        elif [[ $MANAGE =~ ^[tT]$ ]]; then
+            echo "Troubleshooting Kea Stork server"
+            variables
+            if proceed; then
+                validateKeaStorkServerService
+                validateKeaStorkDatabaseService
+                validateKeaStorkConfiguration
+                echo "All services are running."
+            fi
+        else
+            echo "Invalid selection"
+            exit
         fi
-    elif [[ $DEPLOYMENT =~ ^[tT]$ ]]; then
-        echo "Troubleshooting features are not implemented yet. Work in progress..."
-        echo "Exiting."
-        exit
     else
         echo "Invalid selection"
         exit
@@ -346,7 +465,7 @@ if ! isRoot; then
     exit
 fi
 
-deploy
+run
 
 echo "Script done. Exiting."
 exit
