@@ -2,7 +2,7 @@
     "Dhcp6": {
         "interfaces-config": {
             "interfaces": [
-                "${PUBLIC_INTERFACE_NAME}"
+                "${NETWORK_INTERFACE_NAME}"
             ]
         },
         "control-socket": {
