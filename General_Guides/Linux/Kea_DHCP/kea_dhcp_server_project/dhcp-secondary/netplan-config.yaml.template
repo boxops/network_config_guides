@@ -4,25 +4,13 @@ network:
   ethernets:
 
     # public interface for serving DHCP traffic
-    ${PUBLIC_INTERFACE_NAME}:
+    ${NETWORK_INTERFACE_NAME}:
       addresses:
-        - ${PUBLIC_IPV4_ADDRESS_WITH_MASK}
+        - ${NETWORK_IPV4_ADDRESS_WITH_MASK}
       routes:
-        - to: ${PUBLIC_ROUTE_TO}
-          via: ${PUBLIC_ROUTE_VIA}
+        - to: ${NETWORK_ROUTE_TO}
+          via: ${NETWORK_ROUTE_VIA}
       nameservers:
         addresses:
-          - ${PUBLIC_PRIMARY_NAMESERVER_ADDRESS}
-          - ${PUBLIC_SECONDARY_NAMESERVER_ADDRESS}
-
-    # internal interface for REST API and management traffic
-    ${INTERNAL_INTERFACE_NAME}:
-      addresses:
-        - ${INTERNAL_IPV4_ADDRESS_WITH_MASK}
-      routes:
-        - to: ${INTERNAL_ROUTE_TO}
-          via: ${INTERNAL_ROUTE_VIA}
-      nameservers:
-        addresses:
-          - ${INTERNAL_PRIMARY_NAMESERVER_ADDRESS}
-          - ${INTERNAL_SECONDARY_NAMESERVER_ADDRESS}
+          - ${NETWORK_PRIMARY_NAMESERVER_ADDRESS}
+          - ${NETWORK_SECONDARY_NAMESERVER_ADDRESS}
