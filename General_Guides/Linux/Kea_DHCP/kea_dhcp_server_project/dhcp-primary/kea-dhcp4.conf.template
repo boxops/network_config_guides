@@ -2,7 +2,7 @@
     "Dhcp4": {
         "interfaces-config": {
             "interfaces": [
-                "${NETWORK_INTERFACE_NAME}"
+                "${PUBLIC_NETWORK_INTERFACE_NAME}"
             ],
             "dhcp-socket-type": "raw"
         },
