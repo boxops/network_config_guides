@@ -272,7 +272,7 @@ function deployKeaDHCPStorkAgent() {
     # Add permissions and ownership to the Kea Stork agent configuration file
     chmod 644 "${STORK_CONFIG_DIRECTORY}/agent.env"
     # Replace agent-credentials.json file in /etc/stork
-    envsubst < "${VARS_DIRECTORY}/agent-credentials.json.template" > "${STORK_CONFIG_DIRECTORY}/agent-credentials.json"
+    #envsubst < "${VARS_DIRECTORY}/agent-credentials.json.template" > "${STORK_CONFIG_DIRECTORY}/agent-credentials.json"
     # Enable and start the Kea Stork agent
     enableService isc-stork-agent
     startService isc-stork-agent
