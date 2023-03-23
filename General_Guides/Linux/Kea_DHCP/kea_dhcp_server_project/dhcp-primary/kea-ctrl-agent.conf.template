@@ -9,7 +9,7 @@
     "Control-agent": {
         // We need to specify where the agent should listen to incoming HTTP
         // queries.
-        "http-host": "${NETWORK_IPV4_ADDRESS}",
+        "http-host": "${MANAGEMENT_NETWORK_IPV4_ADDRESS}",
         "http-port": ${HTTP_REST_API_PORT},
         // TLS trust anchor (Certificate Authority). This is a file name or
         // (for OpenSSL only) a directory path.
