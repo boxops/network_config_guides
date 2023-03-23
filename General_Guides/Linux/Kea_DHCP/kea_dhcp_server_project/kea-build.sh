@@ -168,7 +168,9 @@ function validateKeaDHCPConfiguration() {
     else
         echo "Kea DHCP6 server configuration file is valid."
     fi
+}
 
+function validateNetplanConfiguration() {
     if [ ! -f "/etc/netplan/${NETPLAN_CONFIG_FILE}" ]; then
         echo "Netplan configuration file does not exist. Exiting."
         exit
@@ -192,12 +194,12 @@ function validateKeaDHCPStorkAgent() {
     else
         echo "Kea Stork Agent is running."
     fi
-    if [ ! -f "${STORK_CONFIG_DIRECTORY}/agent-credentials.json" ]; then
-        echo "Kea Stork Agent credentials file does not exist. Exiting."
-        exit
-    else
-        echo "Kea Stork Agent credentials file exists in ${STORK_CONFIG_DIRECTORY}."
-    fi
+    # if [ ! -f "${STORK_CONFIG_DIRECTORY}/agent-credentials.json" ]; then
+    #     echo "Kea Stork Agent credentials file does not exist. Exiting."
+    #     exit
+    # else
+    #     echo "Kea Stork Agent credentials file exists in ${STORK_CONFIG_DIRECTORY}."
+    # fi
 }
 
 function deployKeaDHCPServer() {
@@ -254,10 +256,18 @@ function deployKeaDHCPConfiguration() {
     envsubst < "${VARS_DIRECTORY}/kea-dhcp6.conf.template" > "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"
     # Add permissions and ownership to the Kea DHCP6 server configuration file
     chmod 644 "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"
-    # Replace/create the netplan config
-    envsubst < "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}.template" > "/etc/netplan/${NETPLAN_CONFIG_FILE}"
 
     validateKeaDHCPConfiguration
+}
+
+function deployNetplanConfiguration() {
+    ## Configure Netplan
+    # Replace/create the netplan config
+    envsubst < "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}.template" > "/etc/netplan/${NETPLAN_CONFIG_FILE}"
+    # Apply the netplan configuration
+    netplan apply
+
+    validateNetplanConfiguration
 }
 
 function deployKeaDHCPStorkAgent() {
@@ -309,12 +319,13 @@ function validateKeaStorkDatabaseService() {
 
 function validateKeaStorkConfiguration() {
     echo "Validating Stork configuration"
-    if ! netplan apply; then
-        echo "Netplan configuration file is invalid. Exiting."
-        exit
-    else
-        echo "Netplan configuration file is valid."
-    fi
+    echo "TODO: Implement validation of Stork configuration"
+    # if ! netplan apply; then
+    #     echo "Netplan configuration file is invalid. Exiting."
+    #     exit
+    # else
+    #     echo "Netplan configuration file is valid."
+    # fi
 }
 
 function deployKeaStorkServer() {
@@ -359,8 +370,9 @@ EOF
 
 function deployKeaStorkConfiguration() {
     ## Configure Stork server
+    echo "TODO: Implement configuration of Stork server"
     # Replace/create the netplan config
-    envsubst < "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}.template" > "/etc/netplan/${NETPLAN_CONFIG_FILE}"
+    #envsubst < "${VARS_DIRECTORY}/${NETPLAN_CONFIG_FILE}.template" > "/etc/netplan/${NETPLAN_CONFIG_FILE}"
 
     validateKeaStorkConfiguration
 }
@@ -404,12 +416,14 @@ function run() {
                 deployKeaDHCPDatabase
                 deployKeaDHCPStorkAgent
                 deployKeaDHCPConfiguration
+                # deployNetplanConfiguration
                 echo "Deployment successful. Please consider rebooting your system."
             fi
         elif [[ $MANAGE =~ ^[cC]$ ]]; then
             variables
             if proceed; then
                 deployKeaDHCPConfiguration
+                # deployNetplanConfiguration
             fi
         elif [[ $MANAGE =~ ^[tT]$ ]]; then
             echo "Troubleshooting Kea DHCP server"
@@ -419,6 +433,7 @@ function run() {
                 validateKeaDHCPDatabase
                 validateKeaDHCPStorkAgent
                 validateKeaDHCPConfiguration
+                # validateNetplanConfiguration
                 echo "All services are running."
             fi
         else
@@ -437,12 +452,14 @@ function run() {
                 deployKeaStorkServer
                 deployKeaStorkDatabase
                 deployKeaStorkConfiguration
+                # deployNetplanConfiguration
                 echo "Deployment successful. Please consider rebooting your system."
             fi
         elif [[ $MANAGE =~ ^[cC]$ ]]; then
             variables
             if proceed; then
                 deployKeaStorkConfiguration
+                # deployNetplanConfiguration
                 echo "Configuration successful."
             fi
         elif [[ $MANAGE =~ ^[tT]$ ]]; then
@@ -452,6 +469,7 @@ function run() {
                 validateKeaStorkServerService
                 validateKeaStorkDatabaseService
                 validateKeaStorkConfiguration
+                # validateNetplanConfiguration
                 echo "All services are running."
             fi
         else
