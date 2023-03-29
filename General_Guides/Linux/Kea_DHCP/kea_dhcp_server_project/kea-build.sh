@@ -256,6 +256,10 @@ function deployKeaDHCPConfiguration() {
     envsubst < "${VARS_DIRECTORY}/kea-dhcp6.conf.template" > "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"
     # Add permissions and ownership to the Kea DHCP6 server configuration file
     chmod 644 "${DHCP_CONFIG_DIRECTORY}/kea-dhcp6.conf"
+    # Create log files for Kea DHCP4 and DHCP6 servers
+    touch /var/log/kea-dhcp4.log /var/log/kea-dhcp6.log
+    # Change the ownership of the files to Kea user
+    chown _kea /var/log/kea-dhcp4.log /var/log/kea-dhcp6.log
 
     validateKeaDHCPConfiguration
 }
