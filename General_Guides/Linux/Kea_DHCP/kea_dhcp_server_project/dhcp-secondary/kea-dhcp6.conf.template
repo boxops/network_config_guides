@@ -27,9 +27,9 @@
             "user": "${DATABASE_USER}",
             "password": "${DATABASE_USER_PASSWORD}",
             "reconnect-wait-time": 3000,
-            "max-reconnect-tries": 3,
+            "max-reconnect-tries": 5,
             "on-fail": "stop-retry-exit",
-            "connect-timeout": 3
+            "connect-timeout": 10
         },
         "expired-leases-processing": {
             "reclaim-timer-wait-time": 10,
@@ -133,11 +133,11 @@
                 "pools": [
                     {
                         "pool": "2001:db8:1::/65",
-                        "client-class": "HA_lab-dhcp-primary"
+                        "client-class": "HA_dhcp-primary"
                     },
                     {
                         "pool": "2001:db8:1:0:8000::/65",
-                        "client-class": "HA_lab-dhcp-secondary"
+                        "client-class": "HA_dhcp-secondary"
                     }
                 ],
                 "option-data": [
@@ -187,11 +187,11 @@
                 "pools": [
                     {
                         "pool": "2001:db8:2::/65",
-                        "client-class": "HA_lab-dhcp-primary"
+                        "client-class": "HA_dhcp-primary"
                     },
                     {
                         "pool": "2001:db8:2:0:8000::/65",
-                        "client-class": "HA_lab-dhcp-secondary"
+                        "client-class": "HA_dhcp-secondary"
                     }
                 ]
             }
