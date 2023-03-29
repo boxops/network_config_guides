@@ -4,7 +4,7 @@
             "interfaces": [
                 "${PUBLIC_NETWORK_INTERFACE_NAME}"
             ],
-            "dhcp-socket-type": "raw"
+            "dhcp-socket-type": "udp"
         },
         "control-socket": {
             "socket-type": "unix",
@@ -28,9 +28,9 @@
             "user": "${DATABASE_USER}",
             "password": "${DATABASE_USER_PASSWORD}",
             "reconnect-wait-time": 3000,
-            "max-reconnect-tries": 3,
+            "max-reconnect-tries": 5,
             "on-fail": "stop-retry-exit",
-            "connect-timeout": 3
+            "connect-timeout": 10
         },
         "expired-leases-processing": {
             "reclaim-timer-wait-time": 10,
@@ -113,11 +113,11 @@
                 "pools": [
                     {
                         "pool": "192.168.20.1-192.168.20.127",
-                        "client-class": "HA_lab-dhcp-primary"
+                        "client-class": "HA_dhcp-primary"
                     },
                     {
                         "pool": "192.168.20.128-192.168.20.253",
-                        "client-class": "HA_lab-dhcp-secondary"
+                        "client-class": "HA_dhcp-secondary"
                     }
                 ],
                 "option-data": [
@@ -145,11 +145,11 @@
                 "pools": [
                     {
                         "pool": "192.168.100.1-192.168.100.255",
-                        "client-class": "HA_lab-dhcp-primary"
+                        "client-class": "HA_dhcp-primary"
                     },
                     {
                         "pool": "192.168.101.0-192.168.101.253",
-                        "client-class": "HA_lab-dhcp-secondary"
+                        "client-class": "HA_dhcp-secondary"
                     }
                 ],
                 // "relay": {
