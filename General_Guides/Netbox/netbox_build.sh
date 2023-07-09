@@ -6,7 +6,9 @@ ALLOWED_HOSTS="['*']"
 DATABASE_NAME='netbox'
 DATABASE_USER='netbox'
 DATABASE_USER_PASSWORD='123qwe'
-SUPERUSER=''
+SUPERUSER='root'
+SUPERUSER_PASSWORD='123qwe'
+SUPERUSER_EMAIL='admin@admin.com'
 
 # Check if user is root
 function isRoot() {
@@ -89,12 +91,12 @@ function configureNetbox() {
     sed -i "/^ALLOWED_HOSTS =/c\ALLOWED_HOSTS = $ALLOWED_HOSTS" /opt/netbox/netbox/netbox/configuration.py
 
     # TODO: Fix insertion of variables
-    # sed -i "/    'USER': '',/c\    'USER': '$DATABASE_USER'," /opt/netbox/netbox/netbox/configuration.py
-    # sed -i "/    'PASSWORD': '',/c\    'PASSWORD': '$DATABASE_USER_PASSWORD'," /opt/netbox/netbox/netbox/configuration.py
+    sed -i "/    'USER': '',               # PostgreSQL username/c\    'USER': '$DATABASE_USER'," /opt/netbox/netbox/netbox/configuration.py
+    sed -i "/    'PASSWORD': '',           # PostgreSQL password/c\    'PASSWORD': '$DATABASE_USER_PASSWORD'," /opt/netbox/netbox/netbox/configuration.py
 
     # Generate SECRET_KEY
     if $GENERATE_SECRET_KEY; then
-        echo "Generating Secret Key"
+        # echo "Generating Secret Key"
         SECRET_KEY=$(python3 /opt/netbox/netbox/generate_secret_key.py)
         sed -i "/^SECRET_KEY = ''/c\SECRET_KEY = '$SECRET_KEY'" /opt/netbox/netbox/netbox/configuration.py
     else
@@ -107,20 +109,32 @@ function configureNetbox() {
 
 function createSuperUser() {
     source /opt/netbox/venv/bin/activate
-    python3 /opt/netbox/netbox/manage.py createsuperuser
 
-    # your_command <<EOF
-    # answer1
-    # answer2
-    # answer3
-    # EOF
+    DJANGO_SUPERUSER_USERNAME=$SUPERUSER DJANGO_SUPERUSER_PASSWORD=$SUPERUSER_PASSWORD \
+    python3 /opt/netbox/netbox/manage.py createsuperuser --email=$SUPERUSER_EMAIL --noinput
 }
 
 function httpServerSetup() {
     # Obtain an SSL Certificate
     sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/ssl/private/netbox.key \
-    -out /etc/ssl/certs/netbox.crt
+    -out /etc/ssl/certs/netbox.crt <<EOF
+''
+''
+''
+''
+''
+''
+''
+EOF
+
+    # Country Name (2 letter code) [AU]:
+    # State or Province Name (full name) [Some-State]:
+    # Locality Name (eg, city) []:
+    # Organization Name (eg, company) [Internet Widgits Pty Ltd]:
+    # Organizational Unit Name (eg, section) []:
+    # Common Name (e.g. server FQDN or YOUR name) []:
+    # Email Address []:
 
     # HTTP Server Installation - Option A: nginx
     installPackages nginx
@@ -133,6 +147,7 @@ function httpServerSetup() {
 }
 
 function run() {
+
     ### Start
     updateUpgradeSystem
 
@@ -148,34 +163,34 @@ function run() {
     startService redis
     enableService redis-server
     enableService redis
-    redis-cli ping # TODO: validate
+    redis-cli ping
 
     # Install System Packages
     installPackages git python3 python3-pip python3-venv python3-dev build-essential libxml2-dev libxslt1-dev libffi-dev libpq-dev libssl-dev zlib1g-dev
 
     downloadNetbox
 
-    # configureNetbox
+    configureNetbox
 
-    # createSuperUser # TODO: pass answers to prompts
+    createSuperUser
 
-    # # Schedule the Housekeeping Task
-    # sudo ln -s /opt/netbox/contrib/netbox-housekeeping.sh /etc/cron.daily/netbox-housekeeping
+    # Schedule the Housekeeping Task
+    sudo ln -s /opt/netbox/contrib/netbox-housekeeping.sh /etc/cron.daily/netbox-housekeeping
 
-    # # Setup Gunicorn
-    # sudo cp /opt/netbox/contrib/gunicorn.py /opt/netbox/gunicorn.py
+    # Setup Gunicorn
+    sudo cp /opt/netbox/contrib/gunicorn.py /opt/netbox/gunicorn.py
 
-    # # systemd Setup
-    # sudo cp -v /opt/netbox/contrib/*.service /etc/systemd/system/
-    # sudo systemctl daemon-reload
+    # systemd Setup
+    sudo cp -v /opt/netbox/contrib/*.service /etc/systemd/system/
+    sudo systemctl daemon-reload
 
-    # startService netbox
-    # startService netbox-rq
-    # enableService netbox
-    # enableService netbox-rq
+    startService netbox
+    startService netbox-rq
+    enableService netbox
+    enableService netbox-rq
 
-    # # Nginx Setup
-    # httpServerSetup
+    # Nginx Setup
+    httpServerSetup
 
 }
 
