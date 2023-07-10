@@ -22,6 +22,17 @@ if ! isRoot; then
     exit
 fi
 
+function disableNeedrestart() {
+    echo "Disable needrestart which causes the interruption of scripts in Ubuntu."
+    # Disable "Pending kernel upgrade" messages
+    # edit the /etc/needrestart/needrestart.conf file, changing the line: #\$nrconf{kernelhints} = -1; to $nrconf{kernelhints} = -1;
+    sed -i "s/#\$nrconf{kernelhints} = -1;/\$nrconf{kernelhints} = -1;/g" /etc/needrestart/needrestart.conf
+
+    # Set needrestart services to: a (automatically restart)
+    # edit the /etc/needrestart/needrestart.conf file, changing the line: #$nrconf{restart} = 'i'; to $nrconf{restart} = 'a';
+    sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/g" /etc/needrestart/needrestart.conf
+}
+
 function enableService() {
     echo "Enabling ${1} service"
     systemctl enable $1
@@ -72,9 +83,10 @@ function downloadNetbox() {
     # Download NetBox by Cloning the Git Repository
     sudo mkdir -p /opt/netbox/
     sudo git clone -b master --depth 1 https://github.com/netbox-community/netbox.git /opt/netbox/
-    # If the current stable release is broken, then rm -rf /opt/netbox and clone the previous release
+    # If the current stable release is broken, then remote the current release and clone the previous release
+    # rm -rf /opt/netbox
     # sudo git clone -b master https://github.com/netbox-community/netbox.git /opt/netbox/
-    # git checkout v3.5.4
+    # git checkout v3.5.4 /opt/netbox/
 }
 
 function configureNetbox() {
@@ -149,6 +161,7 @@ EOF
 function run() {
 
     ### Start
+    disableNeedrestart
     updateUpgradeSystem
 
     installPackages postgresql
